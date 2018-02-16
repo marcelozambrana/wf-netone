@@ -1,0 +1,42 @@
+<ion-header>
+    <ion-title>Wfm-Netone</ion-title>
+</ion-header>
+
+<ion-content padding>
+
+  <button ion-button icon-left color="light" full (click)="syncServer()">
+      <ion-icon name="sync"></ion-icon>
+      Sincronizar
+  </button>
+
+  <button ion-button icon-left color="light" full (click)="goToCadastroCliente()">
+        <ion-icon name="contacts"></ion-icon>
+      Clientes
+  </button>
+
+  <button ion-button icon-left color="light" full (click)="goToCatalogo()">
+        <ion-icon name="paper"></ion-icon>
+        Catálogo
+  </button>
+
+  <button ion-button icon-left color="light" full (click)="goToPedidos()">
+      <ion-icon name="list-box"></ion-icon>
+      Pedidos Realizados
+  </button>
+
+  <button ion-button icon-left color="light" full (click)="novoPedido()">
+      <ion-icon name="cart"></ion-icon>
+      Novo Pedido
+    </button>
+
+  <button ion-button icon-left color="light" full (click)="goToRelatorios()">
+      <ion-icon name="podium"></ion-icon>
+      Relatórios
+    </button>
+
+  <button ion-button icon-left color="danger" full (click)="logoff()">
+      <ion-icon name="exit"></ion-icon>
+      Sair
+    </button>
+
+</ion-content>

@@ -1,0 +1,25 @@
+<ion-content padding>
+  <form padding [formGroup]="loginForm" (submit)="login()" novalidate>
+      <ion-item>
+        <ion-input [(ngModel)]="email"
+                  formControlName="email"
+                  type="text"
+                  placeholder="Digite seu e-mail"
+                  clearInput clearOnEdit="false">
+        </ion-input>
+      </ion-item>
+      <h6 *ngIf="errorEmail" class="error"> {{messageEmail}}</h6>
+
+      <ion-item>
+          <ion-input [(ngModel)]="password"
+                    formControlName="password"
+                    type="password"
+                    placeholder="Digite sua senha"
+                    clearInput clearOnEdit="false">
+          </ion-input>
+      </ion-item>
+      <h6 *ngIf="errorPassword" class="error"> {{messagePassword}}</h6>
+      
+      <button ion-button block outline color="secondary">Login  </button>
+  </form>
+</ion-content>
