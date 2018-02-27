@@ -1,0 +1,48 @@
+page-catalogo-produto {
+    
+    .catalogo-content {
+            background: #284B63;
+
+        .card {
+            width: 40%;
+            text-align: center;
+            margin: 35px;
+            background: #ffff;
+            border: 2px solid black;
+        
+                
+            .container {
+                padding: 2px 16px;
+            }
+
+            .image {
+                padding: 10px;
+            }
+        }
+        
+        @media (min-width: 0px) {
+            .card {
+                width: 100%;
+            }
+        }
+     
+        @media (min-width: 420px) {
+            .card {
+                width: 100%;
+            }
+        }
+     
+        @media (min-width: 760px) {
+            .card {
+                width: 40%;
+            }
+        }
+
+        @media (min-width: 920px) {
+            .card {
+                width: 25%;
+            }
+        }
+
+    }
+}

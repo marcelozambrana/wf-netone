@@ -1,0 +1,56 @@
+<ion-header>
+  <ion-navbar>
+    <ion-title>{{titulo}} Cliente</ion-title>
+  </ion-navbar>
+</ion-header>
+
+
+<ion-content padding class="cliente-content">
+
+  <form padding [formGroup]="clienteForm" novalidate>
+
+    <ion-list inset>
+      <ion-item>
+        <ion-input type="text" placeholder="Nome Completo" formControlName="nome" [(ngModel)]="nome"></ion-input>
+      </ion-item>
+
+      <ion-item>
+        <ion-input type="text" placeholder="CPF/CNPJ" formControlName="cpfCnpj" [(ngModel)]="cpfCnpj"></ion-input>
+      </ion-item>
+
+      <ion-item>
+        <ion-input type="text" placeholder="RG/IE" formControlName="rg" [(ngModel)]="rg"></ion-input>
+      </ion-item>
+
+      <ion-item>
+        <ion-input type="email" placeholder="E-mail" formControlName="email" [(ngModel)]="email"></ion-input>
+      </ion-item>
+    </ion-list>
+
+    <ion-list inset>
+      <ion-item>
+        <ion-input type="text" placeholder="Logradouro" formControlName="logradouro" [(ngModel)]="logradouro"></ion-input>
+      </ion-item>
+
+      <ion-item>
+        <ion-input type="text" placeholder="CEP" formControlName="cep" [(ngModel)]="cep"></ion-input>
+      </ion-item>
+
+      <ion-item>
+        <ion-input type="text" placeholder="Bairro" formControlName="bairro" [(ngModel)]="bairro"></ion-input>
+      </ion-item>
+
+      <ion-item>
+        <ion-input type="text" placeholder="Cidade" formControlName="cidade" [(ngModel)]="cidade"></ion-input>
+      </ion-item>
+
+      <ion-item>
+        <ion-input type="text" placeholder="Estado" formControlName="uf" [(ngModel)]="uf"></ion-input>
+      </ion-item>
+    </ion-list>
+
+    <button ion-button class="submit-btn" block (click)="adicionarCliente()">Salvar</button>
+
+  </form>
+
+</ion-content>

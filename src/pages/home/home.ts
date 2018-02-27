@@ -2,47 +2,74 @@ import { Component } from '@angular/core';
 import { NavController, LoadingController } from 'ionic-angular';
 
 import { LoginPage } from '../login/login';
+import { PerfilPage } from '../perfil/perfil';
+import { NovoPedidoPage } from '../novo-pedido/novo-pedido';
+import { ClientesPage } from '../clientes/clientes';
+import { CatalogoProdutoPage } from '../catalogo-produto/catalogo-produto';
+
+import { AuthProvider } from '../../providers/auth/auth';
+
 
 @Component({
   selector: 'page-home',
-  templateUrl: 'home.html'
+  templateUrl: 'home.html',
 })
 export class HomePage {
 
-  constructor(public navCtrl: NavController, private loadingCtrl: LoadingController) {
+  constructor(public navCtrl: NavController, private loadingCtrl: LoadingController, private auth: AuthProvider) {
+    this.auth.user.subscribe(
+      (auth) => {
+        if (auth == null) {
+          this.navCtrl.setRoot(LoginPage);
+        }
+      });
   }
 
   syncServer() {
     let loader = this.loadingCtrl.create({
       content: 'Sincronizando...',
+      dismissOnPageChange: true
     });
 
-    loader.present().then(() => {
-      setTimeout(()=>{
-        loader.dismiss();
-      },3000);
-    })
+    loader.present();
+
+    setTimeout(() => {
+      loader.dismiss();
+    }, 3000);
+
   }
 
   novoPedido() {
+    this.navCtrl.push(NovoPedidoPage);
   }
 
-  goToCadastroCliente() {
+  clientes() {
+    this.navCtrl.push(ClientesPage);
   }
 
-  goToCatalogo() {
+  catalogo() {
+    this.navCtrl.push(CatalogoProdutoPage);
   }
 
-  goToPedidos() {
+  pedidos() {
   }
 
-  goToRelatorios() {
+  condicoesPagamento() {
   }
 
-  logoff() {
+  relatorios() {
+  }
+
+  perfilUsuario() {
+    this.navCtrl.push(PerfilPage);
+  }
+
+  async logout() {
+    /*const result = await this.auth.logout();
+    if (result) {
+      this.navCtrl.setRoot(LoginPage);
+    } */
     this.navCtrl.setRoot(LoginPage);
   }
-
-
 
 }

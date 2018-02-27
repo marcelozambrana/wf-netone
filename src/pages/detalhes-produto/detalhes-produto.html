@@ -1,0 +1,28 @@
+<ion-header>
+
+  <ion-navbar>
+    <ion-title>Detalhes do Produto</ion-title>
+  </ion-navbar>
+
+</ion-header>
+
+
+<ion-content padding class="detalhe-content">
+
+  <div class="card">
+
+    <img [src]="produto.urlImg" alt="produto.titulo" style="width: 50%" class="image" />
+
+    <div class="container">
+      <h4>
+        <b>{{produto.titulo}}</b>
+      </h4>
+      <p> <b>Largura: </b> {{ produto.largura }} cm</p>
+      <p><b>Comprimento: </b> {{ produto.comprimento }} cm</p>
+      <p><b>Altura:</b>{{ produto.altura }} cm</p>
+      <p><b>Cor: </b>{{ produto.cor }}</p>
+      <p class="texto-descricao">{{ produto.descricaoCompleta }} cm</p>
+    </div>
+  </div>
+
+</ion-content>

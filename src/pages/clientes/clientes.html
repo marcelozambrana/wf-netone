@@ -1,0 +1,28 @@
+<ion-header>
+  <ion-navbar>
+    <ion-title>Lista Clientes</ion-title>
+
+    <ion-buttons end>
+      <button ion-button icon-only (click)="adicionarCliente()">
+        <ion-icon name="person-add"></ion-icon>
+      </button>
+    </ion-buttons>
+  </ion-navbar>
+</ion-header>
+
+<ion-content padding class="cliente-content">
+  <ion-searchbar></ion-searchbar>
+
+  <ion-list inset>
+    <ion-item *ngFor="let cli of clientes">
+      {{ cli.nome }}
+      <button clear="" ion-button item-end icon-left (click)="editar(cli.id)">
+        <ion-icon name="create"></ion-icon>
+      </button>
+      <button clear="" ion-button item-end icon-left color="danger" (click)="excluir(cli.id)">
+        <ion-icon name="trash"></ion-icon>
+      </button>
+    </ion-item>
+  </ion-list>
+
+</ion-content>

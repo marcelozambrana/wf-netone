@@ -1,42 +1,83 @@
 <ion-header>
-    <ion-title>Wfm-Netone</ion-title>
+  <ion-navbar>
+    <ion-title>Workforce Netone</ion-title>
+
+    <ion-buttons end>
+      <button ion-button icon-only (click)="novoPedido()">
+        <ion-icon name="add"></ion-icon>
+      </button>
+      <button ion-button icon-only (click)="perfilUsuario()">
+        <ion-icon name="contact"></ion-icon>
+      </button>
+      <button ion-button icon-only (click)="logout()">
+        <ion-icon name="exit"></ion-icon>
+      </button>
+    </ion-buttons>
+  </ion-navbar>
 </ion-header>
 
-<ion-content padding>
+<ion-content padding class="home-content">
+  <ion-grid>
+    <ion-row>
+      <ion-col col-12 col-md-6 col-xl-3>
+        <button ion-button icon-left color="light" full (click)="novoPedido()">
+          <ion-icon name="cart"></ion-icon>
+          Novo Pedido
+        </button>
+      </ion-col>
 
-  <button ion-button icon-left color="light" full (click)="syncServer()">
-      <ion-icon name="sync"></ion-icon>
-      Sincronizar
-  </button>
+      <ion-col col-12 col-md-6 col-xl-3>
+        <button ion-button icon-left color="light" full (click)="catalogo()">
+          <ion-icon name="paper"></ion-icon>
+          Catálogo
+        </button>
+      </ion-col>
 
-  <button ion-button icon-left color="light" full (click)="goToCadastroCliente()">
-        <ion-icon name="contacts"></ion-icon>
-      Clientes
-  </button>
+      <ion-col col-12 col-md-6 col-xl-3>
+        <button ion-button icon-left color="light" full (click)="clientes()">
+          <ion-icon name="contacts"></ion-icon>
+          Clientes
+        </button>
+      </ion-col>
 
-  <button ion-button icon-left color="light" full (click)="goToCatalogo()">
-        <ion-icon name="paper"></ion-icon>
-        Catálogo
-  </button>
+      <ion-col col-12 col-md-6 col-xl-3>
+        <button ion-button icon-left color="light" full (click)="pedidos()">
+          <ion-icon name="list-box"></ion-icon>
+          Pedidos Realizados
+        </button>
+      </ion-col>
+    </ion-row>
 
-  <button ion-button icon-left color="light" full (click)="goToPedidos()">
-      <ion-icon name="list-box"></ion-icon>
-      Pedidos Realizados
-  </button>
+    <ion-row>
+      <ion-col col-12 col-md-6 col-xl-3>
+        <button ion-button icon-left color="light" full (click)="condicoesPagamento()">
+          <ion-icon name="calculator"></ion-icon>
+          Condições de Pagamento
+        </button>
+      </ion-col>
 
-  <button ion-button icon-left color="light" full (click)="novoPedido()">
-      <ion-icon name="cart"></ion-icon>
-      Novo Pedido
-    </button>
+      <ion-col col-12 col-md-6 col-xl-3>
+        <button ion-button icon-left color="light" full (click)="relatorios()">
+          <ion-icon name="podium"></ion-icon>
+          Relatórios
+        </button>
+      </ion-col>
 
-  <button ion-button icon-left color="light" full (click)="goToRelatorios()">
-      <ion-icon name="podium"></ion-icon>
-      Relatórios
-    </button>
+      <ion-col col-12 col-md-6 col-xl-3>
+        <button ion-button icon-left color="light" full (click)="syncServer()">
+          <ion-icon name="sync"></ion-icon>
+          Sincronizar
+        </button>
+      </ion-col>
 
-  <button ion-button icon-left color="danger" full (click)="logoff()">
-      <ion-icon name="exit"></ion-icon>
-      Sair
-    </button>
+      <ion-col col-12 col-md-6 col-xl-3>
+        <button ion-button icon-left color="danger" full (click)="logout()">
+          <ion-icon name="exit"></ion-icon>
+          Sair
+        </button>
+      </ion-col>
+    </ion-row>
+  </ion-grid>
+
 
 </ion-content>
