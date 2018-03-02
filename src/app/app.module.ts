@@ -31,6 +31,9 @@ import { CatalogoProdutoPage } from '../pages/catalogo-produto/catalogo-produto'
 import { DetalhesProdutoPage } from '../pages/detalhes-produto/detalhes-produto';
 import { ClientesPage } from '../pages/clientes/clientes';
 import { NovoClientePage } from '../pages/novo-cliente/novo-cliente';
+import { CondicaoPagamentoPageModule } from '../pages/condicao-pagamento/condicao-pagamento.module';
+import { CondicaoPagamentoProvider } from '../providers/condicao-pagamento/condicao-pagamento';
+import { CondicaoPagamentoPage } from '../pages/condicao-pagamento/condicao-pagamento';
 
 @NgModule({
   declarations: [
@@ -44,6 +47,7 @@ import { NovoClientePage } from '../pages/novo-cliente/novo-cliente';
     DetalhesProdutoPage,
     ClientesPage,
     NovoClientePage,
+    CondicaoPagamentoPage
   ],
   imports: [
     BrowserModule,
@@ -54,7 +58,7 @@ import { NovoClientePage } from '../pages/novo-cliente/novo-cliente';
     // Configuração do serviço de autenticação do firebase
     AngularFireAuthModule,
     // Configuração do serviço de banco de dados do firebase
-    AngularFirestoreModule,
+    AngularFirestoreModule
   ],
   bootstrap: [IonicApp],
   entryComponents: [
@@ -68,6 +72,7 @@ import { NovoClientePage } from '../pages/novo-cliente/novo-cliente';
     DetalhesProdutoPage,
     ClientesPage,
     NovoClientePage,
+    CondicaoPagamentoPage
   ],
   providers: [
     StatusBar,
@@ -76,6 +81,7 @@ import { NovoClientePage } from '../pages/novo-cliente/novo-cliente';
     AuthProvider,
     UserProvider,
     ClientesProvider,
+    CondicaoPagamentoProvider
   ]
 })
 export class AppModule { }

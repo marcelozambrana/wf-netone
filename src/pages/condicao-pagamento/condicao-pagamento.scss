@@ -1,0 +1,38 @@
+page-condicao-pagamento {
+    .home-content {
+        background: #284B63;
+     
+        ion-row {
+            align-items: center;
+            text-align: center;
+        }
+
+        .item-md p {
+            float: right;
+        }
+
+        button {
+            border: 1px solid #ffffff;
+            min-height: 120px;
+        }
+
+        @media (min-width: 0px) {
+            button {
+                min-height: 10px;
+                border-radius: 30px !important;
+                border: 1px solid #ffffff;
+                margin-top: 5px;
+            }
+        }
+     
+        @media (min-width: 420px) {
+            .button {
+                min-height: 120px;
+                border-radius: 1px !important;
+                border: 1px solid black;
+            }
+        }
+      
+    }
+
+}
