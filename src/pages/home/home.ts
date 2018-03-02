@@ -1,3 +1,4 @@
+import { CondicaoPagamentoPage } from './../condicao-pagamento/condicao-pagamento';
 import { Component } from '@angular/core';
 import { NavController, LoadingController } from 'ionic-angular';
 
@@ -55,6 +56,7 @@ export class HomePage {
   }
 
   condicoesPagamento() {
+    this.navCtrl.push(CondicaoPagamentoPage);
   }
 
   relatorios() {
