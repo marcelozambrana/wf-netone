@@ -2,7 +2,8 @@ import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { CONDICOES_PAGAMENTO } from './mock-condicao-pagamento';
 import { CondicaoPagamento } from '../../models/condicao-pagamento';
-
+import { AngularFirestore, AngularFirestoreCollection } from 'angularfire2/firestore';
+import { Observable } from 'rxjs/Observable';
 /*
   Generated class for the CondicaoPagamentoProvider provider.
 
@@ -12,8 +13,14 @@ import { CondicaoPagamento } from '../../models/condicao-pagamento';
 @Injectable()
 export class CondicaoPagamentoProvider {
 
-  constructor(public http: HttpClient) {
+  private condicaoCollection: AngularFirestoreCollection<CondicaoPagamento>;
+
+  public condicao: Observable<CondicaoPagamento[]>;
+
+  constructor(public http: HttpClient, private afs: AngularFirestore) {
     console.log('Hello CondicaoPagamentoProvider Provider');
+    this.condicaoCollection = this.afs.collection('condicoes');
+    this.condicao = this.condicaoCollection.valueChanges();
   }
 
   findOneByIntegration(id: number): CondicaoPagamento | any{
@@ -39,6 +46,13 @@ export class CondicaoPagamentoProvider {
 
   // delete(condicaoPgto: CondicaoPagamento | number ){
   // }
+
+  syncWithFirestore(){
+    let condicoes : CondicaoPagamento[] = [this.findAllByIntegration()[0]];
+    condicoes.forEach(cond => {
+      this.condicaoCollection.add(cond);
+    });
+  }
 
 
 }
