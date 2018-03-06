@@ -9,6 +9,7 @@ import { ClientesPage } from '../clientes/clientes';
 import { CatalogoProdutoPage } from '../catalogo-produto/catalogo-produto';
 
 import { AuthProvider } from '../../providers/auth/auth';
+import { CondicaoPagamentoProvider } from '../../providers/condicao-pagamento/condicao-pagamento';
 
 
 @Component({
@@ -17,7 +18,10 @@ import { AuthProvider } from '../../providers/auth/auth';
 })
 export class HomePage {
 
-  constructor(public navCtrl: NavController, private loadingCtrl: LoadingController, private auth: AuthProvider) {
+  constructor(public navCtrl: NavController, 
+              private loadingCtrl: LoadingController, 
+              private auth: AuthProvider,
+              private condicaoPagamentoProvider: CondicaoPagamentoProvider) {
     this.auth.user.subscribe(
       (auth) => {
         if (auth == null) {
@@ -32,8 +36,8 @@ export class HomePage {
       dismissOnPageChange: true
     });
 
-    loader.present();
-
+    loader.present(); 
+    this.condicaoPagamentoProvider.syncWithFirestore();
     setTimeout(() => {
       loader.dismiss();
     }, 3000);

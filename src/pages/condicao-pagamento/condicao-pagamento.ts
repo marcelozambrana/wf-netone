@@ -26,7 +26,6 @@ export class CondicaoPagamentoPage {
   constructor(public navCtrl: NavController, public navParams: NavParams,
               public condicaoPagamentoProvider: CondicaoPagamentoProvider) {
     // this.items = condicaoPagamentoProvider.findAll();
-    // this.condicaoPagamentoProvider.syncWithFirestore();
     this.items = this.condicaoPagamentoProvider.condicao;
   }
 

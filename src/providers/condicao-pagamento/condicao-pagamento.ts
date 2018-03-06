@@ -35,6 +35,7 @@ export class CondicaoPagamentoProvider {
 
 
   findOne(id: number): CondicaoPagamento | any{
+    return this.condicaoCollection.doc(id.toString())
   }  
 
   findAll(): CondicaoPagamento[] | any[]{
@@ -42,15 +43,16 @@ export class CondicaoPagamentoProvider {
   }
 
   save(condicaoPgto: CondicaoPagamento){
+    this.condicaoCollection.doc(condicaoPgto.id.toString()).set(condicaoPgto);
   }
 
   // delete(condicaoPgto: CondicaoPagamento | number ){
   // }
 
   syncWithFirestore(){
-    let condicoes : CondicaoPagamento[] = [this.findAllByIntegration()[0]];
+    let condicoes : CondicaoPagamento[] = this.findAllByIntegration();
     condicoes.forEach(cond => {
-      this.condicaoCollection.add(cond);
+      this.save(cond);
     });
   }
 

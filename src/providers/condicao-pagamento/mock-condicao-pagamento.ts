@@ -4,7 +4,7 @@ export let CONDICOES_PAGAMENTO : CondicaoPagamento[] | any = [
     {
       "id": 286,
       "numeroParcelas": 1,
-      "descricao": "A VISTA",
+      "descricao": "Á VISTA",
       "percentualVariacao": 0,
       "parcelas": [
         {
