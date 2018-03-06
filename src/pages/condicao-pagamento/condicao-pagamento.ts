@@ -2,6 +2,7 @@ import { Component } from '@angular/core';
 import { IonicPage, NavController, NavParams } from 'ionic-angular';
 import { CondicaoPagamentoProvider } from '../../providers/condicao-pagamento/condicao-pagamento';
 import { CondicaoPagamento } from '../../models/condicao-pagamento';
+import { Observable } from 'rxjs/Observable';
 
 /**
  * Generated class for the CondicaoPagamentoPage page.
@@ -17,11 +18,15 @@ import { CondicaoPagamento } from '../../models/condicao-pagamento';
 })
 export class CondicaoPagamentoPage {
 
-  public items: CondicaoPagamento[] | any[];
+  // public items: CondicaoPagamento[] | any[];
+
+
+  public items: Observable<CondicaoPagamento[]>;
 
   constructor(public navCtrl: NavController, public navParams: NavParams,
               public condicaoPagamentoProvider: CondicaoPagamentoProvider) {
-    this.items = condicaoPagamentoProvider.findAll();
+    // this.items = condicaoPagamentoProvider.findAll();
+    this.items = this.condicaoPagamentoProvider.condicao;
   }
 
   ionViewDidLoad() {

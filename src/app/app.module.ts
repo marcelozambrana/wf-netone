@@ -58,7 +58,7 @@ import { CondicaoPagamentoPage } from '../pages/condicao-pagamento/condicao-paga
     // Configuração do serviço de autenticação do firebase
     AngularFireAuthModule,
     // Configuração do serviço de banco de dados do firebase
-    AngularFirestoreModule
+    AngularFirestoreModule.enablePersistence()
   ],
   bootstrap: [IonicApp],
   entryComponents: [

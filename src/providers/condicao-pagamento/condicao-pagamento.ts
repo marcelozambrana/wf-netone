@@ -2,7 +2,8 @@ import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { CONDICOES_PAGAMENTO } from './mock-condicao-pagamento';
 import { CondicaoPagamento } from '../../models/condicao-pagamento';
-
+import { AngularFirestore, AngularFirestoreCollection } from 'angularfire2/firestore';
+import { Observable } from 'rxjs/Observable';
 /*
   Generated class for the CondicaoPagamentoProvider provider.
 
@@ -12,8 +13,14 @@ import { CondicaoPagamento } from '../../models/condicao-pagamento';
 @Injectable()
 export class CondicaoPagamentoProvider {
 
-  constructor(public http: HttpClient) {
+  private condicaoCollection: AngularFirestoreCollection<CondicaoPagamento>;
+
+  public condicao: Observable<CondicaoPagamento[]>;
+
+  constructor(public http: HttpClient, private afs: AngularFirestore) {
     console.log('Hello CondicaoPagamentoProvider Provider');
+    this.condicaoCollection = this.afs.collection('condicoes');
+    this.condicao = this.condicaoCollection.valueChanges();
   }
 
   findOneByIntegration(id: number): CondicaoPagamento | any{
@@ -28,6 +35,7 @@ export class CondicaoPagamentoProvider {
 
 
   findOne(id: number): CondicaoPagamento | any{
+    return this.condicaoCollection.doc(id.toString())
   }  
 
   findAll(): CondicaoPagamento[] | any[]{
@@ -35,10 +43,18 @@ export class CondicaoPagamentoProvider {
   }
 
   save(condicaoPgto: CondicaoPagamento){
+    this.condicaoCollection.doc(condicaoPgto.id.toString()).set(condicaoPgto);
   }
 
   // delete(condicaoPgto: CondicaoPagamento | number ){
   // }
+
+  syncWithFirestore(){
+    let condicoes : CondicaoPagamento[] = this.findAllByIntegration();
+    condicoes.forEach(cond => {
+      this.save(cond);
+    });
+  }
 
 
 }
