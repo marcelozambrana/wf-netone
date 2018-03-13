@@ -1,6 +1,6 @@
 {
   "name": "wf-netone",
-  "app_id": "",
+  "app_id": "f3defa8a",
   "type": "ionic-angular",
   "integrations": {
     "cordova": {}

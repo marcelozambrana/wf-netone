@@ -66,7 +66,7 @@ export class CatalogoProdutoPage {
         comprimento: 188,
         altura: 32,
         cor: "Branco",
-        preco: 999.99
+        preco: 100.95
       });
     }
   }

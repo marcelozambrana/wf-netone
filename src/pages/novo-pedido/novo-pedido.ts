@@ -57,6 +57,7 @@ export class NovoPedidoPage {
   }
 
   excluirItem(item) {
+    this.pedido.total = this.pedido.total - (item.preco * item.quantidade);
     this.items.pop(item);
   }
 
