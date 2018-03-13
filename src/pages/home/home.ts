@@ -1,14 +1,14 @@
 import { CondicaoPagamentoPage } from './../condicao-pagamento/condicao-pagamento';
 import { Component } from '@angular/core';
-import { NavController, LoadingController } from 'ionic-angular';
+import { NavController, NavParams, LoadingController } from 'ionic-angular';
+
+import { Storage } from '@ionic/storage';
 
 import { LoginPage } from '../login/login';
-import { PerfilPage } from '../perfil/perfil';
 import { NovoPedidoPage } from '../novo-pedido/novo-pedido';
 import { ClientesPage } from '../clientes/clientes';
 import { CatalogoProdutoPage } from '../catalogo-produto/catalogo-produto';
 
-import { AuthProvider } from '../../providers/auth/auth';
 import { CondicaoPagamentoProvider } from '../../providers/condicao-pagamento/condicao-pagamento';
 
 
@@ -18,16 +18,21 @@ import { CondicaoPagamentoProvider } from '../../providers/condicao-pagamento/co
 })
 export class HomePage {
 
-  constructor(public navCtrl: NavController, 
-              private loadingCtrl: LoadingController, 
-              private auth: AuthProvider,
-              private condicaoPagamentoProvider: CondicaoPagamentoProvider) {
-    this.auth.user.subscribe(
-      (auth) => {
-        if (auth == null) {
-          this.navCtrl.setRoot(LoginPage);
-        }
+  caminhoFirebase = "";
+
+  constructor(public navCtrl: NavController, public navParams: NavParams,
+    private loadingCtrl: LoadingController,
+    private storage: Storage,
+    private condicaoPagamentoProvider: CondicaoPagamentoProvider) {
+
+      this.storage.get('tokenApi').then((token) => {
+        console.log('Your tokenApi is ' + token );
       });
+
+      this.storage.get('caminhoFirestone').then((path) => {
+        console.log('root path storage firebase: ' + path );
+      });
+
   }
 
   syncServer() {
@@ -36,7 +41,8 @@ export class HomePage {
       dismissOnPageChange: true
     });
 
-    loader.present(); 
+    loader.present();
+    
     this.condicaoPagamentoProvider.syncWithFirestore();
     setTimeout(() => {
       loader.dismiss();
@@ -66,15 +72,8 @@ export class HomePage {
   relatorios() {
   }
 
-  perfilUsuario() {
-    this.navCtrl.push(PerfilPage);
-  }
-
-  async logout() {
-    /*const result = await this.auth.logout();
-    if (result) {
-      this.navCtrl.setRoot(LoginPage);
-    } */
+  logout() {
+    this.storage.set('usuarioAutenticado', false);
     this.navCtrl.setRoot(LoginPage);
   }
 

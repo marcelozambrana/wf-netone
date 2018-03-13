@@ -3,6 +3,9 @@
     <ion-title>Novo Pedido</ion-title>
 
     <ion-buttons end>
+      <button ion-button icon-only (click)="adicionarItemPedido()">
+        <ion-icon name="cart"></ion-icon>
+      </button>
       <button ion-button icon-only (click)="adicionarCliente()">
         <ion-icon name="person-add"></ion-icon>
       </button>
@@ -12,5 +15,119 @@
 
 <ion-content padding class="pedido-content">
 
+  <form padding [formGroup]="pedidoForm" novalidate>
+
+    <ion-list inset>
+      <h6>Cliente do Pedido</h6>
+
+      <ion-item>
+        <ion-label floating>CPF/CNPJ</ion-label>
+        <ion-input type="text" pattern=".{10,11}[0-9]+$" maxlength="11" formControlName="cliente" [(ngModel)]="pedido.cliente"></ion-input>
+      </ion-item>
+
+      <h6>Dados gerais</h6>
+      <ion-item>
+        <ion-label floating>Data criação</ion-label>
+        <ion-datetime displayFormat="MM/DD/YYYY" formControlName="dataPedido" [(ngModel)]="pedido.dataPedido"></ion-datetime>
+      </ion-item>
+
+      <ion-item>
+        <ion-label floating>Data para entrega</ion-label>
+        <ion-datetime displayFormat="MM/DD/YYYY" formControlName="dataPedido" [(ngModel)]="pedido.dataEntrega"></ion-datetime>
+      </ion-item>
+
+      <ion-item>
+        <ion-label floating>Forma de cobrança</ion-label>
+        <ion-select formControlName="formaCobranca" [(ngModel)]="pedido.formaCobranca">
+          <ion-option value="boleto">Boleto</ion-option>
+          <ion-option value="dinheiro">Dinheiro</ion-option>
+          <ion-option value="cartaoDebito">Cartão Débito</ion-option>
+          <ion-option value="cartaoCredito">Cartão Crédito</ion-option>
+          <ion-option value="cheque">Cheque</ion-option>
+        </ion-select>
+      </ion-item>
+
+      <ion-item>
+        <ion-label floating>CondicaoPagamento</ion-label>
+        <ion-select formControlName="condicaoPagamento" [(ngModel)]="pedido.condicaoPagamento">
+          <ion-option value="boleto">1x</ion-option>
+        </ion-select>
+      </ion-item>
+
+      <h6>Dados para entrega</h6>
+      <ion-item>
+        <ion-label floating>Logradouro</ion-label>
+        <ion-input type="text" formControlName="logradouro" [(ngModel)]="pedido.enderecoEntrega.logradouro"></ion-input>
+      </ion-item>
+
+      <ion-item>
+        <ion-label floating>Nº</ion-label>
+        <ion-input type="text" formControlName="numero" [(ngModel)]="pedido.enderecoEntrega.numero"></ion-input>
+      </ion-item>
+
+      <ion-item>
+        <ion-label floating>Complemento</ion-label>
+        <ion-input type="text" formControlName="complemento" [(ngModel)]="pedido.enderecoEntrega.complemento"></ion-input>
+      </ion-item>
+
+      <ion-item>
+        <ion-label floating>CEP</ion-label>
+        <ion-input type="number" maxlength="8" formControlName="cep" [(ngModel)]="pedido.enderecoEntrega.cep"></ion-input>
+      </ion-item>
+
+      <ion-item>
+        <ion-label floating>Bairro</ion-label>
+        <ion-input type="text" formControlName="bairro" [(ngModel)]="pedido.enderecoEntrega.bairro"></ion-input>
+      </ion-item>
+
+      <ion-item>
+        <ion-label floating>Cidade</ion-label>
+        <ion-input type="text" formControlName="cidade" [(ngModel)]="pedido.enderecoEntrega.cidade"></ion-input>
+      </ion-item>
+
+      <ion-item>
+        <ion-label floating>UF</ion-label>
+        <ion-input type="text" maxlength="2" formControlName="uf" [(ngModel)]="pedido.enderecoEntrega.uf"></ion-input>
+      </ion-item>
+
+      <h6>Desconto</h6>
+      <ion-item>
+        <ion-label floating>R$ Desconto total</ion-label>
+        <ion-input type="number" formControlName="desconto" [(ngModel)]="pedido.descontoTotal"></ion-input>
+      </ion-item>
+
+    </ion-list>
+
+    <ion-list inset>
+      <h6>Produtos</h6>
+  
+      <h4 *ngIf="items.length == 0">Nenhum produto adicionado ainda</h4>
+
+      <ion-item *ngFor="let item of items">
+        <span item-start style="font-weight: bold; color: black">{{ item.nome }}</span>
+        <span item-end style="font-weight: bold; color: black">Qtde: {{ item.quantidade}}</span>
+        <button clear="" ion-button item-end icon-left (tap)="tapAddQuantidade($event, item)">
+            <ion-icon name="add-circle"></ion-icon>
+        </button>
+
+        <button clear="" ion-button item-end icon-left (tap)="tapRemoveQuantidade($event, item)">
+            <ion-icon name="remove-circle"></ion-icon>
+        </button>  
+        <button clear="" ion-button item-end icon-left color="danger" (click)="excluirItem(item.id)">
+          <ion-icon name="trash"></ion-icon>
+        </button>
+        
+      </ion-item>
+
+      <h6>Total Pedido: {{ pedido.total | number}}</h6>
+    </ion-list>
+
+    <ion-list>
+      <button ion-button block (click)="finalizar()">Finalizar</button>
+      <button ion-button block color="light" (click)="salvarRascunho()">Salvar Rascunho</button>
+      <button ion-button block color="danger" outline (click)="cancelar()">Cancelar Pedido</button>
+    </ion-list>
+
+  </form>
 
 </ion-content>

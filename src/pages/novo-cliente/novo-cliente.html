@@ -10,46 +10,83 @@
   <form padding [formGroup]="clienteForm" novalidate>
 
     <ion-list inset>
+      <h6>Informe seu CPF/CNPJ</h6>
+
       <ion-item>
-        <ion-input type="text" placeholder="Nome Completo" formControlName="nome" [(ngModel)]="nome"></ion-input>
+        <ion-label floating>CPF/CNPJ</ion-label>
+        <ion-input type="text" pattern=".{10,11}[0-9]+$" maxlength="11" formControlName="cpfCnpj" [(ngModel)]="cliente.cpfCnpj"
+          (ionBlur)="onBlurCpfCnpj($event.value)" [disabled]="isClienteCpfExistente"></ion-input>
+      </ion-item>
+      <h6 *ngIf="msgIsClienteCpfExistente" class="warning"> {{mensagemClienteExistente}}</h6>
+
+      <h6>Dados gerais</h6>
+      <ion-item>
+        <ion-label floating>Nome Completo</ion-label>
+        <ion-input type="text" formControlName="nome" [(ngModel)]="cliente.nome"></ion-input>
       </ion-item>
 
       <ion-item>
-        <ion-input type="text" placeholder="CPF/CNPJ" formControlName="cpfCnpj" [(ngModel)]="cpfCnpj"></ion-input>
+        <ion-label floating>RG/IE</ion-label>
+        <ion-input type="text" formControlName="rg" [(ngModel)]="cliente.rg"></ion-input>
       </ion-item>
 
       <ion-item>
-        <ion-input type="text" placeholder="RG/IE" formControlName="rg" [(ngModel)]="rg"></ion-input>
+        <ion-label floating>E-mail</ion-label>
+        <ion-input type="email" formControlName="email" [(ngModel)]="cliente.email"></ion-input>
       </ion-item>
 
       <ion-item>
-        <ion-input type="email" placeholder="E-mail" formControlName="email" [(ngModel)]="email"></ion-input>
+        <ion-label floating>Telefone Fixo</ion-label>
+        <ion-input type="text" formControlName="fixo" [(ngModel)]="cliente.fixo"></ion-input>
+      </ion-item>
+
+      <ion-item>
+        <ion-label floating>Celular</ion-label>
+        <ion-input type="text" formControlName="celular" [(ngModel)]="cliente.celular"></ion-input>
       </ion-item>
     </ion-list>
 
     <ion-list inset>
+      <h6>Dados de endereco</h6>
+
       <ion-item>
-        <ion-input type="text" placeholder="Logradouro" formControlName="logradouro" [(ngModel)]="logradouro"></ion-input>
+        <ion-label floating>Logradouro</ion-label>
+        <ion-input type="text" formControlName="logradouro" [(ngModel)]="cliente.endereco.logradouro"></ion-input>
       </ion-item>
 
       <ion-item>
-        <ion-input type="text" placeholder="CEP" formControlName="cep" [(ngModel)]="cep"></ion-input>
+        <ion-label floating>Nº</ion-label>
+        <ion-input type="text" formControlName="numero" [(ngModel)]="cliente.endereco.numero"></ion-input>
+      </ion-item>
+
+
+      <ion-item>
+        <ion-label floating>CEP</ion-label>
+        <ion-input type="text" maxlength="8" formControlName="cep" [(ngModel)]="cliente.endereco.cep"></ion-input>
       </ion-item>
 
       <ion-item>
-        <ion-input type="text" placeholder="Bairro" formControlName="bairro" [(ngModel)]="bairro"></ion-input>
+        <ion-label floating>Bairro</ion-label>
+        <ion-input type="text" formControlName="bairro" [(ngModel)]="cliente.endereco.bairro"></ion-input>
       </ion-item>
 
       <ion-item>
-        <ion-input type="text" placeholder="Cidade" formControlName="cidade" [(ngModel)]="cidade"></ion-input>
+        <ion-label floating>Cidade</ion-label>
+        <ion-input type="text" formControlName="cidade" [(ngModel)]="cliente.endereco.cidade"></ion-input>
       </ion-item>
 
       <ion-item>
-        <ion-input type="text" placeholder="Estado" formControlName="uf" [(ngModel)]="uf"></ion-input>
+        <ion-label floating>UF</ion-label>
+        <ion-input type="text" maxlength="2" formControlName="uf" [(ngModel)]="cliente.endereco.uf"></ion-input>
       </ion-item>
+
     </ion-list>
 
-    <button ion-button class="submit-btn" block (click)="adicionarCliente()">Salvar</button>
+    <ion-list>
+      <button *ngIf="!isClienteCpfExistente" ion-button block (click)="adicionar(cliente)">Salvar</button>
+      <button *ngIf="isClienteCpfExistente" ion-button block (click)="atualizar(cliente)">Salvar</button>
+      <button ion-button block outline (click)="cancelar()">Cancelar</button>
+    </ion-list>
 
   </form>
 

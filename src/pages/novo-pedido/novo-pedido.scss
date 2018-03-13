@@ -1,5 +1,36 @@
 page-novo-pedido {
     .pedido-content {
         background: #284B63;
+
+        ion-list-header {
+            background: #284B63; 
+        }
+
+        form {
+            ion-item {
+                border-radius: 30px !important;
+                padding-left: 30px !important;
+                font-size: 0.9em;
+                margin-bottom: 10px;
+                border: 1px solid #ffffff;
+                border-bottom: 0px !important;
+                box-shadow: none !important;
+            }
+        }
+
+        button {
+            border-radius: 30px !important;
+            border: 1px solid #ffffff;
+        }
+
+        h6 {
+            color: #fff;
+        }
+
+        h4 {
+            color: yellowgreen;
+            text-align: center;
+        }
+
     }
 }

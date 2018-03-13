@@ -16,9 +16,19 @@ page-novo-cliente {
             box-shadow: none !important;
         }
 
-         button {
+        button {
             border-radius: 30px !important;
             border: 1px solid #ffffff;
+        }
+
+        h6 {
+            color: #fff;
+        }
+
+        .warning {
+            color: darkorange;
+            font-weight: bold;
+            font-size: 16px;
         }
       
     }

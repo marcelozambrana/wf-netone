@@ -2,12 +2,11 @@ import { Component } from '@angular/core';
 import { IonicPage, NavController, NavParams, LoadingController, AlertController } from 'ionic-angular';
 import { FormBuilder, Validators } from '@angular/forms';
 
+import { Storage } from '@ionic/storage';
+
 import { HomePage } from '../home/home';
-import { UsuarioPage } from '../usuario/usuario';
 
-import { UserAuth } from '../../models/userAuth';
-
-import { AuthProvider } from '../../providers/auth/auth';
+import { LoginProvider } from '../../providers/login/login';
 
 
 @IonicPage()
@@ -17,8 +16,6 @@ import { AuthProvider } from '../../providers/auth/auth';
 })
 export class LoginPage {
 
-  public user = {} as UserAuth;
-
   public loginForm: any;
   mensagemErroEmail = "";
   mensagemErroPassword = "";
@@ -26,13 +23,23 @@ export class LoginPage {
   isErroPassword = false;
 
   constructor(public navCtrl: NavController, public navParams: NavParams, public formBuilder: FormBuilder,
-    private loadingCtrl: LoadingController, private auth: AuthProvider, private alertCtrl: AlertController
-  ) {
+    private loadingCtrl: LoadingController, private alertCtrl: AlertController,
+    private loginProvider: LoginProvider, private storage: Storage) {
+
     this.loginForm = formBuilder.group({
       email: ['', Validators.required],
       password: ['', Validators.compose([Validators.minLength(6), Validators.maxLength(20),
       Validators.required])]
-    })
+    });
+
+    this.storage.get('usuarioAutenticado').then((result) => {
+     
+      console.log('isUsuarioAutenticado: ' + result);
+     
+      if (result) {
+        this.navCtrl.setRoot(HomePage);
+      }
+    });
   }
 
   alert(title, message) {
@@ -73,27 +80,25 @@ export class LoginPage {
       loader.present();
 
       try {
-        this.user.email = email.value;
-        this.user.password = password.value;
 
-        const result = await this.auth.login(this.user);
+        const result: any = await this.loginProvider.login(email.value, password.value);
         if (result) {
+          console.log('result token login:' + result.token);
+
+          this.storage.set('usuarioAutenticado', true);
+          this.storage.set('tokenApi', result.token);
+          this.storage.set('caminhoFirestone', result.email + '/');
+
           this.navCtrl.setRoot(HomePage);
+
         }
       } catch (e) {
         loader.dismiss();
-        if (e.code === "auth/user-not-found") {
-          this.alert('Erro ao logar', 'Usuário não registrado'); 
-        } else if (e.code === "auth/wrong-password") {
-          this.alert('Erro ao logar', 'Usuário ou senha incorreta'); 
-        } else {
-          this.alert('Erro ao logar', e.message);
-        }
+
+        this.alert('Erro ao logar', e.message);
+
       }
     }
   }
 
-  registrar() {
-    this.navCtrl.push(UsuarioPage);
-  }
 }

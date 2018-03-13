@@ -5,6 +5,20 @@ page-home {
         ion-row {
             align-items: center;
             text-align: center;
+
+            div {
+                color: #fff;
+                font-size: 170%;
+
+                .card-icon {
+                    padding: 20px;
+                }
+
+                .card-title {
+                    padding: 20px;
+                    font-size: 70%;
+                }
+            }
         }
 
         button {

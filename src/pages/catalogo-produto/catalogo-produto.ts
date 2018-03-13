@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { IonicPage, NavController, NavParams } from 'ionic-angular';
+import { IonicPage, NavController, NavParams, AlertController, Events } from 'ionic-angular';
 
 import { DetalhesProdutoPage } from '../detalhes-produto/detalhes-produto';
 
@@ -29,12 +29,27 @@ export class CatalogoProdutoPage {
   page = 1;
   totalPage = 5;
 
-  constructor(public navCtrl: NavController, public navParams: NavParams) {
-    this.buscaMaisProdutos(this.page, 12);
+  isFromPedido = false;
+
+  constructor(public navCtrl: NavController, public navParams: NavParams,
+    private ev: Events, private alertCtrl: AlertController) {
+
+    this.isFromPedido = this.navParams.get('fromPedido') || false;
+
+    this.buscaMaisProdutos(0, 12);
+  }
+
+  alert(title, message) {
+    let al = this.alertCtrl.create({
+      title: title,
+      subTitle: message,
+      buttons: ['Fechar']
+    });
+    al.present();
   }
 
   buscaMaisProdutos(numeroPagina, quantidade) {
-    
+
     if (numeroPagina > 5)
       return;
 
@@ -50,7 +65,8 @@ export class CatalogoProdutoPage {
         largura: 138,
         comprimento: 188,
         altura: 32,
-        cor: "Branco"
+        cor: "Branco",
+        preco: 999.99
       });
     }
   }
@@ -59,8 +75,8 @@ export class CatalogoProdutoPage {
     console.log('Begin async operation');
 
     setTimeout(() => {
-      this.page=this.page+1;
-      
+      this.page = this.page + 1;
+
       this.buscaMaisProdutos(this.page, 4);
 
       console.log('Async operation has ended');
@@ -69,7 +85,12 @@ export class CatalogoProdutoPage {
   }
 
   detalhes(produto) {
-    this.navCtrl.push(DetalhesProdutoPage, {produtoParam: produto})
+    this.navCtrl.push(DetalhesProdutoPage, { produtoParam: produto })
+  }
+
+  adicionarCarrinho(produto) {
+    this.ev.publish('adicionarProdutoCarrinho', produto);
+    this.alert("Sucesso", "Produto adicionado ao pedido");
   }
 
 }

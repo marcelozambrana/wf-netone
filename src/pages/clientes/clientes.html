@@ -1,6 +1,6 @@
 <ion-header>
   <ion-navbar>
-    <ion-title>Lista Clientes</ion-title>
+    <ion-title>Clientes</ion-title>
 
     <ion-buttons end>
       <button ion-button icon-only (click)="adicionarCliente()">
@@ -11,10 +11,11 @@
 </ion-header>
 
 <ion-content padding class="cliente-content">
-  <ion-searchbar></ion-searchbar>
+  <ion-searchbar placeholder="Buscar nome" [(ngModel)]="searchTerm" (ionInput)="filtrarClientes()"></ion-searchbar>
+  
 
   <ion-list inset>
-    <ion-item *ngFor="let cli of clientes">
+    <ion-item *ngFor="let cli of clientes | async">
       {{ cli.nome }}
       <button clear="" ion-button item-end icon-left (click)="editar(cli.id)">
         <ion-icon name="create"></ion-icon>

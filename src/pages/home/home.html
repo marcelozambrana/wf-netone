@@ -6,7 +6,7 @@
       <button ion-button icon-only (click)="novoPedido()">
         <ion-icon name="add"></ion-icon>
       </button>
-      <button ion-button icon-only (click)="perfilUsuario()">
+      <button ion-button icon-only>
         <ion-icon name="contact"></ion-icon>
       </button>
       <button ion-button icon-only (click)="logout()">
@@ -20,61 +20,61 @@
   <ion-grid>
     <ion-row>
       <ion-col col-12 col-md-6 col-xl-3>
-        <button ion-button icon-left color="light" full (click)="novoPedido()">
-          <ion-icon name="cart"></ion-icon>
-          Novo Pedido
-        </button>
+        <div (click)="novoPedido()" style="background: #F5B700">
+          <div class="card-icon"><ion-icon name="cart"></ion-icon></div>
+          <div class="card-title"><span>Novo Pedido</span></div>
+        </div>
       </ion-col>
 
       <ion-col col-12 col-md-6 col-xl-3>
-        <button ion-button icon-left color="light" full (click)="catalogo()">
-          <ion-icon name="paper"></ion-icon>
-          Catálogo
-        </button>
+        <div (click)="catalogo()" style="background: #04E762">
+          <div class="card-icon"><ion-icon name="paper"></ion-icon></div>
+            <div class="card-title"><span>Catálogo</span></div>
+        </div>
       </ion-col>
 
       <ion-col col-12 col-md-6 col-xl-3>
-        <button ion-button icon-left color="light" full (click)="clientes()">
-          <ion-icon name="contacts"></ion-icon>
-          Clientes
-        </button>
+        <div (click)="clientes()" style="background: #89FC00">
+          <div class="card-icon"><ion-icon name="contacts"></ion-icon></div>
+            <div class="card-title"><span>Clientes</span></div>
+        </div>
       </ion-col>
 
       <ion-col col-12 col-md-6 col-xl-3>
-        <button ion-button icon-left color="light" full (click)="pedidos()">
-          <ion-icon name="list-box"></ion-icon>
-          Pedidos Realizados
-        </button>
+        <div (click)="pedidos()" style="background: #42CAFD">
+          <div class="card-icon"><ion-icon name="list-box"></ion-icon></div>
+            <div class="card-title"><span>Pedidos Realizados</span></div>
+        </div>
       </ion-col>
     </ion-row>
 
     <ion-row>
       <ion-col col-12 col-md-6 col-xl-3>
-        <button ion-button icon-left color="light" full (click)="condicoesPagamento()">
-          <ion-icon name="calculator"></ion-icon>
-          Condições de Pagamento
-        </button>
+        <div (click)="condicoesPagamento()" style="background: #754668">
+          <div class="card-icon"><ion-icon name="calculator"></ion-icon></div>
+            <div class="card-title"><span>Condições de Pagamento</span></div>
+        </div>
       </ion-col>
 
       <ion-col col-12 col-md-6 col-xl-3>
-        <button ion-button icon-left color="light" full (click)="relatorios()">
-          <ion-icon name="podium"></ion-icon>
-          Relatórios
-        </button>
+        <div (click)="relatorios()" style="background: #008BF8">
+          <div class="card-icon"><ion-icon name="podium"></ion-icon></div>
+            <div class="card-title"><span>Relatórios</span></div>
+        </div>
       </ion-col>
 
       <ion-col col-12 col-md-6 col-xl-3>
-        <button ion-button icon-left color="light" full (click)="syncServer()">
-          <ion-icon name="sync"></ion-icon>
-          Sincronizar
-        </button>
+        <div (click)="syncServer()" style="background: #DC0073">
+          <div class="card-icon"><ion-icon name="sync"></ion-icon></div>
+            <div class="card-title"><span>Sincronizar</span></div>
+        </div>
       </ion-col>
 
       <ion-col col-12 col-md-6 col-xl-3>
-        <button ion-button icon-left color="danger" full (click)="logout()">
-          <ion-icon name="exit"></ion-icon>
-          Sair
-        </button>
+        <div (click)="logout()" style="background: #E3170A">
+          <div class="card-icon"><ion-icon name="exit"></ion-icon></div>
+            <div class="card-title"><span>Sair</span></div>
+        </div>
       </ion-col>
     </ion-row>
   </ion-grid>
