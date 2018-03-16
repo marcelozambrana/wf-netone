@@ -7,6 +7,7 @@ import { NovoClientePage } from '../novo-cliente/novo-cliente';
 import { Pedido } from '../../models/pedido';
 import { CatalogoProdutoPage } from '../catalogo-produto/catalogo-produto';
 import { HomePage } from '../home/home';
+import { ItemsPedidoPage } from '../items-pedido/items-pedido';
 
 @IonicPage()
 @Component({
@@ -55,32 +56,16 @@ export class NovoPedidoPage {
   adicionarItemPedido() {
     this.navCtrl.push(CatalogoProdutoPage, { fromPedido: true });
   }
-
-  excluirItem(item) {
-    this.pedido.total = this.pedido.total - (item.preco * item.quantidade);
-    this.items.pop(item);
-  }
-
+  
   cancelar() {
     this.navCtrl.push(HomePage);
   }
 
-  finalizar() {
+  salvar() {
   }
 
-  salvarRascunho() {
-  }
-
-  tapAddQuantidade(e, item) {
-    item.quantidade++;
-    this.pedido.total = this.pedido.total + (item.preco);
-  }
-
-  tapRemoveQuantidade(e, item) {
-    if (item.quantidade > 0) {
-      item.quantidade--;
-      this.pedido.total = this.pedido.total - (item.preco);
-    }
+  itemsPedido() {
+    this.navCtrl.push(ItemsPedidoPage, { "pedido": this.pedido, "items": this.items});
   }
 
 }

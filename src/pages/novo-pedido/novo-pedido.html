@@ -3,8 +3,11 @@
     <ion-title>Novo Pedido</ion-title>
 
     <ion-buttons end>
-      <button ion-button icon-only (click)="adicionarItemPedido()">
+      <button ion-button icon-only (click)="itemsPedido()">
         <ion-icon name="cart"></ion-icon>
+      </button>
+      <button ion-button icon-only (click)="adicionarItemPedido()">
+        <ion-icon name="paper"></ion-icon>
       </button>
       <button ion-button icon-only (click)="adicionarCliente()">
         <ion-icon name="person-add"></ion-icon>
@@ -101,32 +104,7 @@
   </form>
 
   <ion-list>
-    <h6>Produtos</h6>
-
-    <h4 *ngIf="items.length == 0">Nenhum produto adicionado ainda</h4>
-
-    <ion-item *ngFor="let item of items">
-      <span item-start style="font-weight: bold; color: black">{{ item.nome }}</span>
-      <span item-end style="font-weight: bold; color: black">Qtde: {{ item.quantidade}}</span>
-      <button clear="" ion-button item-end icon-left (tap)="tapAddQuantidade($event, item)">
-        <ion-icon name="add-circle"></ion-icon>
-      </button>
-
-      <button clear="" ion-button item-end icon-left (tap)="tapRemoveQuantidade($event, item)">
-        <ion-icon name="remove-circle"></ion-icon>
-      </button>
-      <button clear="" ion-button item-end icon-left color="danger" (click)="excluirItem(item)">
-        <ion-icon name="trash"></ion-icon>
-      </button>
-
-    </ion-item>
-
-    <h6>Total Pedido: {{ pedido.total | number}}</h6>
-  </ion-list>
-
-  <ion-list>
-    <button ion-button block (click)="finalizar()">Finalizar</button>
-    <button ion-button block color="light" (click)="salvarRascunho()">Salvar Rascunho</button>
+    <button ion-button block (click)="salvar()">Salvar</button>
     <button ion-button block color="danger" outline (click)="cancelar()">Cancelar Pedido</button>
   </ion-list>
 
