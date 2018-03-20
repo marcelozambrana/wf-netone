@@ -20,7 +20,7 @@ export class PedidosProvider {
     this.pedidos = this.pedidosCollection.snapshotChanges().map(changes => {
       return changes.map(a => {
         const data = a.payload.doc.data() as Pedido;
-        data.id = a.payload.doc.id;
+        data.numero = a.payload.doc.id;
         return data;
       });
     });
@@ -40,7 +40,7 @@ export class PedidosProvider {
   }
 
   atualizar(pedido:Pedido) {
-    this.pedidoDoc = this.afs.doc(`pedidos/${pedido.id}`);
+    this.pedidoDoc = this.afs.doc(`pedidos/${pedido.numero}`);
     return this.pedidoDoc.update(pedido);
   }
 
