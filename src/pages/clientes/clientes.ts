@@ -36,7 +36,7 @@ export class ClientesPage {
   }
 
   adicionarCliente() {
-    this.navCtrl.push(NovoClientePage, { titulo: 'Adicionar' });
+    this.navCtrl.push(NovoClientePage, { titulo: 'Novo' });
   }
 
   editar(id: string) {

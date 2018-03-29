@@ -9,44 +9,56 @@
 
   <form padding [formGroup]="clienteForm" novalidate>
 
-    <ion-list inset>
+    <div *ngIf="passo==1">
       <h6>Informe seu CPF/CNPJ</h6>
 
-      <ion-item>
-        <ion-label floating>CPF/CNPJ</ion-label>
-        <ion-input type="text" pattern=".{10,11}[0-9]+$" maxlength="11" formControlName="cpfCnpj" [(ngModel)]="cliente.cpfCnpj"
-          (ionBlur)="onBlurCpfCnpj($event.value)" [disabled]="isClienteCpfExistente"></ion-input>
-      </ion-item>
-      <h6 *ngIf="msgIsClienteCpfExistente" class="warning"> {{mensagemClienteExistente}}</h6>
+      <ion-list>
+        <ion-item>
+          <ion-label floating>CPF/CNPJ</ion-label>
+          <ion-input type="text" name="cpf" [brmasker]="{person: true}" formControlName="cpfCnpj" [(ngModel)]="cliente.cpfCnpj" [disabled]="isClienteCpfExistente"></ion-input>
+        </ion-item>
 
+        <button ion-button block (click)="validaCpfEContinua(cliente)">Continuar</button>
+      </ion-list>
+
+      <h6 *ngIf="isErro" class="error"> {{mensagemErro}}</h6>
+    </div>
+
+    <div *ngIf="passo==2">
       <h6>Dados gerais</h6>
-      <ion-item>
-        <ion-label floating>Nome Completo</ion-label>
-        <ion-input type="text" formControlName="nome" [(ngModel)]="cliente.nome"></ion-input>
-      </ion-item>
+      <ion-list>
+        <ion-item>
+          <ion-label floating>Nome Completo/Razão Social</ion-label>
+          <ion-input type="text" formControlName="nome" [(ngModel)]="cliente.nome"></ion-input>
+        </ion-item>
 
-      <ion-item>
-        <ion-label floating>RG/IE</ion-label>
-        <ion-input type="text" formControlName="rg" [(ngModel)]="cliente.rg"></ion-input>
-      </ion-item>
+        <ion-item>
+          <ion-label floating>RG/IE</ion-label>
+          <ion-input type="text" formControlName="rg" [(ngModel)]="cliente.rg"></ion-input>
+        </ion-item>
 
-      <ion-item>
-        <ion-label floating>E-mail</ion-label>
-        <ion-input type="email" formControlName="email" [(ngModel)]="cliente.email"></ion-input>
-      </ion-item>
+        <ion-item>
+          <ion-label floating>E-mail</ion-label>
+          <ion-input type="email" formControlName="email" [(ngModel)]="cliente.email"></ion-input>
+        </ion-item>
 
-      <ion-item>
-        <ion-label floating>Telefone Fixo</ion-label>
-        <ion-input type="text" formControlName="fixo" [(ngModel)]="cliente.fixo"></ion-input>
-      </ion-item>
+        <ion-item>
+          <ion-label floating>Telefone Fixo</ion-label>
+          <ion-input type="text" formControlName="fixo" [brmasker]="{phone: true}" [(ngModel)]="cliente.fixo"></ion-input>
+        </ion-item>
 
-      <ion-item>
-        <ion-label floating>Celular</ion-label>
-        <ion-input type="text" formControlName="celular" [(ngModel)]="cliente.celular"></ion-input>
-      </ion-item>
-    </ion-list>
+        <ion-item>
+          <ion-label floating>Celular</ion-label>
+          <ion-input type="text" formControlName="celular" [brmasker]="{phone: true}" [(ngModel)]="cliente.celular"></ion-input>
+        </ion-item>
 
-    <ion-list inset>
+        <button ion-button block (click)="validaDadosGeraisEContinua(cliente)">Continuar</button>
+      </ion-list>
+
+      <h6 *ngIf="isErro" class="error"> {{mensagemErro}}</h6>
+    </div>
+
+    <ion-list inset *ngIf="passo==3">
       <h6>Dados de endereco</h6>
 
       <ion-item>
@@ -56,13 +68,13 @@
 
       <ion-item>
         <ion-label floating>Nº</ion-label>
-        <ion-input type="text" formControlName="numero" [(ngModel)]="cliente.endereco.numero"></ion-input>
+        <ion-input type="number" pattern="\\d*" formControlName="numero" [(ngModel)]="cliente.endereco.numero"></ion-input>
       </ion-item>
 
 
       <ion-item>
         <ion-label floating>CEP</ion-label>
-        <ion-input type="text" maxlength="8" formControlName="cep" [(ngModel)]="cliente.endereco.cep"></ion-input>
+        <ion-input type="text" [brmasker]="{mask:'00.000-000', len:10}" formControlName="cep" [(ngModel)]="cliente.endereco.cep"></ion-input>
       </ion-item>
 
       <ion-item>
@@ -80,13 +92,12 @@
         <ion-input type="text" maxlength="2" formControlName="uf" [(ngModel)]="cliente.endereco.uf"></ion-input>
       </ion-item>
 
-    </ion-list>
-
-    <ion-list>
       <button *ngIf="!isClienteCpfExistente" ion-button block (click)="adicionar(cliente)">Salvar</button>
       <button *ngIf="isClienteCpfExistente" ion-button block (click)="atualizar(cliente)">Salvar</button>
       <button ion-button block outline (click)="cancelar()">Cancelar</button>
+
     </ion-list>
+
 
   </form>
 

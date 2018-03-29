@@ -27,8 +27,12 @@ page-novo-cliente {
 
         .warning {
             color: darkorange;
-            font-weight: bold;
             font-size: 16px;
+        }
+
+        .error {
+            color: red;
+            font-size: 12px;
         }
       
     }

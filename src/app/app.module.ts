@@ -10,6 +10,8 @@ import { SplashScreen } from '@ionic-native/splash-screen';
 import { StatusBar } from '@ionic-native/status-bar';
 import { HttpClientModule } from '@angular/common/http';
 
+import { BrMaskerModule } from 'brmasker-ionic-3';
+
 // Importações para funcionamento do Firebase e da Autenticação
 import { AngularFireModule } from 'angularfire2';
 import { AngularFireDatabaseModule } from 'angularfire2/database';
@@ -60,7 +62,8 @@ import { ItemsPedidoPage } from '../pages/items-pedido/items-pedido';
     AngularFirestoreModule.enablePersistence(),
     AngularFireDatabaseModule,
     // Configuração do serviço de banco de dados do firebase
-    AngularFirestoreModule.enablePersistence()
+    AngularFirestoreModule.enablePersistence(),
+    BrMaskerModule
   ],
   bootstrap: [IonicApp],
   entryComponents: [
