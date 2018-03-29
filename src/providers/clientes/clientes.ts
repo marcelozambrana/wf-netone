@@ -31,6 +31,8 @@ export class ClientesProvider {
   }
 
   adicionar(cliente: Cliente) {
+    cliente.cpfCnpj = cliente.cpfCnpj.replace(/\D/g, "");
+    
     return this.cliCollection.add(cliente);
   }
 
@@ -40,6 +42,8 @@ export class ClientesProvider {
   }
 
   atualizar(cliente:Cliente) {
+    cliente.cpfCnpj = cliente.cpfCnpj.replace(/\D/g, "");
+
     this.cliDoc = this.afs.doc(`clientes/${cliente.id}`);
     return this.cliDoc.update(cliente);
   }

@@ -9,24 +9,26 @@
 
   <form padding [formGroup]="clienteForm" novalidate>
 
-    <div *ngIf="passo==1">
-      <h6>Informe seu CPF/CNPJ</h6>
+    <div *ngIf="passo==1 || isClienteCpfExistente">
 
-      <ion-list>
+      <h6>Informe seu CPF/CNPJ</h6>
+      <ion-list inset>
         <ion-item>
           <ion-label floating>CPF/CNPJ</ion-label>
           <ion-input type="text" name="cpf" [brmasker]="{person: true}" formControlName="cpfCnpj" [(ngModel)]="cliente.cpfCnpj" [disabled]="isClienteCpfExistente"></ion-input>
         </ion-item>
 
-        <button ion-button block (click)="validaCpfEContinua(cliente)">Continuar</button>
+        <button ion-button block *ngIf="!isClienteCpfExistente" (click)="validaCpfEContinua(cliente)">Continuar</button>
       </ion-list>
 
       <h6 *ngIf="isErro" class="error"> {{mensagemErro}}</h6>
     </div>
 
+
     <div *ngIf="passo==2">
+
       <h6>Dados gerais</h6>
-      <ion-list>
+      <ion-list inset>
         <ion-item>
           <ion-label floating>Nome Completo/Razão Social</ion-label>
           <ion-input type="text" formControlName="nome" [(ngModel)]="cliente.nome"></ion-input>
@@ -55,12 +57,11 @@
         <button ion-button block (click)="validaDadosGeraisEContinua(cliente)">Continuar</button>
       </ion-list>
 
-      <h6 *ngIf="isErro" class="error"> {{mensagemErro}}</h6>
     </div>
 
     <ion-list inset *ngIf="passo==3">
+    
       <h6>Dados de endereco</h6>
-
       <ion-item>
         <ion-label floating>Logradouro</ion-label>
         <ion-input type="text" formControlName="logradouro" [(ngModel)]="cliente.endereco.logradouro"></ion-input>
@@ -97,7 +98,6 @@
       <button ion-button block outline (click)="cancelar()">Cancelar</button>
 
     </ion-list>
-
 
   </form>
 

@@ -3,13 +3,10 @@
     <ion-title>Novo Pedido</ion-title>
 
     <ion-buttons end>
-      <!-- <button ion-button icon-only (click)="itemsPedido()">
-        <ion-icon name="cart"></ion-icon>
-      </button> -->
-      <button ion-button icon-only (click)="adicionarItemPedido()">
+      <button ion-button icon-only (click)="adicionarItemPedido()" *ngIf="passo==4">
         <ion-icon name="paper"></ion-icon>
       </button>
-      <button ion-button icon-only (click)="adicionarCliente()">
+      <button ion-button icon-only (click)="adicionarCliente()" *ngIf="passo==1">
         <ion-icon name="person-add"></ion-icon>
       </button>
     </ion-buttons>
@@ -17,147 +14,163 @@
 </ion-header>
 
 
+<ion-content class="pedido-content">
 
-<ion-content padding class="pedido-content">
+  <form padding [formGroup]="pedidoForm" novalidate>
 
-  <div>
-    <ion-segment [(ngModel)]="typeSegment">
-      <ion-segment-button value="pedido">
-        Dados do Pedido
-      </ion-segment-button>
-      <ion-segment-button value="itens">
-        Itens
-      </ion-segment-button>
-    </ion-segment>
-  </div>
-    
-  <div [ngSwitch]="typeSegment">
+    <div *ngIf="passo==1 || passo==2">
 
-    <form padding [formGroup]="pedidoForm" novalidate  *ngSwitchCase="'pedido'">
-  
+      <h6>Cliente do Pedido</h6>
       <ion-list inset>
-        <h6>Cliente do Pedido</h6>
 
         <ion-item *ngIf="clientFound">
           <ion-icon name="md-person" item-start></ion-icon>
           <h2>{{pedido.cliente.nome}}</h2>
           <h3>{{pedido.cliente.cpfCnpj}}</h3>
-        </ion-item>        
-      
+        </ion-item>
+        
         <ion-item *ngIf="!clientFound">
           <ion-label floating>CPF/CNPJ</ion-label>
-          <ion-input type="text" pattern=".{10,11}[0-9]+$" maxlength="11" formControlName="cliente" (ionBlur)="onBlurCpfCnpj($event.value)" [(ngModel)]="pedido.cliente"></ion-input>
+          <ion-input type="text" [brmasker]="{person: true}" formControlName="cliente" (ionBlur)="onBlurCpfCnpj($event.value)" [(ngModel)]="pedido.cliente" [disabled]="passo!=1"></ion-input>
         </ion-item>
+        
+        <button *ngIf="passo==1 && !clientFound" ion-button block (click)="selecionaClienteEContinua()">Buscar Cliente</button>
+        <button *ngIf="passo==1 && clientFound" ion-button block (click)="selecionaClienteEContinua()">Continuar</button>
+      </ion-list>
 
-        <h6 *ngIf="clientNotFound" class="warning"> {{mensagemClienteExistente}}</h6>
-  
-        <h6>Dados gerais</h6>
+      <h6 *ngIf="clientSearch && !clientFound" class="warning"> {{mensagemClienteNaoEncontrado}}</h6>
+    </div>
+
+
+    <div *ngIf="passo==2">
+
+      <h6>Dados gerais</h6>
+      <ion-list inset>
         <ion-item>
           <ion-label floating>Emissão</ion-label>
-          <ion-datetime displayFormat="MM/DD/YYYY" formControlName="dataPedido" [(ngModel)]="pedido.emissao"></ion-datetime>
+          <ion-datetime disabled displayFormat="DD/MM/YYYY" pickerFormat="DD/MM/YYYY" formControlName="dataEmissao" [(ngModel)]="pedido.emissao"></ion-datetime>
         </ion-item>
-  
+
         <ion-item>
-          <ion-label floating>Previsão de entrega</ion-label>
-          <ion-datetime displayFormat="MM/DD/YYYY" formControlName="dataPedido" [(ngModel)]="pedido.previsaoEntrega"></ion-datetime>
+          <ion-label floating>Previsão de Entrega</ion-label>
+          <ion-datetime displayFormat="DD/MM/YYYY" pickerFormat="DD/MM/YYYY" formControlName="dataPrevisaoEntrega" [(ngModel)]="pedido.previsaoEntrega"></ion-datetime>
         </ion-item>
-  
+
         <ion-item>
-          <ion-label floating>Forma de cobrança</ion-label>
+          <ion-label floating>Forma de Cobrança</ion-label>
           <ion-select formControlName="formaCobranca" [(ngModel)]="pedido.formaCobranca">
             <ion-option value="boleto">Boleto</ion-option>
-            <ion-option value="dinheiro">Dinheiro</ion-option>
             <ion-option value="cartaoDebito">Cartão Débito</ion-option>
             <ion-option value="cartaoCredito">Cartão Crédito</ion-option>
             <ion-option value="cheque">Cheque</ion-option>
+            <ion-option value="dinheiro">Dinheiro</ion-option>
           </ion-select>
         </ion-item>
-  
+
         <ion-item>
-          <ion-label floating>CondicaoPagamento</ion-label>
+          <ion-label floating>Condição Pagamento</ion-label>
           <ion-select formControlName="condicaoPagamento" [(ngModel)]="pedido.condicaoPagamentoId">
             <ion-option value="{{condicao.id}}" *ngFor="let condicao of condicoes | async">{{condicao.descricao}}</ion-option>
           </ion-select>
         </ion-item>
 
-        <h6>Desconto</h6>
-        <ion-item>
-          <ion-label floating>R$ Desconto total</ion-label>
-          <ion-input type="number" formControlName="desconto" [(ngModel)]="pedido.descontoTotal"></ion-input>
-        </ion-item>        
-  
-        <div *ngIf="false">
-          <h6>Dados para entrega</h6>
-          <ion-item>
-            <ion-label floating>Logradouro</ion-label>
-            <ion-input type="text" formControlName="logradouro" [(ngModel)]="pedido.enderecoEntrega.logradouro"></ion-input>
-          </ion-item>
-    
-          <ion-item>
-            <ion-label floating>Nº</ion-label>
-            <ion-input type="text" formControlName="numero" [(ngModel)]="pedido.enderecoEntrega.numero"></ion-input>
-          </ion-item>
-    
-          <ion-item>
-            <ion-label floating>Complemento</ion-label>
-            <ion-input type="text" formControlName="complemento" [(ngModel)]="pedido.enderecoEntrega.complemento"></ion-input>
-          </ion-item>
-    
-          <ion-item>
-            <ion-label floating>CEP</ion-label>
-            <ion-input type="number" maxlength="8" formControlName="cep" [(ngModel)]="pedido.enderecoEntrega.cep"></ion-input>
-          </ion-item>
-    
-          <ion-item>
-            <ion-label floating>Bairro</ion-label>
-            <ion-input type="text" formControlName="bairro" [(ngModel)]="pedido.enderecoEntrega.bairro"></ion-input>
-          </ion-item>
-    
-          <ion-item>
-            <ion-label floating>Cidade</ion-label>
-            <ion-input type="text" formControlName="cidade" [(ngModel)]="pedido.enderecoEntrega.cidade"></ion-input>
-          </ion-item>
-    
-          <ion-item>
-            <ion-label floating>UF</ion-label>
-            <ion-input type="text" maxlength="2" formControlName="uf" [(ngModel)]="pedido.enderecoEntrega.uf"></ion-input>
-          </ion-item>
-    
-          
-        </div>
+        <button ion-button block (click)="selecionaDadoCobrancaEContinua()">Continuar</button>
       </ion-list>
-  
-    </form>
 
-    <ion-list padding *ngSwitchCase="'itens'">
+      <h6 *ngIf="mensagemDadosCobrancaNaoPreenchidos != ''" class="warning"> {{mensagemDadosCobrancaNaoPreenchidos}}</h6>
+    </div>
+
+
+    <div *ngIf="passo==10">
+
+      <h6>Dados para entrega</h6>
+      <ion-list inset>
+
+        <ion-item>
+          <ion-label floating>Logradouro</ion-label>
+          <ion-input type="text" formControlName="logradouro" [(ngModel)]="pedido.enderecoEntrega.logradouro"></ion-input>
+        </ion-item>
+
+        <ion-item>
+          <ion-label floating>Nº</ion-label>
+          <ion-input type="text" formControlName="numero" [(ngModel)]="pedido.enderecoEntrega.numero"></ion-input>
+        </ion-item>
+
+        <ion-item>
+          <ion-label floating>Complemento</ion-label>
+          <ion-input type="text" formControlName="complemento" [(ngModel)]="pedido.enderecoEntrega.complemento"></ion-input>
+        </ion-item>
+
+        <ion-item>
+          <ion-label floating>CEP</ion-label>
+          <ion-input type="number" maxlength="8" formControlName="cep" [(ngModel)]="pedido.enderecoEntrega.cep"></ion-input>
+        </ion-item>
+
+        <ion-item>
+          <ion-label floating>Bairro</ion-label>
+          <ion-input type="text" formControlName="bairro" [(ngModel)]="pedido.enderecoEntrega.bairro"></ion-input>
+        </ion-item>
+
+        <ion-item>
+          <ion-label floating>Cidade</ion-label>
+          <ion-input type="text" formControlName="cidade" [(ngModel)]="pedido.enderecoEntrega.cidade"></ion-input>
+        </ion-item>
+
+        <ion-item>
+          <ion-label floating>UF</ion-label>
+          <ion-input type="text" maxlength="2" formControlName="uf" [(ngModel)]="pedido.enderecoEntrega.uf"></ion-input>
+        </ion-item>
+
+      </ion-list>
+    </div>
+
+
+    <div *ngIf="passo==4">
+      <ion-list inset>
+
         <h6>Produtos</h6>
-        <p *ngIf="pedido.itens.length == 0" >Nenhum produto adicionado</p>
-         <ion-item *ngFor="let item of pedido.itens"> 
+
+        <p *ngIf="pedido.itens.length == 0">Nenhum produto adicionado</p>
+
+        <ion-item *ngFor="let item of pedido.itens">
           <span item-start style="font-weight: bold; color: black">{{ item.nome }}</span>
           <span item-end style="font-weight: bold; color: black">Qtde: {{ item.quantidade}}</span>
           <button clear="" ion-button item-end icon-left (tap)="tapAddQuantidade($event, item)">
             <ion-icon name="add-circle"></ion-icon>
           </button>
-    
+
           <button clear="" ion-button item-end icon-left (tap)="tapRemoveQuantidade($event, item)">
             <ion-icon name="remove-circle"></ion-icon>
           </button>
           <button clear="" ion-button item-end icon-left color="danger" (click)="excluirItem(item)">
             <ion-icon name="trash"></ion-icon>
           </button>
-    
-        </ion-item> 
-    
-        <h6>Total Pedido: {{ pedido.total  || 0 | number}}</h6>
+        </ion-item>
 
-        <button ion-button block (click)="adicionarItemPedido()">Adicionar Item</button>
-      </ion-list>    
-  </div>    
+        <button ion-button block (click)="resumoPedido()">Resumo Pedido</button>
+      </ion-list>
+    </div>
 
-  <ion-list>
-    <button ion-button block (click)="salvar()">Salvar</button>
-    <button ion-button block color="danger" outline (click)="cancelar()">Cancelar Pedido</button>
-  </ion-list>
+    <div *ngIf="passo==5">
+      <ion-list inset>
 
+        <h6>Desconto</h6>
+        <ion-item>
+          <ion-label floating>(R$) Desconto total</ion-label>
+          <ion-input type="number" formControlName="desconto" [(ngModel)]="pedido.descontoTotal"></ion-input>
+        </ion-item>
+
+        <h6>Total Pedido: R$ {{ pedido.total || 0 | number}}</h6>
+
+        <br/>
+        <br/>
+        
+        <button ion-button block color="secondary" outline (click)="voltarAdicionarItens()">Alterar Pedido</button>
+        <button ion-button block color="danger" (click)="cancelar()">Cancelar Pedido</button>
+        <button ion-button block (click)="salvar()">Salvar</button>
+      </ion-list>
+    </div>
+
+  </form>
 
 </ion-content>

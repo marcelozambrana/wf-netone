@@ -36,7 +36,6 @@ import { CondicaoPagamentoProvider } from '../providers/condicao-pagamento/condi
 import { CondicaoPagamentoPage } from '../pages/condicao-pagamento/condicao-pagamento';
 import { LoginProvider } from '../providers/login/login';
 import { PedidosProvider } from '../providers/pedidos/pedidos';
-import { ItemsPedidoPage } from '../pages/items-pedido/items-pedido';
 
 @NgModule({
   declarations: [
@@ -49,7 +48,6 @@ import { ItemsPedidoPage } from '../pages/items-pedido/items-pedido';
     ClientesPage,
     NovoClientePage,
     CondicaoPagamentoPage,
-    ItemsPedidoPage
   ],
   imports: [
     BrowserModule,
@@ -76,7 +74,6 @@ import { ItemsPedidoPage } from '../pages/items-pedido/items-pedido';
     ClientesPage,
     NovoClientePage,
     CondicaoPagamentoPage,
-    ItemsPedidoPage
   ],
   providers: [
     StatusBar,
