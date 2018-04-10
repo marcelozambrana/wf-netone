@@ -15,4 +15,16 @@
 // for the .md, .ios, or .wp mode classes. The mode class is
 // automatically applied to the <body> element in the app.
 
+.toast-error{
+    .toast-wrapper {
+        background-color: #dc3545!important;
+    }
+}
+
+.toast-success{
+    .toast-wrapper {
+        background-color: #28a745!important;
+    }
+}
+
 

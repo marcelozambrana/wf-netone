@@ -1,10 +1,18 @@
 page-novo-pedido {
+
+    .list  {
+
+        .list-md{
+            margin: 0;
+        }
+    }
+
     .pedido-content {
         background: darkmagenta;
 
         ion-list-header {
             background: darkmagenta; 
-        }
+        } 
 
         form {
             ion-item {
