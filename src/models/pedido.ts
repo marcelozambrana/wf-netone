@@ -11,15 +11,3 @@ export interface Pedido {
     itens: ItemPedido[] | any[];
     total: number;
 }
-
-
-// isFinalizado: boolean;
-// enderecoEntrega: {
-//     logradouro: string;
-//     numero: string;
-//     complemento: string;
-//     bairro: string;
-//     cep: number;
-//     cidade: string;
-//     uf: string;
-// },

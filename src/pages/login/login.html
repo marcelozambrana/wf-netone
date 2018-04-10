@@ -17,7 +17,7 @@
           <ion-list inset>
             <h6 *ngIf="isErroEmail" class="error"> {{mensagemErroEmail}}</h6>
             <ion-item>
-              <ion-input type="email" placeholder="Digite seu e-mail" formControlName="email" [(ngModel)]="email" clearInput clearOnEdit="false"></ion-input>
+              <ion-input type="text" placeholder="Digite seu usuário" formControlName="email" [(ngModel)]="email" clearInput clearOnEdit="false"></ion-input>
             </ion-item>
 
             <h6 *ngIf="isErroPassword" class="error"> {{mensagemErroPassword}}</h6>

@@ -9,8 +9,8 @@ import { NovoPedidoPage } from '../novo-pedido/novo-pedido';
 import { ClientesPage } from '../clientes/clientes';
 import { CatalogoProdutoPage } from '../catalogo-produto/catalogo-produto';
 
+import { LoginProvider } from '../../providers/login/login';
 import { CondicaoPagamentoProvider } from '../../providers/condicao-pagamento/condicao-pagamento';
-
 
 @Component({
   selector: 'page-home',
@@ -23,14 +23,15 @@ export class HomePage {
   constructor(public navCtrl: NavController, public navParams: NavParams,
     private loadingCtrl: LoadingController,
     private storage: Storage,
-    private condicaoPagamentoProvider: CondicaoPagamentoProvider) {
+    private condicaoPagamentoProvider: CondicaoPagamentoProvider,
+    private loginProvider: LoginProvider) {
 
       this.storage.get('tokenApi').then((token) => {
         console.log('Your tokenApi is ' + token );
       });
 
       this.storage.get('caminhoFirestone').then((path) => {
-        console.log('root path storage firebase: ' + path );
+        console.log('Root path storage firebase: ' + path );
       });
 
   }
@@ -72,8 +73,15 @@ export class HomePage {
   relatorios() {
   }
 
-  logout() {
+  async logout() {
+
+    const result: any = await this.loginProvider.logout();
+
     this.storage.set('usuarioAutenticado', false);
+    this.storage.set('caminhoFirestone', 'temp/');
+    this.storage.set('netone-auth-token', null);
+    this.storage.set('netone-next-request-token', null);
+
     this.navCtrl.setRoot(LoginPage);
   }
 

@@ -22,13 +22,17 @@ export class LoginPage {
   isErroEmail = false;
   isErroPassword = false;
 
-  constructor(public navCtrl: NavController, public navParams: NavParams, public formBuilder: FormBuilder,
-    private loadingCtrl: LoadingController, private alertCtrl: AlertController,
-    private loginProvider: LoginProvider, private storage: Storage) {
+  constructor(public navCtrl: NavController, 
+    public navParams: NavParams, 
+    public formBuilder: FormBuilder,
+    private loadingCtrl: LoadingController, 
+    private alertCtrl: AlertController,
+    private storage: Storage,
+    private loginProvider: LoginProvider) {
 
     this.loginForm = formBuilder.group({
       email: ['', Validators.required],
-      password: ['', Validators.compose([Validators.minLength(6), Validators.maxLength(20),
+      password: ['', Validators.compose([Validators.minLength(4), Validators.maxLength(20),
       Validators.required])]
     });
 
@@ -57,14 +61,14 @@ export class LoginPage {
     if (!this.loginForm.valid) {
       if (!email.valid) {
         this.isErroEmail = true;
-        this.mensagemErroEmail = 'Ops! E-mail inválido';
+        this.mensagemErroEmail = 'Ops! Usuário inválido';
       } else {
         this.mensagemErroEmail = '';
       }
 
       if (!password.valid) {
         this.isErroPassword = true;
-        this.mensagemErroPassword = 'A senha precisa ter de 6 a 20 caracteres.';
+        this.mensagemErroPassword = 'A senha precisa ter de 4 a 20 caracteres.';
       } else {
         this.mensagemErroPassword = '';
       }
@@ -83,18 +87,19 @@ export class LoginPage {
 
         const result: any = await this.loginProvider.login(email.value, password.value);
         if (result) {
-          console.log('result token login:' + result.token);
+          console.log('result token login: ' + result.token);
 
           this.storage.set('usuarioAutenticado', true);
-          this.storage.set('tokenApi', result.token);
-          this.storage.set('caminhoFirestone', result.email + '/');
+          this.storage.set('caminhoFirestone', email.value + '/');
+          this.storage.set('netone-auth-token',  result.token);
+          this.storage.set('netone-next-request-token', null);
 
           this.navCtrl.setRoot(HomePage);
-
         }
+        
       } catch (e) {
         loader.dismiss();
-
+        console.log(e)
         this.alert('Erro ao logar', e.message);
 
       }

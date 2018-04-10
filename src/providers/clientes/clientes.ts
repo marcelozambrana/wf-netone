@@ -4,7 +4,6 @@ import { Observable } from 'rxjs/Observable';
 import { AngularFirestore } from 'angularfire2/firestore';
 import { AngularFirestoreCollection, AngularFirestoreDocument } from 'angularfire2/firestore';
 
-
 import { Cliente } from '../../models/cliente';
 
 @Injectable()
