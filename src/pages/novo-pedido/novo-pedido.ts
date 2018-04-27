@@ -50,6 +50,15 @@ export class NovoPedidoPage {
     private alertCtrl: AlertController,
     private toastCtrl: ToastController) {
 
+    let pedidoEdit = this.navParams.get('pedido');
+    console.log(pedidoEdit);
+
+    if (pedidoEdit){      
+      this.passo = "5";
+      this.pedido = pedidoEdit;
+      this.calcQtde();
+    }
+
     this.condicoes = condicaoPagamentoService.condicao;
 
     this.ev.subscribe('adicionarProdutoCarrinho', produto => {
@@ -114,6 +123,7 @@ export class NovoPedidoPage {
     }
 
     if (!this.pedido.numero) {
+      this.pedido.enviado = false;
       this.pedidoService.adicionar(this.pedido).then((result: any) => {
         this.alert("Sucesso", "Pedido realizado com sucesso.");
         this.navCtrl.pop();

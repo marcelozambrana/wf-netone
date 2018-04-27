@@ -10,4 +10,5 @@ export interface Pedido {
     desconto: number;
     itens: ItemPedido[] | any[];
     total: number;
+    enviado: boolean;
 }

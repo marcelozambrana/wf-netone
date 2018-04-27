@@ -46,10 +46,22 @@ export class PedidosProvider {
 
   public buscarPedidosDadoCpfCnpj(cpfCnpj:string) {
     return this.afs.collection('pedidos', ref => ref.where('cliente', '==', cpfCnpj)).valueChanges();
-  }
+  } 
+
+  public buscarPedidosPorStatus(enviado:boolean): Observable<Pedido[]> {
+    let aux : AngularFirestoreCollection<Pedido> = this.afs.collection('pedidos', ref => ref.where('enviado', '==', enviado));
+    return aux.snapshotChanges().map(changes => {
+      return changes.map(a => {
+        const data = a.payload.doc.data() as Pedido;
+        data.numero = a.payload.doc.id;
+        return data;
+      });
+    });
+  }  
 
   public buscarId(id:string) {
-    return this.afs.doc(`pedidos/${id}`).valueChanges();
+    // return this.afs.doc(`pedidos/${id}`).valueChanges();
+    return this.pedidosCollection.doc(id.toString()).ref.get();
   }
 
 }
