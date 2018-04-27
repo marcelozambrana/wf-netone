@@ -1,3 +1,4 @@
+import { ListagemPedidoPage } from './../listagem-pedido/listagem-pedido';
 import { CondicaoPagamentoPage } from './../condicao-pagamento/condicao-pagamento';
 import { Component } from '@angular/core';
 import { NavController, NavParams, LoadingController } from 'ionic-angular';
@@ -64,6 +65,7 @@ export class HomePage {
   }
 
   pedidos() {
+    this.navCtrl.push(ListagemPedidoPage);
   }
 
   condicoesPagamento() {

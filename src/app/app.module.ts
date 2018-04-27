@@ -27,6 +27,7 @@ import { LoginProvider } from '../providers/login/login';
 
 import { NovoPedidoPage } from '../pages/novo-pedido/novo-pedido';
 import { PedidosProvider } from '../providers/pedidos/pedidos';
+import { ListagemPedidoPage } from './../pages/listagem-pedido/listagem-pedido';
 
 import { CatalogoProdutoPage } from '../pages/catalogo-produto/catalogo-produto';
 import { DetalhesProdutoPage } from '../pages/detalhes-produto/detalhes-produto';
@@ -39,7 +40,6 @@ import { CondicaoPagamentoPage } from '../pages/condicao-pagamento/condicao-paga
 import { CondicaoPagamentoPageModule } from '../pages/condicao-pagamento/condicao-pagamento.module';
 import { CondicaoPagamentoProvider } from '../providers/condicao-pagamento/condicao-pagamento';
 
-
 @NgModule({
   declarations: [
     MyApp,
@@ -51,6 +51,7 @@ import { CondicaoPagamentoProvider } from '../providers/condicao-pagamento/condi
     ClientesPage,
     NovoClientePage,
     CondicaoPagamentoPage,
+    ListagemPedidoPage
   ],
   imports: [
     BrowserModule,
@@ -76,6 +77,7 @@ import { CondicaoPagamentoProvider } from '../providers/condicao-pagamento/condi
     ClientesPage,
     NovoClientePage,
     CondicaoPagamentoPage,
+    ListagemPedidoPage
   ],
   providers: [
     StatusBar,
