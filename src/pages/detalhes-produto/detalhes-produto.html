@@ -9,20 +9,22 @@
 
 <ion-content padding class="detalhe-content">
 
-  <div class="card">
+  <ion-card>
 
-    <img [src]="produto.urlImg" alt="produto.titulo" style="width: 70%" class="image" />
+    <img [src]="produto.urlImg" alt="produto.titulo" />
 
-    <div class="container">
-      <h4>
-        <b>{{produto.titulo}}</b>
-      </h4>
-      <p> <b>Largura: </b> {{ produto.largura }} cm</p>
-      <p><b>Comprimento: </b> {{ produto.comprimento }} cm</p>
-      <p><b>Altura:</b>{{ produto.altura }} cm</p>
-      <p><b>Cor: </b>{{ produto.cor }}</p>
-      <p class="texto-descricao">{{ produto.descricaoCompleta }} cm</p>
-    </div>
-  </div>
+    <ion-card-content>
+      <ion-title text-center tex-wrap>{{produto.descricao}}</ion-title>
+      <h4 text-center>{{produto.grupo}}</h4>
+      <h4 text-center>{{produto.subgrupo}}</h4>
+      <br />
+      <p text-center><b>Tamanho: </b>{{ produto.tamanho }}</p>
+      <p text-center><b>Cor: </b>{{ produto.cor }}</p>
+      <p text-center><b>Largura: </b> {{ produto.largura }} cm</p>
+      <p text-center><b>Comprimento: </b> {{ produto.comprimento }} cm</p>
+      <p text-center><b>Altura:</b>{{ produto.altura }} cm</p>
+    </ion-card-content>
+
+  </ion-card>
 
 </ion-content>

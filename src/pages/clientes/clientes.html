@@ -11,9 +11,9 @@
 </ion-header>
 
 <ion-content padding class="cliente-content">
+
   <ion-searchbar placeholder="Buscar nome" [(ngModel)]="searchTerm" (ionInput)="filtrarClientes()"></ion-searchbar>
   
-
   <ion-list inset>
     <ion-item *ngFor="let cli of clientes | async">
       {{ cli.nome }}

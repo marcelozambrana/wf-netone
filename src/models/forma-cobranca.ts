@@ -1,6 +1,6 @@
-export interface CondicaoPagamento {
+export interface FormaCobranca {
     idFirebase?: string;
     id: string;
-    numeroParcelas: string;
     descricao: string;
+    descricaoReduzido: string;
 }

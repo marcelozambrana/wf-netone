@@ -6,7 +6,8 @@ import { Storage } from '@ionic/storage';
 
 import { HomePage } from '../home/home';
 
-import { LoginProvider } from '../../providers/login/login';
+import { ApiProvider } from '../../providers/api/api';
+import { ClientesProvider } from '../../providers/clientes/clientes';
 
 
 @IonicPage()
@@ -28,7 +29,8 @@ export class LoginPage {
     private loadingCtrl: LoadingController, 
     private alertCtrl: AlertController,
     private storage: Storage,
-    private loginProvider: LoginProvider) {
+    private clientesProvider: ClientesProvider,
+    private apiProvider: ApiProvider) {
 
     this.loginForm = formBuilder.group({
       email: ['', Validators.required],
@@ -36,11 +38,11 @@ export class LoginPage {
       Validators.required])]
     });
 
-    this.storage.get('usuarioAutenticado').then((result) => {
+    this.storage.get('usuarioAutenticado').then((isAuth) => {
      
-      console.log('isUsuarioAutenticado: ' + result);
+      console.log('isUsuarioAutenticado: ' + isAuth);
      
-      if (result) {
+      if (isAuth) {
         this.navCtrl.setRoot(HomePage);
       }
     });
@@ -77,7 +79,7 @@ export class LoginPage {
       this.mensagemErroPassword = '';
 
       let loader = this.loadingCtrl.create({
-        content: 'Loading...',
+        content: 'Logando...',
         dismissOnPageChange: true
       });
 
@@ -85,15 +87,28 @@ export class LoginPage {
 
       try {
 
-        const result: any = await this.loginProvider.login(email.value, password.value);
-        if (result) {
-          console.log('result token login: ' + result.token);
+        const resultLogin: any = await this.apiProvider.login(email.value, password.value);
+        if (resultLogin) {
+          console.log('result token login: ' + resultLogin.token);
+
+          const resultAutorizar: any = await this.apiProvider.autorizar(resultLogin.token);
+          console.log('next token login: ' + resultAutorizar.requestToken);
 
           this.storage.set('usuarioAutenticado', true);
-          this.storage.set('caminhoFirestone', email.value + '/');
-          this.storage.set('netone-auth-token',  result.token);
-          this.storage.set('netone-next-request-token', null);
-
+          this.storage.set('netone-auth-token',  resultLogin.token);
+          this.storage.set('netone-next-request-token', resultAutorizar.requestToken);
+          
+          let user:any = await this.clientesProvider.buscarUsuario(email.value);
+          console.log(user)
+      
+          if (!user) {
+            console.log("Primeiro acesso, criando usuário: " + email.value);
+            let newDocUser = await this.clientesProvider.adicionarUsuario(email.value);
+            this.storage.set('caminhoFirestone', newDocUser.path);
+          } else {
+            this.storage.set('caminhoFirestone', 'usuarios/' + user.id);
+          }
+           
           this.navCtrl.setRoot(HomePage);
         }
         

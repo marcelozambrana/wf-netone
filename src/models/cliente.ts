@@ -2,15 +2,17 @@ export interface Cliente {
     id?: string;
     cpfCnpj: string;
     nome: string;
-    rg: string;
+    fantasia: string;
+    rgInscricaoEstadual: string;
     email: string;
-    fixo: string;
+    telefone: string;
     celular: string;
     endereco: {
-        logradouro: string;
+        endereco: string;
         numero: string;
         bairro: string;
         cep: number;
+        complemento: string;
         cidade: string;
         uf: string;
     }

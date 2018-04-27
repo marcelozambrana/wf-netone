@@ -10,24 +10,14 @@ import { DetalhesProdutoPage } from '../detalhes-produto/detalhes-produto';
 })
 export class CatalogoProdutoPage {
 
-  //Mock produtos
-  produtos_img = [
-    { urlImg: 'http://www.colchaocostarica.com.br/produtos/imagens/712-det-colchao-ortobom-freedom.jpg' },
-    { urlImg: 'https://www.costaricacolchoes.com.br/produtos/adicionais/2492-58436-Conjunto-Box-Bau-Colchao-Ortobom-Molas-Pocket-Freedom---Cam.jpg' },
-    { urlImg: 'https://static.onofreagora.com.br/onofreeletro/produto/multifotos/hd/605514_3.jpg' },
-    { urlImg: 'https://www.costaricacolchoes.com.br/produtos/imagens/20228-det-Conjunto-Box-Colchao-Ortobom-Molas-Pocket-Light---Cama-Box-Nobuck-Ner.jpg' },
-    { urlImg: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSh2cfY15HdQ9jdrA51Hv8eDYCO_CMZRbAAgiTiKhe3e-jWJnof' },
-    { urlImg: 'https://a-static.mlcdn.com.br/1500x1500/cama-box-box-colchao-casal-mola-138x188cm-ortobom-exclusive-diamond/magazineluiza/088903800/0e4a71d8586f84fc88dcaa3c73009968.jpg' },
-    { urlImg: 'https://a-static.mlcdn.com.br/1500x1500/cama-box-box-colchao-casal-mola-138x188cm-ortobom/magazineluiza/219805900/8eda9bc4f24075bc1144dfa2e4416728.jpg' },
-    { urlImg: 'http://appsisecommerces3.s3.amazonaws.com/clientes/cliente12013/produtos/4291/L4297.jpg' },
-    { urlImg: 'https://static.carrefour.com.br/medias/sys_master/images/images/h5c/h6e/h00/h00/9618770133022.jpg' },
-    { urlImg: 'https://static.carrefour.com.br/medias/sys_master/images/images/h65/hfa/h00/h00/9618769477662.jpg' },
-  ];
-
   items = [];
+  produtos = [];
 
-  page = 1;
-  totalPage = 5;
+  searchTerm: string = '';
+
+  page = 0;
+  totalPage = 0;
+  quantidadeFetch = 5;
 
   isFromPedido = false;
 
@@ -35,8 +25,9 @@ export class CatalogoProdutoPage {
     private ev: Events, private alertCtrl: AlertController) {
 
     this.isFromPedido = this.navParams.get('fromPedido') || false;
-
-    this.buscaMaisProdutos(0, 12);
+    this.produtos = this.navParams.get('produtos') || [];
+    this.totalPage = (this.produtos.length / this.quantidadeFetch) < 1 ? 1 : (this.produtos.length / this.quantidadeFetch);
+    this.buscaMaisProdutos(this.page);
   }
 
   alert(title, message) {
@@ -48,36 +39,55 @@ export class CatalogoProdutoPage {
     al.present();
   }
 
-  buscaMaisProdutos(numeroPagina, quantidade) {
+  filtrarProdutos() {
+    console.log('filtrando produtos: ' + this.searchTerm);
 
-    if (numeroPagina > 5)
+    if (this.searchTerm === '') {
+      this.page = 0;
+      this.items = [];
+      this.buscaMaisProdutos(this.page);
+      return;
+    }
+
+    if (this.searchTerm.length < 3) {
+      return;
+    }
+
+    this.items = this.produtos.filter((item) => {
+      return item.descricao.toLowerCase().indexOf(
+        this.searchTerm.toLowerCase()) > -1;
+    })
+  }
+
+  buscaMaisProdutos(numeroPagina) {
+    console.log('page: ' + numeroPagina + ', this.produtos.length: ' + this.produtos.length + ', quantidadeFetch: ' + this.quantidadeFetch)
+    console.log('start index to fetch: ' + numeroPagina * this.quantidadeFetch)
+
+    if (numeroPagina > this.totalPage)
       return;
 
-    for (var i = 0; i < quantidade; i++) {
-      var newUrlImg = this.produtos_img[Math.floor(Math.random() * this.produtos_img.length)];
-
-      this.items.push({
-        urlImg: newUrlImg.urlImg,
-        titulo: "Colchão Ortobom " + this.items.length,
-        resumoDescricao: "Colchão Ortobom Freedom Casal 138x188x32 Branco, com dimensões de 138x188x32cm",
-        descricaoCompleta: "Colchão Ortobom Freedom Casal 138x188x32 Branco, com dimensões de 138x188x32cm. Ortobom Freedom: Tem sua estrutura composta por Molas Superpocket ensacadas individualmente, que fazem o peso de um corpo não interferir no conforto do outro." +
-          "Possui manta de espuma Viscoelástica (desenvolvida pela NASA). Seu tecido é em malha hipersoft com elastano, oferecendo uma maior suavidade. O Freedom recebe um tratamento inovador, o Evo Care Vital, um composto de Óleo de Jojoba, Vitamina E e Aloe Vera, que protege a pele contra o envelhecimento precoce. Este tratamento funciona mesmo com a utilização do lençol, pois as fibras do colchão absorvem estes agentes. Possui respiros laterais que evitam a proliferação de ácaros, como também de bactérias e fungos. Devido a tecnologia No Turn, o Freedom não precisa ser virado.",
-        largura: 138,
-        comprimento: 188,
-        altura: 32,
-        cor: "Branco",
-        preco: 100.95
-      });
+    if (this.produtos.length > ((this.totalPage * this.quantidadeFetch) + this.quantidadeFetch)) {
+      return;
     }
+
+    let produtosTemp = [...this.produtos];
+    let resultArray = produtosTemp.splice(numeroPagina * this.quantidadeFetch, this.quantidadeFetch);
+    this.items.push(...resultArray);
+
   }
 
   doInfinite(infiniteScroll) {
     console.log('Begin async operation');
 
     setTimeout(() => {
+
+      if (this.searchTerm != '') {
+        infiniteScroll.complete();
+        return;
+      }
       this.page = this.page + 1;
 
-      this.buscaMaisProdutos(this.page, 4);
+      this.buscaMaisProdutos(this.page);
 
       console.log('Async operation has ended');
       infiniteScroll.complete();

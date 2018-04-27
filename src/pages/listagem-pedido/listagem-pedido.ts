@@ -1,17 +1,15 @@
-import { NovoPedidoPage } from './../novo-pedido/novo-pedido';
-import { NovoClientePage } from './../novo-cliente/novo-cliente';
-import { Pedido } from './../../models/pedido';
-import { PedidosProvider } from './../../providers/pedidos/pedidos';
-import { Component } from '@angular/core';
-import { IonicPage, NavController, NavParams } from 'ionic-angular';
 import { Observable } from 'rxjs/Observable';
+import { Component } from '@angular/core';
 
-/**
- * Generated class for the ListagemPedidoPage page.
- *
- * See https://ionicframework.com/docs/components/#navigation for more info on
- * Ionic pages and navigation.
- */
+import { IonicPage, NavController, NavParams } from 'ionic-angular';
+
+import { Pedido } from './../../models/pedido';
+import { CondicaoPagamento } from '../../models/condicao-pagamento';
+import { FormaCobranca } from '../../models/forma-cobranca';
+
+import { NovoPedidoPage } from './../novo-pedido/novo-pedido';
+import { PedidosProvider } from './../../providers/pedidos/pedidos';
+
 
 @IonicPage()
 @Component({
@@ -24,9 +22,17 @@ export class ListagemPedidoPage {
   
   public items: Observable<Pedido[]>;
 
+  produtosSelect = [];
+  public condicoesPagamentoSelect: CondicaoPagamento[];
+  public formasCobrancaSelect: FormaCobranca[];
+
   constructor(public navCtrl: NavController, 
               public navParams: NavParams, 
               public pedidosProvider: PedidosProvider) {
+
+    this.produtosSelect = this.navParams.get('produtos') || [];
+    this.condicoesPagamentoSelect = this.navParams.get('condicoes') || [];
+    this.formasCobrancaSelect = this.navParams.get('formasCobranca') || [];
 
     this.filter(status);
 
@@ -42,7 +48,9 @@ export class ListagemPedidoPage {
   }
 
   visualizar(pedido: Pedido){
-    this.navCtrl.push(NovoPedidoPage, {pedido : pedido});        
+    this.navCtrl.push(NovoPedidoPage, {pedido : pedido,
+      produtos: this.produtosSelect, condicoes: this.condicoesPagamentoSelect, 
+      formasCobranca: this.formasCobrancaSelect });        
   }
 
   novoPedido() {

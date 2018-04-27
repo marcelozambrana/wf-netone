@@ -1,60 +1,99 @@
-import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { CONDICOES_PAGAMENTO } from './mock-condicao-pagamento';
-import { CondicaoPagamento } from '../../models/condicao-pagamento';
-import { AngularFirestore, AngularFirestoreCollection } from 'angularfire2/firestore';
 import { Observable } from 'rxjs/Observable';
-/*
-  Generated class for the CondicaoPagamentoProvider provider.
 
-  See https://angular.io/guide/dependency-injection for more info on providers
-  and Angular DI.
-*/
+import { AngularFirestore, AngularFirestoreCollection, AngularFirestoreDocument } from 'angularfire2/firestore';
+
+import { Storage } from '@ionic/storage';
+
+import { CondicaoPagamento } from '../../models/condicao-pagamento';
+
+
 @Injectable()
 export class CondicaoPagamentoProvider {
 
   private condicaoCollection: AngularFirestoreCollection<CondicaoPagamento>;
+  public condicoes: Observable<CondicaoPagamento[]>;
+  condicaoDoc: AngularFirestoreDocument<CondicaoPagamento>;
 
-  public condicao: Observable<CondicaoPagamento[]>;
+  rootPathFirebase;
+  
+  constructor(private afs: AngularFirestore, private storage: Storage) { }
 
-  constructor(public http: HttpClient, private afs: AngularFirestore) {
-    console.log('Hello CondicaoPagamentoProvider Provider');
-    this.condicaoCollection = this.afs.collection('condicoes');
-    this.condicao = this.condicaoCollection.valueChanges();
+  async init() {
+    await this.storage.get('caminhoFirestone').then((path) => {
+      this.rootPathFirebase = path;
+      console.log('Root path storage firebase: ' + this.rootPathFirebase);
+
+      this.condicaoCollection = this.afs.collection(this.rootPathFirebase + '/condicoes'); //ref()
+
+      this.condicoes = this.condicaoCollection.snapshotChanges().map(changes => {
+        return changes.map(a => {
+          const data = a.payload.doc.data() as CondicaoPagamento;
+          data.id = a.payload.doc.id;
+          return data;
+        });
+      });
+    });
   }
 
-  findOneByIntegration(id: number): CondicaoPagamento | any{
-    CONDICOES_PAGAMENTO.filter(cond => {
+  todos() {
+    return new Promise(resolve => {
+      this.afs.collection(this.rootPathFirebase + '/condicoes')
+        .snapshotChanges().map(changes => {
+          return changes.map(a => {
+            const data = a.payload.doc.data() as CondicaoPagamento;
+            data.idFirebase = a.payload.doc.id;
+            return data;
+          })
+        })
+        .subscribe(docs => {
+          if (docs.length === 0) {
+            resolve(null)
+          }
+          resolve(docs)
+        })
+    })
+  }
+
+  adicionar(condicao: CondicaoPagamento) {
+    return this.condicaoCollection.add(condicao);
+  }
+
+  atualizar(condicao: CondicaoPagamento) {
+
+    this.condicaoDoc = this.afs.doc(this.rootPathFirebase + `/condicoes/${condicao.idFirebase}`);
+    return this.condicaoDoc.update(condicao);
+  }
+
+  /*findOneByIntegration(id: string): CondicaoPagamento | any {
+    this.condicoes.filter(cond => {
       return cond.id === id;
     })
   }
 
-  findAllByIntegration(): CondicaoPagamento[] | any[]{
-    return CONDICOES_PAGAMENTO;
+  findAllByIntegration(): CondicaoPagamento[] | any[] {
+    return this.condicoes;
   }
 
 
-  findOne(id: number): CondicaoPagamento | any{
-    return this.condicaoCollection.doc(id.toString())
-  }  
+  findOne(id: string): CondicaoPagamento | any {
+    return this.condicaoCollection.doc(id)
+  }
 
-  findAll(): CondicaoPagamento[] | any[]{
+  findAll(): CondicaoPagamento[] | any[] {
     return this.findAllByIntegration();
   }
 
-  save(condicaoPgto: CondicaoPagamento){
-    this.condicaoCollection.doc(condicaoPgto.id.toString()).set(condicaoPgto);
+  save(condicaoPgto: CondicaoPagamento) {
+    this.condicaoCollection.doc(condicaoPgto.id).set(condicaoPgto);
   }
 
-  // delete(condicaoPgto: CondicaoPagamento | number ){
-  // }
-
-  syncWithFirestore(){
-    let condicoes : CondicaoPagamento[] = this.findAllByIntegration();
+  syncWithFirestore() {
+    let condicoes: CondicaoPagamento[] = this.findAllByIntegration();
     condicoes.forEach(cond => {
       this.save(cond);
     });
-  }
+  }*/
 
 
 }

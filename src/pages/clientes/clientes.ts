@@ -1,15 +1,15 @@
 import { Component } from '@angular/core';
 
-import { IonicPage, NavController, NavParams, AlertController } from 'ionic-angular';
+import { IonicPage, NavController, AlertController } from 'ionic-angular';
 
 import { NovoClientePage } from '../novo-cliente/novo-cliente';
 
-import { AngularFireModule } from 'angularfire2';
 import { Observable } from 'rxjs/Observable';
+
+import { Cliente } from '../../models/cliente';
 
 import { ClientesProvider } from '../../providers/clientes/clientes';
 
-import { Cliente } from '../../models/cliente';
 
 @IonicPage()
 @Component({
@@ -19,11 +19,15 @@ import { Cliente } from '../../models/cliente';
 export class ClientesPage {
 
   searchTerm: string = '';
-  clientes: Observable<any[]>;
 
-  constructor(public navCtrl: NavController, private clientesProvider: ClientesProvider, private alertCtrl: AlertController) {
-    
-    this.clientes = this.clientesProvider.todos();
+  clientesFiltro: Observable<Cliente[]>;
+  clientes: Observable<Cliente[]>;
+
+  constructor(public navCtrl: NavController, private alertCtrl: AlertController,
+    private clientesProvider: ClientesProvider) {
+
+      this.clientes = this.clientesProvider.todos();
+      this.clientesFiltro = this.clientes;
   }
 
   alert(title, message) {
@@ -60,12 +64,7 @@ export class ClientesPage {
   }
 
   filtrarClientes() {
-    console.log('filtrar clientes');
+    console.log('filtrando clientes: ' + this.searchTerm);
   }
-
-  ionViewDidLoad() {
-    this.clientes = this.clientesProvider.todos();
-    this.filtrarClientes();
-   }
 
 }

@@ -14,7 +14,7 @@
 
       <ion-row>
         <ion-col>
-          <ion-list inset>
+          <ion-list>
             <h6 *ngIf="isErroEmail" class="error"> {{mensagemErroEmail}}</h6>
             <ion-item>
               <ion-input type="text" placeholder="Digite seu usuário" formControlName="email" [(ngModel)]="email" clearInput clearOnEdit="false"></ion-input>
@@ -22,7 +22,7 @@
 
             <h6 *ngIf="isErroPassword" class="error"> {{mensagemErroPassword}}</h6>
             <ion-item>
-              <ion-input type="password" placeholder="Digite sua senha" formControlName="password" [(ngModel)]="password" clearInput clearOnEdit="false"></ion-input>
+              <ion-input type="password" placeholder="Digite sua senha" show-hide-input formControlName="password" [(ngModel)]="password" clearInput clearOnEdit="true"></ion-input>
             </ion-item>
           </ion-list>
         </ion-col>

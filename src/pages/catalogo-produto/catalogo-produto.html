@@ -8,26 +8,34 @@
 
 
 <ion-content padding class="catalogo-content">
-  <ion-searchbar placeholder="Buscar produto"></ion-searchbar>
+  
+  <ion-searchbar [(ngModel)]="searchTerm" (ionInput)="filtrarProdutos()" placeholder="Buscar produto"></ion-searchbar>
 
-  <ion-grid>
-    <ion-row>
-      <div *ngFor="let prod of items" class="card">
-        <ion-col col-6 col-md-12>
-          <img [src]="prod.urlImg" alt="prod.titulo" style="width: 100%" class="image"/>
+  <div *ngFor="let prod of items" class="card">
+    <ion-card>
+      <img [src]="prod.urlImg" alt="prod.titulo" />
 
-          <div class="container">
-            <h4><b>{{prod.titulo}}</b></h4>
-            <p>{{prod.resumoDescricao}}</p>
-            <h4><b>R$ {{prod.preco}}</b></h4>
-            <p><button ion-button class="detalhes-btn" block clear (click)="detalhes(prod)">Detalhes</button></p>
+      <ion-card-content>
+        <ion-title text-center tex-wrap>{{prod.descricao}}</ion-title>
+        <p text-center>{{prod.grupo}}</p>
+        <p text-center>{{prod.subgrupo}}</p>
+        <br />
+        <p text-center>Tamanho: {{prod.tamanho}}</p>
+        <p text-center>Cor: {{prod.cor}}</p>
+        <br />
+        <h2 text-center>R$ {{prod.preco}}</h2>
+        <br />
+        <p>
+          <button ion-button class="detalhes-btn" block clear (click)="detalhes(prod)">Detalhes</button>
+        </p>
 
-            <p><button *ngIf="isFromPedido" ion-button secondary color="dark" block (click)="adicionarCarrinho(prod)">Comprar</button></p>
-          </div>
-        </ion-col>
-      </div>
-    </ion-row>
-  </ion-grid>
+        <p>
+          <button *ngIf="isFromPedido" ion-button secondary color="dark" block (click)="adicionarCarrinho(prod)" [disabled]="!prod.preco">Comprar</button>
+        </p>
+      </ion-card-content>
+    </ion-card>
+  </div>
+
 
   <ion-infinite-scroll (ionInfinite)="doInfinite($event)" *ngIf="page < totalPage">
     <ion-infinite-scroll-content loadingSpinner="bubbles" loadingText="Carregando mais produtos..."></ion-infinite-scroll-content>

@@ -21,9 +21,10 @@ import { IonicStorageModule } from '@ionic/storage';
 
 import { BrMaskerModule } from 'brmasker-ionic-3';
 
+import { ApiProvider } from '../providers/api/api';
+
 import { HomePage } from '../pages/home/home';
 import { LoginPage } from '../pages/login/login';
-import { LoginProvider } from '../providers/login/login';
 
 import { NovoPedidoPage } from '../pages/novo-pedido/novo-pedido';
 import { PedidosProvider } from '../providers/pedidos/pedidos';
@@ -37,8 +38,9 @@ import { NovoClientePage } from '../pages/novo-cliente/novo-cliente';
 import { ClientesProvider } from '../providers/clientes/clientes';
 
 import { CondicaoPagamentoPage } from '../pages/condicao-pagamento/condicao-pagamento';
-import { CondicaoPagamentoPageModule } from '../pages/condicao-pagamento/condicao-pagamento.module';
 import { CondicaoPagamentoProvider } from '../providers/condicao-pagamento/condicao-pagamento';
+import { ProdutosProvider } from '../providers/produtos/produtos';
+import { FormaCobrancaProvider } from '../providers/forma-cobranca/forma-cobranca';
 
 @NgModule({
   declarations: [
@@ -83,10 +85,12 @@ import { CondicaoPagamentoProvider } from '../providers/condicao-pagamento/condi
     StatusBar,
     SplashScreen,
     { provide: ErrorHandler, useClass: IonicErrorHandler },
+    ApiProvider,
     ClientesProvider,
     CondicaoPagamentoProvider,
-    LoginProvider,
-    PedidosProvider
+    PedidosProvider,
+    ProdutosProvider,
+    FormaCobrancaProvider
   ]
 })
 export class AppModule { }
