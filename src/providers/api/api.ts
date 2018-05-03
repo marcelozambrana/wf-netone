@@ -97,6 +97,7 @@ export class ApiProvider {
             'netone-next-request-token': next_token
           }
         }).subscribe(res => {
+          console.log('4.1')
           resolve(res);
         }, err => {
           reject(err.error);
@@ -116,6 +117,7 @@ export class ApiProvider {
             'netone-next-request-token': next_token
           }
         }).subscribe(res => {
+          console.log('3.1')
           resolve(res);
         }, err => {
           reject(err.error);
@@ -135,6 +137,7 @@ export class ApiProvider {
             'netone-next-request-token': next_token
           }
         }).subscribe(res => {
+          console.log('2.1')
           resolve(res);
         }, err => {
           reject(err.error);
@@ -155,6 +158,7 @@ export class ApiProvider {
             'netone-next-request-token': next_token
           }
         }).subscribe(res => {
+          console.log('1.1')
           resolve(res);
         }, err => {
           reject(err.error);

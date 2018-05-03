@@ -76,6 +76,7 @@
         <ion-item *ngFor="let item of pedido.itens">
           <h2 style="font-weight: bold; color: black">{{ item.nome }}</h2>
           <p>Qtde: {{ item.quantidade}}</p>
+          <p>Valor: {{ item.valor | number }}</p>
           <button clear="" ion-button item-end *ngIf="!pedido.enviado" (tap)="tapAddQuantidade($event, item)">
             <ion-icon name="add-circle"></ion-icon>
           </button>
@@ -140,8 +141,8 @@
 
         <ion-item>
           <ion-label floating>(R$) Desconto total</ion-label>
-          <ion-input type="number" [disabled]="!pedido.condicaoPagamentoId || !pedido.formaCobrancaId || pedido.enviado" formControlName="desconto"
-            [(ngModel)]="pedido.descontoTotal"></ion-input>
+          <ion-input type="text" [disabled]="!pedido.condicaoPagamentoId || !pedido.formaCobrancaId || pedido.enviado" formControlName="desconto"
+            [(ngModel)]="pedido.descontoTotal" [brmasker]="{money: true}" (ionBlur)="calcDesconto()"></ion-input>
         </ion-item>
 
       </ion-list>
@@ -158,6 +159,7 @@
       <ion-item>
         <h2>Valor Total: R$ {{pedido.total | number}}</h2>
         <p>Qtde: {{qtdTotal | number}}</p>
+        <p *ngIf="pedido.enviado">Desconto: {{pedido.descontoTotal | number}}</p>
       </ion-item>
     </ion-list>
 

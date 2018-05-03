@@ -12,13 +12,14 @@ import { ListagemPedidoPage } from './../listagem-pedido/listagem-pedido';
 import { ApiProvider } from '../../providers/api/api';
 import { ProdutosProvider } from '../../providers/produtos/produtos';
 import { ClientesProvider } from '../../providers/clientes/clientes';
-import { Produto } from '../../models/produto';
 import { CondicaoPagamentoProvider } from '../../providers/condicao-pagamento/condicao-pagamento';
 import { FormaCobrancaProvider } from '../../providers/forma-cobranca/forma-cobranca';
-import { Cliente } from '../../models/cliente';
-import { FormaCobranca } from '../../models/forma-cobranca';
-import { CondicaoPagamento } from '../../models/condicao-pagamento';
 import { PedidosProvider } from '../../providers/pedidos/pedidos';
+
+import { Cliente } from '../../models/cliente';
+import { CondicaoPagamento } from '../../models/condicao-pagamento';
+import { FormaCobranca } from '../../models/forma-cobranca';
+import { Produto } from '../../models/produto';
 
 @Component({
   selector: 'page-home',
@@ -104,6 +105,29 @@ export class HomePage {
     });
   }
 
+  toastAlert(message) {
+    let toast = this.toastCtrl.create({
+      message: message,
+      showCloseButton: true,
+      duration: 3000,
+      closeButtonText: 'Fechar',
+      dismissOnPageChange: true,
+      cssClass: 'toast-error'
+    });
+    toast.present();
+  }
+
+  toastMessage(message) {
+    let toast = this.toastCtrl.create({
+      message: message,
+      duration: 3000,
+      dismissOnPageChange: true,
+      showCloseButton: true,
+      closeButtonText: 'Fechar'
+    });
+    toast.present();
+  }
+
   async buscarProdutos() {
     this.produtos = await this.produtosProvider.todos();
     if (!this.produtos) {
@@ -128,67 +152,12 @@ export class HomePage {
     console.log(this.formasCobranca);
   }
 
-  toastAlert(message) {
-    let toast = this.toastCtrl.create({
-      message: message,
-      showCloseButton: true,
-      duration: 3000,
-      closeButtonText: 'Fechar',
-      dismissOnPageChange: true,
-      cssClass: 'toast-error'
-    });
-    toast.present();
-  }
-
-  toastMessage(message) {
-    let toast = this.toastCtrl.create({
-      message: message,
-      duration: 3000,
-      dismissOnPageChange: true,
-      showCloseButton: true,
-      closeButtonText: 'Fechar'
-    });
-    toast.present();
-  }
-
-  async syncServer() {
-
-    let loaderSync = this.loadingCtrl.create({
-      content: 'Sincronizando Clientes e Produtos... Essa operação pode levar alguns minutos...',
-      dismissOnPageChange: true
-    });
-
-    let resultSyncProdutos: any;
-    let resultSyncClientes: any;
-    let resultSyncCondicoes: any;
-    let resultSyncFormas: any;
-
-    loaderSync.present();
-
-    try {
-      resultSyncProdutos = await this.apiProvider.syncProdutos(this.netoneAuthToken, this.netoneNextToken, this.sequenceApiProduto);
-      resultSyncClientes = await this.apiProvider.syncClientes(this.netoneAuthToken, this.netoneNextToken, this.sequenceApiCliente);
-      resultSyncCondicoes = await this.apiProvider.syncCondicoes(this.netoneAuthToken, this.netoneNextToken, this.sequenceApiCondicoes);
-      resultSyncFormas = await this.apiProvider.syncFormas(this.netoneAuthToken, this.netoneNextToken, this.sequenceApiFormas);
-
-      await this.processaProdutosAPI(resultSyncProdutos);
-      await this.processaClientesAPI(resultSyncClientes);
-      await this.processaCondicoesAPI(resultSyncCondicoes);
-      await this.processaFormasAPI(resultSyncFormas);
-
-    } catch (error) {
-      console.log(error);
-      this.toastAlert(error.message);
-    } finally {
-      await this.buscarProdutos();
-      loaderSync.dismiss();
-    }
-  }
-
   novoPedidoPage() {
-    this.navCtrl.push(NovoPedidoPage, 
-      { produtos: this.produtos, condicoes: this.condicoesPagamento, 
-        formasCobranca: this.formasCobranca });
+    this.navCtrl.push(NovoPedidoPage,
+      {
+        produtos: this.produtos, condicoes: this.condicoesPagamento,
+        formasCobranca: this.formasCobranca
+      });
   }
 
   clientesPage() {
@@ -200,9 +169,11 @@ export class HomePage {
   }
 
   pedidosPage() {
-    this.navCtrl.push(ListagemPedidoPage, 
-      { produtos: this.produtos, condicoes: this.condicoesPagamento, 
-        formasCobranca: this.formasCobranca });
+    this.navCtrl.push(ListagemPedidoPage,
+      {
+        produtos: this.produtos, condicoes: this.condicoesPagamento,
+        formasCobranca: this.formasCobranca
+      });
   }
 
   relatorios() {
@@ -225,6 +196,49 @@ export class HomePage {
     this.navCtrl.setRoot(LoginPage);
   }
 
+  async syncServer() {
+
+    let loaderSync = this.loadingCtrl.create({
+      content: 'Sincronizando Clientes e Produtos... Essa operação pode levar alguns minutos...',
+      dismissOnPageChange: true
+    });
+
+    let resultSyncProdutos: any;
+    let resultSyncClientes: any;
+    let resultSyncCondicoes: any;
+    let resultSyncFormas: any;
+
+    loaderSync.present();
+
+    try {
+      console.log('1')
+      resultSyncProdutos = await this.apiProvider.syncProdutos(this.netoneAuthToken, this.netoneNextToken, this.sequenceApiProduto);
+      console.log('2')
+      resultSyncClientes = await this.apiProvider.syncClientes(this.netoneAuthToken, this.netoneNextToken, this.sequenceApiCliente);
+      console.log('3')
+      resultSyncFormas = await this.apiProvider.syncFormas(this.netoneAuthToken, this.netoneNextToken, this.sequenceApiFormas);
+      console.log('4')
+      resultSyncCondicoes = await this.apiProvider.syncCondicoes(this.netoneAuthToken, this.netoneNextToken, this.sequenceApiCondicoes);
+      console.log('5')
+
+      this.processaProdutosAPI(resultSyncProdutos);
+      console.log('6')
+      this.processaClientesAPI(resultSyncClientes);
+      console.log('7')
+      this.processaCondicoesAPI(resultSyncCondicoes);
+      console.log('8')
+      this.processaFormasAPI(resultSyncFormas);
+      console.log('9')
+
+    } catch (error) {
+      console.log(error);
+      this.toastAlert(error.message);
+    } finally {
+      await this.buscarProdutos();
+      loaderSync.dismiss();
+    }
+  }
+
   async processaCondicoesAPI(result) {
     if (this.sequenceApiCondicoes != null && this.sequenceApiCondicoes >= result[0].sequence) {
       console.log('sequence atual = ' + this.sequenceApiCondicoes + ', sequence retornada = ' + result[0].sequence);
@@ -244,11 +258,11 @@ export class HomePage {
 
       if (condicaoDadoId.length > 0) {
         let condicaoPagamento = { 'idFirebase': condicaoDadoId[0].idFirebase, ...condicao } as CondicaoPagamento;
-        await self.condicoesProvider.atualizar(condicaoPagamento).then((result: any) => {
+        self.condicoesProvider.atualizar(condicaoPagamento).then((result: any) => {
           console.log("Atualizando condicao pagamento: " + condicaoPagamento.id);
         })
       } else {
-        await self.condicoesProvider.adicionar(condicao).then((result: any) => {
+        self.condicoesProvider.adicionar(condicao).then((result: any) => {
           console.log("Salvando novo condicao pagamento: " + condicao.id);
         })
       }
@@ -261,7 +275,7 @@ export class HomePage {
   }
 
   async processaFormasAPI(result) {
-    if (this.sequenceApiFormas != null  && this.sequenceApiFormas >= result[0].sequence) {
+    if (this.sequenceApiFormas != null && this.sequenceApiFormas >= result[0].sequence) {
       console.log('sequence atual = ' + this.sequenceApiFormas + ', sequence retornada = ' + result[0].sequence);
       console.log('Nenhuma atualização de formas de pagamento disponível');
       return false;
@@ -271,7 +285,7 @@ export class HomePage {
 
     let formasApi: FormaCobranca[] = result[0].result;
 
-    await formasApi.forEach(async function (forma) {
+    formasApi.forEach(async function (forma) {
 
       let formaDadoId = self.formasCobranca.filter(element => {
         return element.id === forma.id;
@@ -279,11 +293,11 @@ export class HomePage {
 
       if (formaDadoId.length > 0) {
         let formaCobranca = { 'idFirebase': formaDadoId[0].idFirebase, ...forma } as FormaCobranca;
-        await self.formasProvider.atualizar(formaCobranca).then((result: any) => {
+        self.formasProvider.atualizar(formaCobranca).then((result: any) => {
           console.log("Atualizando forma cobranca: " + formaCobranca.id);
         })
       } else {
-        await self.formasProvider.adicionar(forma).then((result: any) => {
+        self.formasProvider.adicionar(forma).then((result: any) => {
           console.log("Salvando novo forma cobranca: " + forma.id);
         })
       }
@@ -305,7 +319,7 @@ export class HomePage {
 
     let clientesApi: Cliente[] = result[0].result;
 
-    await clientesApi.forEach(async function (cli) {
+    clientesApi.forEach(async function (cli) {
 
       let clientesDadoId = self.clientes.filter(element => {
         return element.cpfCnpj === cli.cpfCnpj;
@@ -313,11 +327,11 @@ export class HomePage {
 
       if (clientesDadoId.length > 0) {
         let cliente = { 'id': clientesDadoId[0].id, ...cli } as Cliente;
-        await self.clientesProvider.atualizar(cliente).then((result: any) => {
+        self.clientesProvider.atualizar(cliente).then((result: any) => {
           console.log("Atualizando cliente: " + cli.cpfCnpj);
         })
       } else {
-        await self.clientesProvider.adicionar(cli).then((result: any) => {
+        self.clientesProvider.adicionar(cli).then((result: any) => {
           console.log("Salvando novo cliente: " + cli.cpfCnpj);
         })
       }
@@ -327,7 +341,6 @@ export class HomePage {
     this.storage.set('sequenceApiCliente', result[0].sequence);
     this.sequenceApiCliente = result[0].sequence;
   }
-
 
   async processaProdutosAPI(result) {
     if (this.sequenceApiProduto != null && this.sequenceApiProduto >= result[0].sequence) {
@@ -355,7 +368,7 @@ export class HomePage {
       }
     })
 
-    await produtosApiMap.forEach(async function (item) {
+    produtosApiMap.forEach(async function (item) {
       item.grupo = !item.grupo ? '' : item.grupo;
       item.subgrupo = !item.subgrupo ? '' : item.subgrupo;
       item.modelo = !item.modelo ? '' : item.modelo;
@@ -366,11 +379,11 @@ export class HomePage {
 
       if (produtosDadoId.length > 0) {
         let prod = { 'id': produtosDadoId[0].id, ...item } as Produto;
-        await self.produtosProvider.atualizar(prod).then((result: any) => {
+        self.produtosProvider.atualizar(prod).then((result: any) => {
           console.log("Atualizando produto: " + item.idReduzido);
         })
       } else {
-        await self.produtosProvider.adicionar(item).then((result: any) => {
+        self.produtosProvider.adicionar(item).then((result: any) => {
           console.log("Salvando novo produto: " + item.idReduzido);
         })
       }

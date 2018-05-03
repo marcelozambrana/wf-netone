@@ -35,7 +35,6 @@ export class NovoPedidoPage {
   clientSearch: boolean = false;
   clientFound: boolean = false;
 
-  vlrTotal: number = 0;
   qtdTotal: number = 0;
 
   public pedidoForm: any;
@@ -70,8 +69,8 @@ export class NovoPedidoPage {
     console.log(this.formasCobranca)
 
     this.ev.subscribe('adicionarProdutoCarrinho', produto => {
-      console.log('adicionou ao carrinho o produto ' + produto.descricao);
-      let novoItem = { 'id': produto.id, 'nome': produto.descricao, 'quantidade': 1, 'preco': produto.preco };
+      console.log('adicionou ao carrinho idReduzido ' + produto.idReduzido);
+      let novoItem = { 'id': produto.id, 'idReduzido': produto.idReduzido, 'nome': produto.descricao, 'quantidade': 1, 'valor': produto.preco };
 
       let result = this.pedido.itens.filter(element => {
         return element.id === produto.id
@@ -79,12 +78,11 @@ export class NovoPedidoPage {
 
       if (result.length > 0) {
         result[0].quantidade++;
-        this.pedido.total = this.pedido.total + result[0].preco;
+        this.calcTotalPedido(result[0].valor);
         this.calcQtde();
       } else {
         this.pedido.itens.push(novoItem);
-        this.pedido.total = this.pedido.total + (novoItem.preco * novoItem.quantidade);
-        console.log("total " + this.pedido.total);
+        this.calcTotalPedido(novoItem.valor * novoItem.quantidade);
         this.calcQtde();
       }
     });
@@ -133,7 +131,7 @@ export class NovoPedidoPage {
     }
 
     if (ped.total <= 0) {
-      this.toastAlert("Pedido não pode ter valor total igual a zero.");
+      this.toastAlert("Pedido não pode ter valor total menor ou igual a zero");
       return false;
     }
 
@@ -268,21 +266,20 @@ export class NovoPedidoPage {
 
   tapAddQuantidade(e, item) {
     item.quantidade++;
-    this.pedido.total = this.pedido.total + (item.preco);
+    this.calcTotalPedido(item.valor);
     this.calcQtde();
   }
 
   tapRemoveQuantidade(e, item) {
     if (item.quantidade > 0) {
       item.quantidade--;
-      this.pedido.total = this.pedido.total - (item.preco);
+      this.calcTotalPedido(-item.valor);
       this.calcQtde();
     }
   }
 
   excluirItem(item) {
-    this.pedido.total = this.pedido.total - (item.preco * item.quantidade);
-
+    this.calcTotalPedido(-item.valor * item.quantidade);
     let index = this.pedido.itens.indexOf(item);
     if (index !== -1) this.pedido.itens.splice(index, 1);
 
@@ -311,11 +308,44 @@ export class NovoPedidoPage {
     this.passo = "produtos";
   }
 
+  calcTotalPedido(valorAdicionar) {
+    if (!this.pedido.total || this.pedido.total < 0) {
+      this.pedido.total = 0;
+    }
+    this.pedido.total = this.pedido.total + valorAdicionar;
+    console.log("total " + this.pedido.total);
+  }
+
+  calcTotalPedidoCompleto() {
+    let totalPedido = 0;
+    
+    this.pedido.itens.forEach(item => {
+      totalPedido = totalPedido + (item.valor * item.quantidade);
+    });
+
+    return totalPedido; 
+  }
+
   calcQtde() {
     this.qtdTotal = 0;
     this.pedido.itens.forEach(item => {
       this.qtdTotal = this.qtdTotal + item.quantidade;
     });
+  }
+
+  calcDesconto() {
+    console.log('calculando desconto...');
+    
+    let totalItens = this.calcTotalPedidoCompleto();
+    let desconto = this.pedido.descontoTotal.replace(',','.');
+    let total = totalItens - desconto;
+    console.log(total)
+    if (total > 0) {
+      this.pedido.total = total;
+    } else {
+      this.pedido.descontoTotal = '0,00'      
+      this.toastAlert("Valor de desconto inválido");
+    }
   }
 
   ionViewCanEnter() {

@@ -57,8 +57,18 @@ export class ListagemPedidoPage {
     this.navCtrl.push(NovoPedidoPage);
   }
 
-  enviar(item){
-    console.log(item);
+  enviar(pedido){
+    console.log(pedido);
+
+    pedido.enviado = true;
+    pedido.descontoTotal = pedido.descontoTotal.replace(',','.');
+    this.pedidosProvider.atualizar(pedido).then((result: any) => {
+    })
+      .catch((error) => {
+        pedido.enviado = false;
+        pedido.descontoTotal = pedido.descontoTotal.replace('.',',');
+        console.log("Falha ao enviar pedido!");
+      });
   }
 
 
