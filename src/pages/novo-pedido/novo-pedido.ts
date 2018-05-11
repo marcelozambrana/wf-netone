@@ -1,9 +1,11 @@
 import { Component } from '@angular/core';
-import { IonicPage, NavController, NavParams, Events, AlertController, ToastController } from 'ionic-angular';
+import { IonicPage, NavController, NavParams, LoadingController, Events, AlertController, ToastController } from 'ionic-angular';
 import { FormBuilder } from '@angular/forms';
 
 import { Observable } from 'rxjs/Observable';
+import { SelectSearchable } from 'ionic-select-searchable';
 
+import { Cliente } from '../../models/cliente';
 import { Pedido } from '../../models/pedido';
 import { CondicaoPagamento } from '../../models/condicao-pagamento';
 import { FormaCobranca } from '../../models/forma-cobranca';
@@ -15,6 +17,8 @@ import { CatalogoProdutoPage } from '../catalogo-produto/catalogo-produto';
 import { PedidosProvider } from '../../providers/pedidos/pedidos';
 import { CondicaoPagamentoProvider } from '../../providers/condicao-pagamento/condicao-pagamento';
 import { ClientesProvider } from '../../providers/clientes/clientes';
+import { CartaoCredito } from '../../models/cartoes-credito';
+import { PlanoOperadora } from '../../models/plano-operadora';
 
 @IonicPage()
 @Component({
@@ -24,8 +28,13 @@ import { ClientesProvider } from '../../providers/clientes/clientes';
 export class NovoPedidoPage {
 
   produtos = [];
-  
+  clientes: any = [];
   pedido: Pedido | any = { total: 0, itens: [] };
+
+  anoEntregaMin = new Date().getFullYear();
+  anoEntregaMax = new Date().getFullYear() + 1;
+  isFormaCobrancaDinheiro = false;
+  isFormaCobrancaCartao = false;
 
   passo = "selecionarCliente";
   pedirConfirmacaoParaSairDoPedido = true;
@@ -40,40 +49,50 @@ export class NovoPedidoPage {
   public pedidoForm: any;
   public condicoesPagamento: CondicaoPagamento[];
   public formasCobranca: FormaCobranca[];
+  public cartoes: CartaoCredito[];
+  public planosCartao: PlanoOperadora[];
 
-  constructor(public navCtrl: NavController,
-    public navParams: NavParams,
-    public formBuilder: FormBuilder,
-    private ev: Events,
+  constructor(public navCtrl: NavController, public navParams: NavParams,
+    public formBuilder: FormBuilder, private ev: Events,
+    private loadingCtrl: LoadingController,
     private condicaoPagamentoService: CondicaoPagamentoProvider,
-    public pedidoService: PedidosProvider,
+    private pedidoService: PedidosProvider,
     private clientesProvider: ClientesProvider,
-    private alertCtrl: AlertController,
-    private toastCtrl: ToastController) {
-
-    let pedidoEdit = this.navParams.get('pedido');
-    console.log(pedidoEdit);
-
-    if (pedidoEdit) {
-      this.passo = "produtos";
-      this.pedido = pedidoEdit;
-      console.log(this.pedido);
-      this.calcQtde();
-    }
+    private alertCtrl: AlertController, private toastCtrl: ToastController) {
 
     this.produtos = this.navParams.get('produtos') || [];
     this.condicoesPagamento = this.navParams.get('condicoes') || [];
     this.formasCobranca = this.navParams.get('formasCobranca') || [];
-
+    this.cartoes = this.navParams.get('cartoes') || [];
+    this.planosCartao = [];
     console.log(this.condicoesPagamento)
     console.log(this.formasCobranca)
+    console.log(this.cartoes)
+
+    let pedidoEdit = this.navParams.get('pedido');
+    if (pedidoEdit) {
+      this.passo = "produtos";
+      this.pedido = pedidoEdit;
+      this.calcQtde();
+      this.calcFormaCobranca();
+    } else {
+      this.carregarClientes()
+    }
+
 
     this.ev.subscribe('adicionarProdutoCarrinho', produto => {
       console.log('adicionou ao carrinho idReduzido ' + produto.idReduzido);
-      let novoItem = { 'id': produto.id, 'idReduzido': produto.idReduzido, 'nome': produto.descricao, 'quantidade': 1, 'valor': produto.preco };
+      let novoItem = {
+        'idReduzido': produto.idReduzido,
+        'nome': produto.descricao,
+        'quantidade': produto.quantidade ? produto.quantidade : 1,
+        'valor': produto.preco,
+        'tamanho': produto.tamanho.length > 0 ? produto.tamanho : '',
+        'cor': produto.cor.length > 0 ? produto.cor : ''
+      };
 
       let result = this.pedido.itens.filter(element => {
-        return element.id === produto.id
+        return element.idReduzido === produto.idReduzido
       })
 
       if (result.length > 0) {
@@ -86,26 +105,18 @@ export class NovoPedidoPage {
         this.calcQtde();
       }
     });
+  }
 
-    this.pedidoForm = formBuilder.group({
-      cliente: [''],
-      dataEmissao: [''],
-      dataPrevisaoEntrega: [''],
-      formaCobranca: [''],
-      condicaoPagamento: [''],
-      desconto: [''],
-      logradouro: [''],
-      complemento: [''],
-      numero: [''],
-      cep: [''],
-      bairro: [''],
-      cidade: [''],
-      uf: ['']
-    });
+  async carregarClientes() {
+    this.clientes = await this.clientesProvider.todosParaPedido();
   }
 
   adicionarCliente() {
-    this.navCtrl.push(NovoClientePage, { titulo: 'Adicionar' });
+    let cidadesParam = this.navParams.get('cidades')
+    this.navCtrl.push(NovoClientePage, {
+      titulo: 'Adicionar',
+      cidades: cidadesParam
+    });
   }
 
   adicionarItemPedido() {
@@ -125,8 +136,13 @@ export class NovoPedidoPage {
       return;
     }
 
-    if (!this.pedido.condicaoPagamentoId) {
+    if (!this.pedido.condicaoPagamentoId && !this.isFormaCobrancaCartao) {
       this.toastAlert("Informe uma condição de pagamento");
+      return;
+    }
+
+    if ((!this.pedido.cartaoId || !this.pedido.planoOperadoraId) && this.isFormaCobrancaCartao) {
+      this.toastAlert("Informe um cartão e plano operadora");
       return;
     }
 
@@ -141,7 +157,7 @@ export class NovoPedidoPage {
       return false;
     }
 
-    return true;
+    return this.calcDesconto();
   }
 
   salvar() {
@@ -154,7 +170,7 @@ export class NovoPedidoPage {
 
     if (!this.pedido.numero) {
       this.pedido.enviado = false;
-      
+
       this.pedidoService.adicionar(this.pedido).then((result: any) => {
         this.alert("Sucesso", "Pedido realizado com sucesso.");
         this.navCtrl.pop();
@@ -222,6 +238,7 @@ export class NovoPedidoPage {
   limparCliente() {
     this.pedido.cliente = null;
     this.clientFound = false;
+    this.passo = "selecionarCliente";
   }
 
   selecionaClienteEContinua() {
@@ -318,12 +335,12 @@ export class NovoPedidoPage {
 
   calcTotalPedidoCompleto() {
     let totalPedido = 0;
-    
+
     this.pedido.itens.forEach(item => {
       totalPedido = totalPedido + (item.valor * item.quantidade);
     });
 
-    return totalPedido; 
+    return totalPedido;
   }
 
   calcQtde() {
@@ -335,21 +352,125 @@ export class NovoPedidoPage {
 
   calcDesconto() {
     console.log('calculando desconto...');
-    
+
     let totalItens = this.calcTotalPedidoCompleto();
-    let desconto = this.pedido.descontoTotal.replace(',','.');
+    let desconto = this.pedido.descontoTotal.replace(',', '.');
+    let descontoMaximo = null;
+
+    if (this.pedido.condicaoPagamentoId) {
+      let condicao:any = this.condicoesPagamento.reduce((retorno, c) => {
+        if (c.id == this.pedido.condicaoPagamentoId) {
+          return c;
+        } else {
+          return retorno;
+        }
+      }, null);
+      console.log(condicao)
+      if (condicao.percentualDescontoMaximo && condicao.percentualDescontoMaximo > 0) {
+        descontoMaximo = totalItens * (condicao.percentualDescontoMaximo/100);
+        console.log('desconto máximo: ' + descontoMaximo);
+        descontoMaximo = descontoMaximo.toFixed(2);
+      }
+    }
+
+    if (this.pedido.planoOperadoraId) {
+      let plano:any = this.planosCartao.reduce((retorno, c) => {
+        if (c.id == this.pedido.planoOperadoraId) {
+          return c;
+        } else {
+          return retorno;
+        }
+      }, null);
+      console.log(plano)
+      if (plano.percentualDescontoMaximo && plano.percentualDescontoMaximo > 0) {
+        descontoMaximo = totalItens * (plano.percentualDescontoMaximo/100);
+        console.log('desconto máximo: ' + descontoMaximo);
+        descontoMaximo = descontoMaximo.toFixed(2);
+      }
+    }
+
+    console.log('desconto: ' + desconto);
+    console.log(desconto);
+    console.log('desconto máximo fixed: ' + descontoMaximo);
+    console.log(descontoMaximo);
+    console.log(+desconto > +descontoMaximo)
+    if (desconto && descontoMaximo && +desconto > +descontoMaximo) {
+      this.toastAlert('Desconto máximo para essas condições de pagamento é R$ ' + descontoMaximo)
+      return false;
+    }
+
     let total = totalItens - desconto;
     console.log(total)
     if (total > 0) {
       this.pedido.total = total;
     } else {
-      this.pedido.descontoTotal = '0,00'      
+      this.pedido.descontoTotal = '0,00'
       this.toastAlert("Valor de desconto inválido");
+      return false;
     }
+
+    return true;
+  }
+
+  calcPlanosCartao() {
+    if (this.pedido.cartaoId) {
+      let cardArray = this.cartoes.filter(c => c.id == this.pedido.cartaoId);
+      this.planosCartao = cardArray.length > 0 ? cardArray[0].planos : [];
+    }
+  }
+
+  calcCondicaoPgto() {
+    this.isFormaCobrancaDinheiro = false;
+    this.isFormaCobrancaCartao = false;
+    this.pedido.condicaoPagamentoId = null;
+    this.pedido.cartaoId = null;
+    this.pedido.planoOperadoraId = null;
+
+    if (!this.pedido.formaCobrancaId) {
+      return;
+    }
+
+    let loader = this.loadingCtrl.create({
+      content: 'Buscando condições pgto...',
+      dismissOnPageChange: true
+    });
+
+    loader.present();
+    this.calcFormaCobranca();
+    loader.dismiss();
+  }
+
+  calcFormaCobranca() {
+    let formaDescricaoArray = this.formasCobranca.filter(
+      f => f.id == this.pedido.formaCobrancaId);
+
+      console.log(formaDescricaoArray)
+    if (formaDescricaoArray[0].descricaoReduzido === 'DIN') {
+      this.isFormaCobrancaDinheiro = true;
+
+      let condicoes = this.condicoesPagamento.filter(
+        c => c.descricao.toUpperCase() === 'A VISTA');
+      this.pedido.condicaoPagamentoId = condicoes[0].id;
+    }
+
+    if (formaDescricaoArray[0].descricaoReduzido === 'CRT') {
+      this.isFormaCobrancaCartao = true;
+    }
+    
+    this.calcPlanosCartao();
   }
 
   ionViewCanEnter() {
     this.pedirConfirmacaoParaSairDoPedido = true;
+  }
+
+  clienteChange(event: { component: SelectSearchable, value: any }) {
+    console.log('cliente selecionado:', event.value);
+    this.clientFound = true;
+  }
+
+  clienteTemplate(cliente: Cliente) {
+    return `${cliente.nome}`;
   }
 
   async ionViewCanLeave() {
@@ -358,7 +479,7 @@ export class NovoPedidoPage {
     if (this.navParams.get('pedido')) {
       return true;
     }
-    
+
     if (this.passo != "selecionarCliente" && this.pedirConfirmacaoParaSairDoPedido) {
       podeSair = await this.showConfirm().then((result) => {
         if (result) {

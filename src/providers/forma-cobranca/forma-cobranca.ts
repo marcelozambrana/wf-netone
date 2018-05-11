@@ -1,20 +1,16 @@
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs/Observable';
-
-import { AngularFirestore, AngularFirestoreCollection, AngularFirestoreDocument } from 'angularfire2/firestore';
-
 import { Storage } from '@ionic/storage';
-
+import { AngularFirestore, AngularFirestoreCollection, AngularFirestoreDocument } from 'angularfire2/firestore';
 
 import { FormaCobranca } from '../../models/forma-cobranca';
 
 @Injectable()
 export class FormaCobrancaProvider {
 
-
   private formaCobrancaCollection: AngularFirestoreCollection<FormaCobranca>;
+  private formaDoc: AngularFirestoreDocument<FormaCobranca>;
   public formas: Observable<FormaCobranca[]>;
-  formaDoc: AngularFirestoreDocument<FormaCobranca>;
 
   rootPathFirebase;
 
@@ -22,15 +18,14 @@ export class FormaCobrancaProvider {
 
   async init() {
     await this.storage.get('caminhoFirestone').then((path) => {
+      
       this.rootPathFirebase = path;
-      console.log('Root path storage firebase: ' + this.rootPathFirebase);
-
       this.formaCobrancaCollection = this.afs.collection(this.rootPathFirebase + '/formascobranca'); //ref()
 
       this.formas = this.formaCobrancaCollection.snapshotChanges().map(changes => {
         return changes.map(a => {
           const data = a.payload.doc.data() as FormaCobranca;
-          data.id = a.payload.doc.id;
+          data.idFirebase = a.payload.doc.id;
           return data;
         });
       });

@@ -2,13 +2,16 @@ import { Cliente } from './cliente';
 import { ItemPedido } from './itempedido';
 
 export interface Pedido {
-    numero?: string;
     cliente: Cliente | any;
+    numero?: string;
     emissao: Date;
     previsaoEntrega: Date;
-    condicaoPagamentoId: number;
-    desconto: number;
     itens: ItemPedido[] | any[];
+    formaCobrancaId: number;
+    condicaoPagamentoId?: number;
+    cartaoId?: number;
+    planoOperadoraId?: number;
+    descontoTotal?: number;
     total: number;
     enviado: boolean;
 }

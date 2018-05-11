@@ -1,13 +1,10 @@
 import { Component } from '@angular/core';
 
-import { IonicPage, NavController, AlertController } from 'ionic-angular';
-
-import { NovoClientePage } from '../novo-cliente/novo-cliente';
-
+import { IonicPage, NavController, NavParams, AlertController } from 'ionic-angular';
 import { Observable } from 'rxjs/Observable';
 
+import { NovoClientePage } from '../novo-cliente/novo-cliente';
 import { Cliente } from '../../models/cliente';
-
 import { ClientesProvider } from '../../providers/clientes/clientes';
 
 
@@ -23,11 +20,16 @@ export class ClientesPage {
   clientesFiltro: Observable<Cliente[]>;
   clientes: Observable<Cliente[]>;
 
-  constructor(public navCtrl: NavController, private alertCtrl: AlertController,
+  cidades = [];
+
+  constructor(public navCtrl: NavController, 
+    public navParams: NavParams,
+    private alertCtrl: AlertController,
     private clientesProvider: ClientesProvider) {
 
       this.clientes = this.clientesProvider.todos();
       this.clientesFiltro = this.clientes;
+      this.cidades = this.navParams.get('cidades');
   }
 
   alert(title, message) {
@@ -40,12 +42,19 @@ export class ClientesPage {
   }
 
   adicionarCliente() {
-    this.navCtrl.push(NovoClientePage, { titulo: 'Novo' });
+    this.navCtrl.push(NovoClientePage, { 
+      titulo: 'Novo',
+      cidades: this.cidades 
+    });
   }
 
   editar(id: string) {
     if (id) {
-      this.navCtrl.push(NovoClientePage, { titulo: 'Editar', idCliente: id });
+      this.navCtrl.push(NovoClientePage, { 
+        titulo: 'Editar', 
+        idCliente: id,
+        cidades: this.cidades 
+      });
     }
   }
 
@@ -63,8 +72,18 @@ export class ClientesPage {
     }
   }
 
-  filtrarClientes() {
+  filtrarClientes(event) {
     console.log('filtrando clientes: ' + this.searchTerm);
+    
+    this.clientes = this.clientes
+    .map(clients => {
+      let fl = clients.filter((cli) => {
+        return cli.nome.toLowerCase().indexOf(
+          this.searchTerm.toLowerCase()) > -1;
+      })
+
+      return fl;
+    });
   }
 
 }

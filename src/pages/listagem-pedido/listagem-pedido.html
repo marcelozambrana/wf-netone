@@ -2,12 +2,6 @@
 
   <ion-navbar>
     <ion-title>Pedidos</ion-title>
-<!--
-    <ion-buttons end>
-      <button ion-button icon-only (click)="novoPedido()">
-        <ion-icon name="add"></ion-icon>
-      </button>
-    </ion-buttons>-->    
   </ion-navbar>
 
 </ion-header>
@@ -15,7 +9,7 @@
 
 <ion-content class="content">
     <div padding-vertical>
-      <ion-segment [(ngModel)]="status">
+      <ion-segment [(ngModel)]="status" color="light">
         <ion-segment-button value="done" (click)="filter('done')">
           Realizados
         </ion-segment-button>
@@ -27,37 +21,24 @@
     
     <div [ngSwitch]="status">
       
-      <!-- <div *ngSwitchCase="'done'">
-        <ion-card *ngFor="let item of items | async">            
-          <ion-item>
-            <ion-icon name="md-person" item-left large ></ion-icon>
-            <h2>{{item.cliente.nome}}</h2>
-            <p>{{item.cliente.cpfCnpj}}</p>
-          </ion-item>
-        
-          <ion-item> 
-            <span item-left>{{item.itens.length}} item(ns)</span>
-            <span item-left>(R$ {{item.total | number}})</span>
-            <button ion-button icon-left clear item-end (click)="visualizar(item)">
-              <ion-icon name="ios-redo"></ion-icon>
-              Visualizar
-            </button>
-          </ion-item>
-        </ion-card>                  
-      </div> -->
-     
       <div >        
         <ion-card *ngFor="let item of items | async">            
           <ion-item>
             <ion-icon name="md-person" item-left large ></ion-icon>
             <h2>{{item.cliente.nome}}</h2>
             <p>{{item.cliente.cpfCnpj}}</p>
+            
             <button ion-button icon-left clear item-end *ngIf="!item.enviado" (click)="enviar(item)">
                 <ion-icon name="send"></ion-icon>
                 ENVIAR
               </button>                        
           </ion-item>
         
+          <ion-item>
+              <p>Realizado em: {{item.emissao  | date: 'dd/MM/yyyy HH:mm'}}</p>
+              <p>Previsão entrega: {{item.previsaoEntrega  | date: 'dd/MM/yyyy' }}</p>
+          </ion-item>
+
           <ion-item> 
             <span item-left>{{item.itens.length}} item(ns)</span>
             <span item-left>(R$ {{item.total | number}})</span>

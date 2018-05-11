@@ -8,13 +8,13 @@ export interface Cliente {
     telefone: string;
     celular: string;
     endereco: {
+        ibgeCidade: string;
         endereco: string;
+        complemento: string;
         numero: string;
         bairro: string;
         cep: number;
-        complemento: string;
-        cidade: string;
         uf: string;
-    }
-    versao: string;
+    };
+    isNovo: boolean;
 }

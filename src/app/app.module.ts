@@ -19,26 +19,23 @@ import { firebaseConfig } from '../config';
 
 import { IonicStorageModule } from '@ionic/storage';
 
+import { SelectSearchableModule } from 'ionic-select-searchable';
 import { BrMaskerModule } from 'brmasker-ionic-3';
 
-import { ApiProvider } from '../providers/api/api';
-
-import { HomePage } from '../pages/home/home';
 import { LoginPage } from '../pages/login/login';
-
+import { HomePage } from '../pages/home/home';
 import { NovoPedidoPage } from '../pages/novo-pedido/novo-pedido';
-import { PedidosProvider } from '../providers/pedidos/pedidos';
 import { ListagemPedidoPage } from './../pages/listagem-pedido/listagem-pedido';
-
 import { CatalogoProdutoPage } from '../pages/catalogo-produto/catalogo-produto';
-import { DetalhesProdutoPage } from '../pages/detalhes-produto/detalhes-produto';
-
 import { ClientesPage } from '../pages/clientes/clientes';
 import { NovoClientePage } from '../pages/novo-cliente/novo-cliente';
-import { ClientesProvider } from '../providers/clientes/clientes';
-
 import { CondicaoPagamentoPage } from '../pages/condicao-pagamento/condicao-pagamento';
+import { ModalAdicionarProdutoPage } from '../pages/catalogo-produto/catalogo-produto';
+
+import { ApiProvider } from '../providers/api/api';
+import { ClientesProvider } from '../providers/clientes/clientes';
 import { CondicaoPagamentoProvider } from '../providers/condicao-pagamento/condicao-pagamento';
+import { PedidosProvider } from '../providers/pedidos/pedidos';
 import { ProdutosProvider } from '../providers/produtos/produtos';
 import { FormaCobrancaProvider } from '../providers/forma-cobranca/forma-cobranca';
 
@@ -49,11 +46,11 @@ import { FormaCobrancaProvider } from '../providers/forma-cobranca/forma-cobranc
     LoginPage,
     NovoPedidoPage,
     CatalogoProdutoPage,
-    DetalhesProdutoPage,
     ClientesPage,
     NovoClientePage,
     CondicaoPagamentoPage,
-    ListagemPedidoPage
+    ListagemPedidoPage,
+    ModalAdicionarProdutoPage
   ],
   imports: [
     BrowserModule,
@@ -66,7 +63,8 @@ import { FormaCobrancaProvider } from '../providers/forma-cobranca/forma-cobranc
     AngularFirestoreModule.enablePersistence(),
     // Configuração do serviço de banco de dados do firebase
     AngularFireDatabaseModule,
-    BrMaskerModule
+    BrMaskerModule,
+    SelectSearchableModule
   ],
   bootstrap: [IonicApp],
   entryComponents: [
@@ -75,11 +73,11 @@ import { FormaCobrancaProvider } from '../providers/forma-cobranca/forma-cobranc
     LoginPage,
     NovoPedidoPage,
     CatalogoProdutoPage,
-    DetalhesProdutoPage,
     ClientesPage,
     NovoClientePage,
     CondicaoPagamentoPage,
-    ListagemPedidoPage
+    ListagemPedidoPage,
+    ModalAdicionarProdutoPage
   ],
   providers: [
     StatusBar,

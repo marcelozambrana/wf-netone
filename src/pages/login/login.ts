@@ -5,7 +5,6 @@ import { FormBuilder, Validators } from '@angular/forms';
 import { Storage } from '@ionic/storage';
 
 import { HomePage } from '../home/home';
-
 import { ApiProvider } from '../../providers/api/api';
 import { ClientesProvider } from '../../providers/clientes/clientes';
 
@@ -23,10 +22,10 @@ export class LoginPage {
   isErroEmail = false;
   isErroPassword = false;
 
-  constructor(public navCtrl: NavController, 
-    public navParams: NavParams, 
+  constructor(public navCtrl: NavController,
+    public navParams: NavParams,
     public formBuilder: FormBuilder,
-    private loadingCtrl: LoadingController, 
+    private loadingCtrl: LoadingController,
     private alertCtrl: AlertController,
     private storage: Storage,
     private clientesProvider: ClientesProvider,
@@ -39,9 +38,9 @@ export class LoginPage {
     });
 
     this.storage.get('usuarioAutenticado').then((isAuth) => {
-     
+
       console.log('isUsuarioAutenticado: ' + isAuth);
-     
+
       if (isAuth) {
         this.navCtrl.setRoot(HomePage);
       }
@@ -63,7 +62,7 @@ export class LoginPage {
     if (!this.loginForm.valid) {
       if (!email.valid) {
         this.isErroEmail = true;
-        this.mensagemErroEmail = 'Ops! Usuário inválido';
+        this.mensagemErroEmail = 'Ops! Usuário inválido.';
       } else {
         this.mensagemErroEmail = '';
       }
@@ -93,25 +92,32 @@ export class LoginPage {
 
           const resultAutorizar: any = await this.apiProvider.autorizar(resultLogin.token);
           console.log('next token login: ' + resultAutorizar.requestToken);
-
           this.storage.set('usuarioAutenticado', true);
-          this.storage.set('netone-auth-token',  resultLogin.token);
+          this.storage.set('netone-auth-token', resultLogin.token);
           this.storage.set('netone-next-request-token', resultAutorizar.requestToken);
-          
-          let user:any = await this.clientesProvider.buscarUsuario(email.value);
-          console.log(user)
-      
-          if (!user) {
+
+          let user: any = await this.clientesProvider.buscarUsuario(email.value);
+          console.log(user);
+
+          let cidadesUf:any = [];
+
+          if (user) {
+
+            let rootPathFirebase = 'usuarios/' + user.id;
+            cidadesUf = await this.getCidadesFirebase(rootPathFirebase);
+            this.storage.set('caminhoFirestone', rootPathFirebase);
+          } else {
+
             console.log("Primeiro acesso, criando usuário: " + email.value);
             let newDocUser = await this.clientesProvider.adicionarUsuario(email.value);
             this.storage.set('caminhoFirestone', newDocUser.path);
-          } else {
-            this.storage.set('caminhoFirestone', 'usuarios/' + user.id);
+            
+            cidadesUf = await this.getCidadesAPIAndAddFirebase(newDocUser.path, resultLogin.token, resultAutorizar.requestToken, 0);
           }
-           
-          this.navCtrl.setRoot(HomePage);
+
+          this.navCtrl.setRoot(HomePage, { cidades: cidadesUf });
         }
-        
+
       } catch (e) {
         loader.dismiss();
         console.log(e)
@@ -119,6 +125,17 @@ export class LoginPage {
 
       }
     }
+  }
+
+  async getCidadesAPIAndAddFirebase(rootPathFirebase, auth_token, next_token, sequence) {
+    let cidadesApi = await this.apiProvider.getCidades(auth_token, next_token, sequence);
+    await this.clientesProvider.adicionarCidades(rootPathFirebase, cidadesApi[0].result)
+    return cidadesApi[0].result;
+  }
+
+  async getCidadesFirebase(rootPathFirebase) {
+    let cidadesFirebase = await this.clientesProvider.buscarCidades(rootPathFirebase);
+    return cidadesFirebase;
   }
 
 }

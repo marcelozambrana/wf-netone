@@ -19,6 +19,9 @@ export class NovoClientePage {
 
   passo = "1";
 
+  cidades = [];
+  estados = [];
+  cidadesEstado = [];
   cliente: any = { endereco: {} } as Cliente;
   titulo: string = "";
   isPessoaJuridica: boolean = false;
@@ -33,6 +36,13 @@ export class NovoClientePage {
     private toastCtrl: ToastController) {
 
     this.titulo = this.navParams.get('titulo');
+    this.cidades = this.navParams.get('cidades');
+    this.estados = this.cidades.reduce((x, cidadeReduce) =>
+      (x.includes(cidadeReduce.estado.sigla) || cidadeReduce.estado.sigla === 'EX')
+        ? x : [...x, cidadeReduce.estado.sigla], [])
+      .sort((a, b) => {
+        return a > b ? 1 : -1;
+      });
 
     this.isPessoaJuridica = false;
 
@@ -40,13 +50,13 @@ export class NovoClientePage {
     if (idCliente) {
       this.isClienteCpfExistente = true;
       this.passo = "2";
-
+      
       this.clientesProvider.buscarId(idCliente).subscribe(cliente => {
         this.cliente = cliente;
         if (cliente) {
           this.cliente.id = idCliente;
           this.isPessoaJuridica = this.cliente.cpfCnpj.length === 14;
-          console.log(this.isPessoaJuridica)
+          this.onSelectChangeUf();
         }
       });
     }
@@ -176,6 +186,7 @@ export class NovoClientePage {
         if (queriedItems.length > 0) {
           this.cliente = queriedItems[0];
           this.isClienteCpfExistente = true;
+          this.onSelectChangeUf();
           return;
 
         } else {
@@ -258,6 +269,14 @@ export class NovoClientePage {
     }
 
     return true;
+  }
+
+  onSelectChangeUf() {
+    this.cidadesEstado = this.cidades
+    .filter( cid => cid.estado.sigla === this.cliente.endereco.uf)
+    .sort((a, b) => {
+      return a.nome > b.nome ? 1 : -1;
+    });
   }
 
   cancelar() {

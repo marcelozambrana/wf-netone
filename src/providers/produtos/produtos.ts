@@ -1,20 +1,16 @@
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs/Observable';
-
-import { AngularFirestore } from 'angularfire2/firestore';
-import { AngularFirestoreCollection, AngularFirestoreDocument } from 'angularfire2/firestore';
-
 import { Storage } from '@ionic/storage';
+import { AngularFirestore, AngularFirestoreCollection, AngularFirestoreDocument } from 'angularfire2/firestore';
 
 import { Produto } from '../../models/produto';
-
 
 @Injectable()
 export class ProdutosProvider {
 
-  produtosCollection: AngularFirestoreCollection<Produto>; //Firestore collection
-  produtos: Observable<Produto[]>;
-  produtoDoc: AngularFirestoreDocument<Produto>;
+  private produtosCollection: AngularFirestoreCollection<Produto>; //Firestore collection
+  private produtoDoc: AngularFirestoreDocument<Produto>;
+  public produtos: Observable<Produto[]>;
 
   rootPathFirebase;
 
@@ -22,9 +18,8 @@ export class ProdutosProvider {
 
   async init() {
     await this.storage.get('caminhoFirestone').then((path) => {
+      
       this.rootPathFirebase = path;
-      console.log('Root path storage firebase: ' + this.rootPathFirebase);
-
       this.produtosCollection = this.afs.collection(this.rootPathFirebase + '/produtos'); //ref()
 
       this.produtos = this.produtosCollection.snapshotChanges().map(changes => {

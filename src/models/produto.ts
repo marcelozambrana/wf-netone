@@ -10,6 +10,5 @@ export interface Produto {
     largura: string;
     altura: string;
     comprimento: string;
-    urlImg: string;
     preco: number;
 }

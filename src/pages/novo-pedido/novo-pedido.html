@@ -9,7 +9,7 @@
       <button ion-button icon-only (click)="adicionarCliente()" *ngIf="passo=='selecionarCliente' && !pedido.enviado">
         <ion-icon name="person-add"></ion-icon>
       </button>
-      <button ion-button icon-only (click)="voltarAdicionarItens()" *ngIf="passo=='dadosPagamento' && !pedido.enviado">
+      <button ion-button icon-only (click)="voltarAdicionarItens()" *ngIf="passo=='dadosPagamento'">
         <ion-icon name="md-cart"></ion-icon>
       </button>
     </ion-buttons>
@@ -19,7 +19,7 @@
 
 <ion-content class="pedido-content">
 
-  <form padding [formGroup]="pedidoForm" novalidate>
+  <div class="form" padding>
 
     <div *ngIf="passo=='selecionarCliente' || passo=='dataEmissao'">
 
@@ -34,9 +34,10 @@
         </ion-item>
 
         <ion-item *ngIf="!clientFound">
-          <ion-label floating>CPF/CNPJ</ion-label>
-          <ion-input type="text" [brmasker]="{person: true}" formControlName="cliente" (ionBlur)="onBlurCpfCnpj($event.value)" [(ngModel)]="pedido.cliente"
-            [disabled]="passo!='selecionarCliente'"></ion-input>
+          <select-searchable [disabled]="passo!='selecionarCliente'" searchPlaceholder="Nome" title="Cliente" [(ngModel)]="pedido.cliente"
+            [items]="clientes" [itemTemplate]="clienteTemplate" itemValueField="cpfCnpj" itemTextField="nome" [canSearch]="true"
+            [noItemsFoundText]="'Nenhum cliente encontrado'" (onChange)="clienteChange($event)">
+          </select-searchable>
         </ion-item>
 
         <button *ngIf="passo=='selecionarCliente' && !clientFound" ion-button block (click)="selecionaClienteEContinua()">Buscar Cliente</button>
@@ -51,12 +52,12 @@
       <ion-list inset>
         <ion-item>
           <ion-label floating>Emissão</ion-label>
-          <ion-datetime disabled displayFormat="DD/MM/YYYY" pickerFormat="DD/MM/YYYY" formControlName="dataEmissao" [(ngModel)]="pedido.emissao"></ion-datetime>
+          <ion-datetime disabled displayFormat="DD/MM/YYYY" pickerFormat="DD/MM/YYYY" [(ngModel)]="pedido.emissao"></ion-datetime>
         </ion-item>
 
         <ion-item>
           <ion-label floating>Previsão de Entrega</ion-label>
-          <ion-datetime displayFormat="DD/MM/YYYY" formControlName="dataPrevisaoEntrega" [(ngModel)]="pedido.previsaoEntrega"></ion-datetime>
+          <ion-datetime displayFormat="DD/MM/YYYY" [(ngModel)]="pedido.previsaoEntrega" min="{{anoEntregaMin}}" max="{{anoEntregaMax}}"></ion-datetime>
         </ion-item>
 
         <button ion-button block (click)="selecionaPrevisaoEntregaEContinua()">Continuar</button>
@@ -75,6 +76,8 @@
 
         <ion-item *ngFor="let item of pedido.itens">
           <h2 style="font-weight: bold; color: black">{{ item.nome }}</h2>
+          <p>Tamanho: {{ item.tamanho }}</p>
+          <p>Cor: {{ item.cor }} </p>
           <p>Qtde: {{ item.quantidade}}</p>
           <p>Valor: {{ item.valor | number }}</p>
           <button clear="" ion-button item-end *ngIf="!pedido.enviado" (tap)="tapAddQuantidade($event, item)">
@@ -127,28 +130,42 @@
 
         <ion-item>
           <ion-label floating>Forma de Cobrança</ion-label>
-          <ion-select formControlName="formaCobranca" [(ngModel)]="pedido.formaCobrancaId" [disabled]="pedido.enviado">
+          <ion-select [(ngModel)]="pedido.formaCobrancaId" [disabled]="pedido.enviado" (ionChange)="calcCondicaoPgto()">
             <ion-option value="{{forma.id}}" *ngFor="let forma of formasCobranca">{{forma.descricao}}</ion-option>
           </ion-select>
         </ion-item>
 
-        <ion-item>
+        <ion-item *ngIf="!isFormaCobrancaCartao">
           <ion-label floating>Condição Pagamento</ion-label>
-          <ion-select formControlName="condicaoPagamento" [(ngModel)]="pedido.condicaoPagamentoId" [disabled]="pedido.enviado">
+          <ion-select [(ngModel)]="pedido.condicaoPagamentoId" [disabled]="pedido.enviado || isFormaCobrancaDinheiro">
             <ion-option value="{{condicao.id}}" *ngFor="let condicao of condicoesPagamento">{{condicao.descricao}}</ion-option>
           </ion-select>
         </ion-item>
 
+        <ion-item *ngIf="isFormaCobrancaCartao">
+          <ion-label floating>Cartão</ion-label>
+          <ion-select [(ngModel)]="pedido.cartaoId" [disabled]="pedido.enviado" (ionChange)="calcPlanosCartao()">
+            <ion-option value="{{car.id}}" *ngFor="let car of cartoes">{{car.descricao}}</ion-option>
+          </ion-select>
+        </ion-item>
+
+        <ion-item *ngIf="isFormaCobrancaCartao && pedido.cartaoId">
+            <ion-label floating>Plano Operadora</ion-label>
+            <ion-select [(ngModel)]="pedido.planoOperadoraId" [disabled]="pedido.enviado">
+              <ion-option value="{{plano.id}}" *ngFor="let plano of planosCartao">{{plano.descricao}}</ion-option>
+            </ion-select>
+          </ion-item>
+
         <ion-item>
           <ion-label floating>(R$) Desconto total</ion-label>
-          <ion-input type="text" [disabled]="!pedido.condicaoPagamentoId || !pedido.formaCobrancaId || pedido.enviado" formControlName="desconto"
-            [(ngModel)]="pedido.descontoTotal" [brmasker]="{money: true}" (ionBlur)="calcDesconto()"></ion-input>
+          <ion-input type="text" [disabled]="(!pedido.condicaoPagamentoId && !pedido.planoOperadoraId) || !pedido.formaCobrancaId || pedido.enviado" [(ngModel)]="pedido.descontoTotal"
+            [brmasker]="{money: true}" (ionBlur)="calcDesconto()"></ion-input>
         </ion-item>
 
       </ion-list>
     </div>
 
-  </form>
+  </div>
 
 </ion-content>
 
@@ -164,7 +181,7 @@
     </ion-list>
 
     <ion-buttons end *ngIf="passo == 'produtos' || passo == 'dadosPagamento'">
-      <button *ngIf="passo == 'produtos' && !pedido.enviado" ion-button block (click)="resumoPedido()">Resumo Pedido</button>
+      <button *ngIf="passo == 'produtos'" ion-button block (click)="resumoPedido()">Resumo Pedido</button>
       <button *ngIf="passo == 'dadosPagamento' && !pedido.enviado" ion-button block (click)="salvar()">Finalizar Pedido</button>
     </ion-buttons>
 

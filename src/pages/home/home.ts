@@ -17,8 +17,9 @@ import { FormaCobrancaProvider } from '../../providers/forma-cobranca/forma-cobr
 import { PedidosProvider } from '../../providers/pedidos/pedidos';
 
 import { Cliente } from '../../models/cliente';
-import { CondicaoPagamento } from '../../models/condicao-pagamento';
 import { FormaCobranca } from '../../models/forma-cobranca';
+import { CondicaoPagamento } from '../../models/condicao-pagamento';
+import { CartaoCredito } from '../../models/cartoes-credito';
 import { Produto } from '../../models/produto';
 
 @Component({
@@ -28,20 +29,22 @@ import { Produto } from '../../models/produto';
 export class HomePage {
 
   mensagem: string;
-  caminhoFirebase = "";
+
+  //storage properties
   netoneAuthToken;
   netoneNextToken;
   rootPathFirebase;
-
   sequenceApiProduto;
   sequenceApiCliente;
   sequenceApiCondicoes;
   sequenceApiFormas;
 
+  cidades: any = [];
   produtos: any = [];
   clientes: any = [];
   formasCobranca: any = [];
   condicoesPagamento: any = [];
+  cartoes: any = [];
 
   constructor(public navCtrl: NavController, public navParams: NavParams,
     private loadingCtrl: LoadingController,
@@ -54,40 +57,26 @@ export class HomePage {
     private formasProvider: FormaCobrancaProvider,
     private pedidosProvider: PedidosProvider) {
 
-    this.storage.get('netone-auth-token').then(token => {
-      this.netoneAuthToken = token;
-    })
-
-    this.storage.get('netone-next-request-token').then(token => {
-      this.netoneNextToken = token;
-    })
-
-    Promise.all([this.storage.get("caminhoFirestone"),
-    this.storage.get("sequenceApiProduto"),
-    this.storage.get("sequenceApiCliente"),
-    this.storage.get("sequenceApiCondicoes"),
-    this.storage.get("sequenceApiFormas"),
+    Promise.all([
+      this.storage.get("caminhoFirestone"),
+      this.storage.get("netone-auth-token"),
+      this.storage.get("netone-next-request-token"),
+      this.storage.get("sequenceApiProduto"),
+      this.storage.get("sequenceApiCliente"),
+      this.storage.get("sequenceApiCondicoes"),
+      this.storage.get("sequenceApiFormas")
     ]).then(async values => {
 
       this.rootPathFirebase = values[0];
+      this.netoneAuthToken = values[1];
+      this.netoneNextToken = values[2];
+      this.sequenceApiProduto = values[3];
+      this.sequenceApiCliente = values[4];
+      this.sequenceApiCondicoes = values[5];
+      this.sequenceApiFormas = values[6];
       console.log('Root path storage firebase: ' + this.rootPathFirebase);
-
-      if (values[1]) {
-        this.sequenceApiProduto = values[1];
-      }
-
-      if (values[2]) {
-        this.sequenceApiCliente = values[2];
-      }
-
-      if (values[3]) {
-        this.sequenceApiCondicoes = values[3];
-      }
-
-      if (values[4]) {
-        this.sequenceApiFormas = values[4];
-      }
-
+      console.log('Auth token: ' + this.netoneAuthToken);
+      console.log('Next token: ' + this.netoneNextToken);
       console.log('sequenceApiProduto: ' + this.sequenceApiProduto);
       console.log('sequenceApiCliente: ' + this.sequenceApiCliente);
       console.log('sequenceApiCondicoes: ' + this.sequenceApiCondicoes);
@@ -99,49 +88,57 @@ export class HomePage {
       await this.formasProvider.init();
       await this.pedidosProvider.init();
       this.buscarProdutos();
-      this.buscarCondicoes();
+      this.buscarCondicoesEPlanosOperadora();
       this.buscarFormas();
-
     });
-  }
 
-  toastAlert(message) {
-    let toast = this.toastCtrl.create({
-      message: message,
-      showCloseButton: true,
-      duration: 3000,
-      closeButtonText: 'Fechar',
-      dismissOnPageChange: true,
-      cssClass: 'toast-error'
-    });
-    toast.present();
-  }
+    this.cidades = this.navParams.get('cidades');
 
-  toastMessage(message) {
-    let toast = this.toastCtrl.create({
-      message: message,
-      duration: 3000,
-      dismissOnPageChange: true,
-      showCloseButton: true,
-      closeButtonText: 'Fechar'
-    });
-    toast.present();
   }
 
   async buscarProdutos() {
-    this.produtos = await this.produtosProvider.todos();
+    let produtosTemp = await this.produtosProvider.todos();
     if (!this.produtos) {
       this.produtos = [];
-    }
-    console.log(this.produtos);
+      return;
+    } 
+
+    this.produtos = await this.agruparProdutosPorMascara(produtosTemp);
   }
 
-  async buscarCondicoes() {
+  async agruparProdutosPorMascara(produtos) {
+    return new Promise(resolve => {
+      let pMascMap = new Map();
+
+      if (!produtos) {
+        resolve([]);
+        return;
+      }
+
+      produtos.forEach(p => {
+        let pMap = pMascMap.get(p.mascara);
+        if (pMap) {
+          pMap.agrupamento.push(p);
+        } else {
+          p.agrupamento = [{ ...p }];
+          pMascMap.set(p.mascara, p);
+        }
+      })
+
+      let retorno = [...Array.from(pMascMap.values()).slice(0)];
+      resolve(retorno);
+    })
+  }
+
+  async buscarCondicoesEPlanosOperadora() {
     this.condicoesPagamento = await this.condicoesProvider.todos();
-    if (!this.condicoesPagamento) {
-      this.condicoesPagamento = [];
-    }
+    this.cartoes = await this.condicoesProvider.todosCartoes();
+    
+    this.condicoesPagamento = !this.condicoesPagamento ? [] : this.condicoesPagamento;
+    this.cartoes = !this.cartoes ? [] : this.cartoes;
+
     console.log(this.condicoesPagamento);
+    console.log(this.cartoes);
   }
 
   async buscarFormas() {
@@ -152,27 +149,46 @@ export class HomePage {
     console.log(this.formasCobranca);
   }
 
-  novoPedidoPage() {
-    this.navCtrl.push(NovoPedidoPage,
-      {
-        produtos: this.produtos, condicoes: this.condicoesPagamento,
-        formasCobranca: this.formasCobranca
-      });
-  }
-
   clientesPage() {
-    this.navCtrl.push(ClientesPage);
+    this.navCtrl.push(ClientesPage, {
+        cidades: this.cidades
+    });
   }
 
   catalogoPage() {
-    this.navCtrl.push(CatalogoProdutoPage, { produtos: this.produtos });
+    if (this.produtos.length === 0) {
+      this.buscarProdutos();
+    }
+
+    this.navCtrl.push(CatalogoProdutoPage,
+      {
+        produtos: this.produtos
+      });
+  }
+
+  novoPedidoPage() {
+    if (this.produtos.length === 0) {
+      this.buscarProdutos();
+    }
+
+    this.navCtrl.push(NovoPedidoPage,
+      {
+        produtos: this.produtos,
+        condicoes: this.condicoesPagamento,
+        formasCobranca: this.formasCobranca,
+        cartoes: this.cartoes,
+        cidades: this.cidades
+      });
   }
 
   pedidosPage() {
     this.navCtrl.push(ListagemPedidoPage,
       {
-        produtos: this.produtos, condicoes: this.condicoesPagamento,
-        formasCobranca: this.formasCobranca
+        produtos: this.produtos,
+        condicoes: this.condicoesPagamento,
+        formasCobranca: this.formasCobranca,
+        cartoes: this.cartoes,
+        cidades: this.cidades
       });
   }
 
@@ -205,36 +221,31 @@ export class HomePage {
 
     let resultSyncProdutos: any;
     let resultSyncClientes: any;
-    let resultSyncCondicoes: any;
     let resultSyncFormas: any;
+    let resultSyncCondicoes: any;
+    let resultSyncCartoes: any;
 
     loaderSync.present();
 
     try {
-      console.log('1')
+
       resultSyncProdutos = await this.apiProvider.syncProdutos(this.netoneAuthToken, this.netoneNextToken, this.sequenceApiProduto);
-      console.log('2')
       resultSyncClientes = await this.apiProvider.syncClientes(this.netoneAuthToken, this.netoneNextToken, this.sequenceApiCliente);
-      console.log('3')
       resultSyncFormas = await this.apiProvider.syncFormas(this.netoneAuthToken, this.netoneNextToken, this.sequenceApiFormas);
-      console.log('4')
       resultSyncCondicoes = await this.apiProvider.syncCondicoes(this.netoneAuthToken, this.netoneNextToken, this.sequenceApiCondicoes);
-      console.log('5')
+      resultSyncCartoes = await this.apiProvider.syncCartoesPlanos(this.netoneAuthToken, this.netoneNextToken);
 
-      this.processaProdutosAPI(resultSyncProdutos);
-      console.log('6')
-      this.processaClientesAPI(resultSyncClientes);
-      console.log('7')
-      this.processaCondicoesAPI(resultSyncCondicoes);
-      console.log('8')
-      this.processaFormasAPI(resultSyncFormas);
-      console.log('9')
-
+      console.log('sincronizando...')
+      await this.processaProdutosAPI(resultSyncProdutos);
+      await this.processaClientesAPI(resultSyncClientes);
+      await this.processaFormasAPI(resultSyncFormas);
+      await this.processaCondicoesAPI(resultSyncCondicoes);
+      await this.processaCartoesPlanosAPI(resultSyncCartoes);
+      console.log('final sincronizacao ...')
     } catch (error) {
       console.log(error);
       this.toastAlert(error.message);
     } finally {
-      await this.buscarProdutos();
       loaderSync.dismiss();
     }
   }
@@ -264,6 +275,36 @@ export class HomePage {
       } else {
         self.condicoesProvider.adicionar(condicao).then((result: any) => {
           console.log("Salvando novo condicao pagamento: " + condicao.id);
+        })
+      }
+    })
+
+    console.log('atualizando sequence condicoes pagamento de ' + this.sequenceApiCondicoes + ' para ' + result[0].sequence);
+    this.storage.set('sequenceApiCondicoes', result[0].sequence);
+    this.sequenceApiCondicoes = result[0].sequence;
+  }
+
+  async processaCartoesPlanosAPI(result) {
+    console.log('sequence retornada api cartoescredito  = ' + result[0].sequence);
+
+    let self = this;
+
+    let cartoesCreditoApi: CartaoCredito[] = result[0].result;
+
+    cartoesCreditoApi.forEach(function (cartao) {
+
+      let planoDadoId = self.cartoes.filter(element => {
+        return element.id === cartao.id;
+      })
+
+      if (planoDadoId.length > 0) {
+        let cartaoCredito = { 'idFirebase': planoDadoId[0].idFirebase, ...cartao } as CartaoCredito;
+        self.condicoesProvider.atualizarCartao(cartaoCredito).then((result: any) => {
+          console.log("Atualizando cartão crédito: " + cartaoCredito.id);
+        })
+      } else {
+        self.condicoesProvider.adicionarCartao(cartao).then((result: any) => {
+          console.log("Salvando novo cartão crédito: " + cartao.id);
         })
       }
     })
@@ -319,11 +360,13 @@ export class HomePage {
 
     let clientesApi: Cliente[] = result[0].result;
 
-    clientesApi.forEach(async function (cli) {
+    clientesApi.forEach(function (cli) {
 
       let clientesDadoId = self.clientes.filter(element => {
         return element.cpfCnpj === cli.cpfCnpj;
       })
+      
+      cli.isNovo = false;
 
       if (clientesDadoId.length > 0) {
         let cliente = { 'id': clientesDadoId[0].id, ...cli } as Cliente;
@@ -351,24 +394,25 @@ export class HomePage {
 
     let self = this;
 
-    let produtosApiMap = await result[0].result.map(p => {
+    let produtosApiMap = result[0].result.map(p => {
       return {
         "idReduzido": p.idReduzido,
+        "mascara": p.mascara,
         "descricao": p.descricao,
         "grupo": p.grupoDescricao,
         "subgrupo": p.subgrupoDescricao,
         "modelo": p.modelo,
-        "cor": p.cor,
-        "tamanho": p.tamanho,
-        "largura": p.largura,
-        "altura": p.altura,
-        "comprimento": p.comprimento,
+        "cor": p.cor ? [p.cor] : [],
+        "tamanho": p.tamanho ? [p.tamanho] : [],
+        "largura": (p.largura && p.largura > 0) ? p.largura : null,
+        "altura": (p.altura && p.altura > 0) ? p.altura : null,
+        "comprimento": (p.comprimento && p.comprimento > 0) ? p.comprimento : null,
         "preco": p.valor,
-        "urlImg": p.urlImagens.length > 0 ? p.urlImagens[0] : 'assets/imgs/no-product.jpg'
+        "urlImgs": p.urlImagens.length > 0 ? p.urlImagens : ['assets/imgs/no-product.jpg']
       }
     })
 
-    produtosApiMap.forEach(async function (item) {
+    produtosApiMap.forEach(function (item) {
       item.grupo = !item.grupo ? '' : item.grupo;
       item.subgrupo = !item.subgrupo ? '' : item.subgrupo;
       item.modelo = !item.modelo ? '' : item.modelo;
@@ -393,4 +437,28 @@ export class HomePage {
     this.storage.set('sequenceApiProduto', result[0].sequence);
     this.sequenceApiProduto = result[0].sequence;
   }
+
+  toastAlert(message) {
+    let toast = this.toastCtrl.create({
+      message: message,
+      showCloseButton: true,
+      duration: 3000,
+      closeButtonText: 'Fechar',
+      dismissOnPageChange: true,
+      cssClass: 'toast-error'
+    });
+    toast.present();
+  }
+
+  toastMessage(message) {
+    let toast = this.toastCtrl.create({
+      message: message,
+      duration: 3000,
+      dismissOnPageChange: true,
+      showCloseButton: true,
+      closeButtonText: 'Fechar'
+    });
+    toast.present();
+  }
+
 }

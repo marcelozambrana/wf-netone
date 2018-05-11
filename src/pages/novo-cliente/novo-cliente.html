@@ -68,7 +68,7 @@
       <h6>Dados de endereco</h6>
       <ion-item>
         <ion-label floating>Logradouro</ion-label>
-        <ion-input text-uppercase type="text"maxlengthmax="100" formControlName="endereco" [(ngModel)]="cliente.endereco.endereco"></ion-input>
+        <ion-input text-uppercase type="text" maxlengthmax="100" formControlName="endereco" [(ngModel)]="cliente.endereco.endereco"></ion-input>
       </ion-item>
 
       <ion-item>
@@ -88,40 +88,16 @@
       </ion-item>
 
       <ion-item>
-        <ion-label floating>Cidade</ion-label>
-        <ion-input text-uppercase type="text" maxlength="40" formControlName="cidade" [(ngModel)]="cliente.endereco.cidade"></ion-input>
+        <ion-label floating>UF</ion-label>
+        <ion-select formControlName="uf" [(ngModel)]="cliente.endereco.uf" (ionChange)="onSelectChangeUf()">
+          <ion-option text-uppercase value="{{sigla}}" *ngFor="let sigla of estados">{{sigla}}</ion-option>
+        </ion-select>
       </ion-item>
 
       <ion-item>
-        <ion-label text-uppercase floating>UF</ion-label>
-        <ion-select formControlName="uf" [(ngModel)]="cliente.endereco.uf">
-          <ion-option value="AC">ACRE</ion-option>
-          <ion-option value="AL">ALAGOAS</ion-option>
-          <ion-option value="AP">AMAPA</ion-option>
-          <ion-option value="AM">AMAZONAS</ion-option>
-          <ion-option value="BA">BAHIA</ion-option>
-          <ion-option value="CE">CEARA</ion-option>
-          <ion-option value="DF">DISTRITO FEDERAL</ion-option>
-          <ion-option value="ES">ESPIRITO SANTO</ion-option>
-          <ion-option value="GO">GOIAS</ion-option>
-          <ion-option value="MA">MARANHAO</ion-option>
-          <ion-option value="MT">MATO GROSSO</ion-option>
-          <ion-option value="MS">MATO GROSSO DO SUL</ion-option>
-          <ion-option value="MG">MINAS GERAIS</ion-option>
-          <ion-option value="PA">PARA</ion-option>
-          <ion-option value="PB">PARAIBA</ion-option>
-          <ion-option value="PR">PARANA</ion-option>
-          <ion-option value="PE">PERNAMBUCO</ion-option>
-          <ion-option value="PI">PIAUI</ion-option>
-          <ion-option value="RJ">RIO DE JANEIRO</ion-option>
-          <ion-option value="RN">RIO GRANDE DO NORTE</ion-option>
-          <ion-option value="RS">RIO GRANDE DO SUL</ion-option>
-          <ion-option value="RO">RONDONIA</ion-option>
-          <ion-option value="RR">RORAIMA</ion-option>
-          <ion-option value="SC">SANTA CATARINA</ion-option>
-          <ion-option value="SP">SAO PAULO</ion-option>
-          <ion-option value="SE">SERGIPE</ion-option>
-          <ion-option value="TO">TOCANTIS</ion-option>
+          <ion-label floating>Cidade</ion-label>
+        <ion-select text-uppercase formControlName="cidade" [(ngModel)]="cliente.endereco.codigoIbge">
+          <ion-option value="{{cid.codigoIbge}}" *ngFor="let cid of cidadesEstado">{{cid.nome}}</ion-option>
         </ion-select>
       </ion-item>
 

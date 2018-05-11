@@ -8,27 +8,33 @@
 
 
 <ion-content padding class="catalogo-content">
-  
+
   <ion-searchbar [(ngModel)]="searchTerm" (ionInput)="filtrarProdutos()" placeholder="Buscar produto"></ion-searchbar>
 
   <div *ngFor="let prod of items" class="card">
     <ion-card>
-      <img [src]="prod.urlImg" alt="prod.titulo" />
+
+      <ion-slides paginationClickable=true loop=false>
+
+        <ion-slide *ngFor="let img of prod.urlImgs">
+          <img [src]="img" alt="prod.titulo" />
+        </ion-slide>
+      </ion-slides>
 
       <ion-card-content>
-        <ion-title text-center tex-wrap>{{prod.descricao}}</ion-title>
-        <p text-center>{{prod.grupo}}</p>
-        <p text-center>{{prod.subgrupo}}</p>
+        <ion-title text-center tex-wrap>{{ prod.descricao }}</ion-title>
+        <ion-title text-center tex-wrap>{{ prod.mascara }}</ion-title>
+        <p text-center>{{ prod.grupo }}</p>
+        <p text-center>{{ prod.subgrupo }}</p>
         <br />
-        <p text-center>Tamanho: {{prod.tamanho}}</p>
-        <p text-center>Cor: {{prod.cor}}</p>
+        <p text-center>Tamanho: {{ prod.tamanho.toString() }}</p>
+        <p text-center>Cor: {{ prod.cor.toString() }}</p>
+        <p text-center *ngIf="prod.comprimento">Comprimento: {{ prod.comprimento }}</p>
+        <p text-center *ngIf="prod.largura">Largura: {{ prod.largura }}</p>
+        <p text-center *ngIf="prod.altura">Altura: {{ prod.altura }}</p>
         <br />
         <h2 text-center>R$ {{prod.preco}}</h2>
         <br />
-        <p>
-          <button ion-button class="detalhes-btn" block clear (click)="detalhes(prod)">Detalhes</button>
-        </p>
-
         <p>
           <button *ngIf="isFromPedido" ion-button secondary color="dark" block (click)="adicionarCarrinho(prod)" [disabled]="!prod.preco">Comprar</button>
         </p>

@@ -6,6 +6,7 @@ import { IonicPage, NavController, NavParams } from 'ionic-angular';
 import { Pedido } from './../../models/pedido';
 import { CondicaoPagamento } from '../../models/condicao-pagamento';
 import { FormaCobranca } from '../../models/forma-cobranca';
+import { CartaoCredito } from '../../models/cartoes-credito';
 
 import { NovoPedidoPage } from './../novo-pedido/novo-pedido';
 import { PedidosProvider } from './../../providers/pedidos/pedidos';
@@ -25,6 +26,7 @@ export class ListagemPedidoPage {
   produtosSelect = [];
   public condicoesPagamentoSelect: CondicaoPagamento[];
   public formasCobrancaSelect: FormaCobranca[];
+  public cartoes: CartaoCredito[];
 
   constructor(public navCtrl: NavController, 
               public navParams: NavParams, 
@@ -33,6 +35,7 @@ export class ListagemPedidoPage {
     this.produtosSelect = this.navParams.get('produtos') || [];
     this.condicoesPagamentoSelect = this.navParams.get('condicoes') || [];
     this.formasCobrancaSelect = this.navParams.get('formasCobranca') || [];
+    this.cartoes = this.navParams.get('cartoes') || [];
 
     this.filter(status);
 
@@ -48,13 +51,13 @@ export class ListagemPedidoPage {
   }
 
   visualizar(pedido: Pedido){
-    this.navCtrl.push(NovoPedidoPage, {pedido : pedido,
-      produtos: this.produtosSelect, condicoes: this.condicoesPagamentoSelect, 
-      formasCobranca: this.formasCobrancaSelect });        
-  }
-
-  novoPedido() {
-    this.navCtrl.push(NovoPedidoPage);
+    this.navCtrl.push(NovoPedidoPage, {
+      pedido : pedido,
+      produtos: this.produtosSelect, 
+      condicoes: this.condicoesPagamentoSelect, 
+      formasCobranca: this.formasCobrancaSelect,
+      cartoes: this.cartoes
+     });        
   }
 
   enviar(pedido){

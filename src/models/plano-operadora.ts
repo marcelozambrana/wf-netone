@@ -1,8 +1,9 @@
-export interface CondicaoPagamento {
+export interface PlanoOperadora {
     idFirebase?: string;
     id: string;
-    numeroParcelas: string;
+    ordem: string;
     descricao: string;
+    numeroParcelas: string;
     percentualVariacao: number;
     percentualDescontoMaximo: number;
     validaDescontoMaximo: boolean;
