@@ -17,10 +17,10 @@
   <ion-list inset>
     <ion-item *ngFor="let cli of clientes | async">
       {{ cli.nome }}
-      <button clear="" ion-button item-end icon-left (click)="editar(cli.id)">
+      <button clear="" ion-button item-end icon-left (click)="editar(cli)">
         <ion-icon name="create"></ion-icon>
       </button>
-      <button clear="" ion-button item-end icon-left color="danger" (click)="excluir(cli.id)">
+      <button clear="" ion-button item-end icon-left color="danger" (click)="excluir(cli)">
         <ion-icon name="trash"></ion-icon>
       </button>
     </ion-item>

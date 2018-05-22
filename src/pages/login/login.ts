@@ -40,20 +40,10 @@ export class LoginPage {
     this.storage.get('usuarioAutenticado').then((isAuth) => {
 
       console.log('isUsuarioAutenticado: ' + isAuth);
-
       if (isAuth) {
         this.navCtrl.setRoot(HomePage);
       }
     });
-  }
-
-  alert(title, message) {
-    let al = this.alertCtrl.create({
-      title: title,
-      subTitle: message,
-      buttons: ['Fechar']
-    });
-    al.present();
   }
 
   async login() {
@@ -73,6 +63,7 @@ export class LoginPage {
       } else {
         this.mensagemErroPassword = '';
       }
+
     } else {
       this.mensagemErroEmail = '';
       this.mensagemErroPassword = '';
@@ -99,43 +90,34 @@ export class LoginPage {
           let user: any = await this.clientesProvider.buscarUsuario(email.value);
           console.log(user);
 
-          let cidadesUf:any = [];
-
           if (user) {
-
             let rootPathFirebase = 'usuarios/' + user.id;
-            cidadesUf = await this.getCidadesFirebase(rootPathFirebase);
             this.storage.set('caminhoFirestone', rootPathFirebase);
           } else {
-
             console.log("Primeiro acesso, criando usuário: " + email.value);
             let newDocUser = await this.clientesProvider.adicionarUsuario(email.value);
             this.storage.set('caminhoFirestone', newDocUser.path);
-            
-            cidadesUf = await this.getCidadesAPIAndAddFirebase(newDocUser.path, resultLogin.token, resultAutorizar.requestToken, 0);
           }
-
-          this.navCtrl.setRoot(HomePage, { cidades: cidadesUf });
+          
+          this.navCtrl.setRoot(HomePage);
         }
 
       } catch (e) {
         loader.dismiss();
         console.log(e)
-        this.alert('Erro ao logar', e.message);
+        this.alert('Erro ao logar', e.message ? e.message : 'Não foi possível alcançar o servidor. Tente novamente.');
 
       }
     }
   }
 
-  async getCidadesAPIAndAddFirebase(rootPathFirebase, auth_token, next_token, sequence) {
-    let cidadesApi = await this.apiProvider.getCidades(auth_token, next_token, sequence);
-    await this.clientesProvider.adicionarCidades(rootPathFirebase, cidadesApi[0].result)
-    return cidadesApi[0].result;
-  }
-
-  async getCidadesFirebase(rootPathFirebase) {
-    let cidadesFirebase = await this.clientesProvider.buscarCidades(rootPathFirebase);
-    return cidadesFirebase;
+  alert(title, message) {
+    let al = this.alertCtrl.create({
+      title: title,
+      subTitle: message,
+      buttons: ['Fechar']
+    });
+    al.present();
   }
 
 }

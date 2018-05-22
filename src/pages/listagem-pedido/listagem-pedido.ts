@@ -20,7 +20,7 @@ import { PedidosProvider } from './../../providers/pedidos/pedidos';
 export class ListagemPedidoPage {
 
   status: String = 'done';
-  
+
   public items: Observable<Pedido[]>;
 
   produtosSelect = [];
@@ -28,9 +28,9 @@ export class ListagemPedidoPage {
   public formasCobrancaSelect: FormaCobranca[];
   public cartoes: CartaoCredito[];
 
-  constructor(public navCtrl: NavController, 
-              public navParams: NavParams, 
-              public pedidosProvider: PedidosProvider) {
+  constructor(public navCtrl: NavController,
+    public navParams: NavParams,
+    public pedidosProvider: PedidosProvider) {
 
     this.produtosSelect = this.navParams.get('produtos') || [];
     this.condicoesPagamentoSelect = this.navParams.get('condicoes') || [];
@@ -38,38 +38,38 @@ export class ListagemPedidoPage {
     this.cartoes = this.navParams.get('cartoes') || [];
 
     this.filter(status);
-
-    this.items = pedidosProvider.buscarPedidosPorStatus(false);
   }
 
   ionViewDidLoad() {
     console.log('ionViewDidLoad ListagemPedidoPage');
   }
 
-  filter(status: string){     
+  filter(status: string) {
     this.items = this.pedidosProvider.buscarPedidosPorStatus(status === 'sent');
   }
 
-  visualizar(pedido: Pedido){
+  visualizar(pedido: Pedido) {
+    let pedidoEdit:any =  JSON.parse(JSON.stringify(pedido));
+
     this.navCtrl.push(NovoPedidoPage, {
-      pedido : pedido,
-      produtos: this.produtosSelect, 
-      condicoes: this.condicoesPagamentoSelect, 
+      pedido: pedidoEdit,
+      produtos: this.produtosSelect,
+      condicoes: this.condicoesPagamentoSelect,
       formasCobranca: this.formasCobrancaSelect,
       cartoes: this.cartoes
-     });        
+    });
   }
 
-  enviar(pedido){
+  enviar(pedido) {
     console.log(pedido);
 
     pedido.enviado = true;
-    pedido.descontoTotal = pedido.descontoTotal.replace(',','.');
+    pedido.descontoTotal = pedido.descontoTotal.replace(',', '.');
     this.pedidosProvider.atualizar(pedido).then((result: any) => {
-    })
-      .catch((error) => {
+      console.log("Pedido enviado com sucesso!");
+    }).catch((error) => {
         pedido.enviado = false;
-        pedido.descontoTotal = pedido.descontoTotal.replace('.',',');
+        pedido.descontoTotal = pedido.descontoTotal.replace('.', ',');
         console.log("Falha ao enviar pedido!");
       });
   }

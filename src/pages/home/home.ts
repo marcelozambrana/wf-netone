@@ -39,7 +39,6 @@ export class HomePage {
   sequenceApiCondicoes;
   sequenceApiFormas;
 
-  cidades: any = [];
   produtos: any = [];
   clientes: any = [];
   formasCobranca: any = [];
@@ -70,7 +69,7 @@ export class HomePage {
       this.rootPathFirebase = values[0];
       this.netoneAuthToken = values[1];
       this.netoneNextToken = values[2];
-      this.sequenceApiProduto = values[3];
+      this.sequenceApiProduto = null;
       this.sequenceApiCliente = values[4];
       this.sequenceApiCondicoes = values[5];
       this.sequenceApiFormas = values[6];
@@ -92,16 +91,14 @@ export class HomePage {
       this.buscarFormas();
     });
 
-    this.cidades = this.navParams.get('cidades');
-
   }
 
   async buscarProdutos() {
     let produtosTemp = await this.produtosProvider.todos();
-    if (!this.produtos) {
+    if (!produtosTemp || produtosTemp === null) {
       this.produtos = [];
       return;
-    } 
+    }
 
     this.produtos = await this.agruparProdutosPorMascara(produtosTemp);
   }
@@ -133,11 +130,13 @@ export class HomePage {
   async buscarCondicoesEPlanosOperadora() {
     this.condicoesPagamento = await this.condicoesProvider.todos();
     this.cartoes = await this.condicoesProvider.todosCartoes();
-    
+
     this.condicoesPagamento = !this.condicoesPagamento ? [] : this.condicoesPagamento;
     this.cartoes = !this.cartoes ? [] : this.cartoes;
 
+    console.log('condições pagamento:');
     console.log(this.condicoesPagamento);
+    console.log('cartões:');
     console.log(this.cartoes);
   }
 
@@ -146,29 +145,46 @@ export class HomePage {
     if (!this.formasCobranca) {
       this.formasCobranca = [];
     }
+    console.log('formas de cobrança:');
     console.log(this.formasCobranca);
   }
 
-  clientesPage() {
-    this.navCtrl.push(ClientesPage, {
-        cidades: this.cidades
+  async clientesPage() {
+    await this.clientesProvider.init();
+    this.navCtrl.push(ClientesPage);
+  }
+
+  async catalogoPage() {
+    if (this.produtos.length === 0) {
+      let loader = this.loadingCtrl.create({
+        content: 'Atualizando produtos...',
+        dismissOnPageChange: true
+      });
+      loader.present();
+
+      await this.buscarProdutos();
+
+      loader.dismiss();
+    }
+
+    this.navCtrl.push(CatalogoProdutoPage, {
+      produtos: this.produtos
     });
   }
 
-  catalogoPage() {
+  async novoPedidoPage() {
     if (this.produtos.length === 0) {
-      this.buscarProdutos();
-    }
-
-    this.navCtrl.push(CatalogoProdutoPage,
-      {
-        produtos: this.produtos
+      let loader = this.loadingCtrl.create({
+        content: 'Atualizando produtos...',
+        dismissOnPageChange: true
       });
-  }
+      loader.present();
+  
+      await this.buscarProdutos();
 
-  novoPedidoPage() {
-    if (this.produtos.length === 0) {
-      this.buscarProdutos();
+      loader.dismiss();
+
+
     }
 
     this.navCtrl.push(NovoPedidoPage,
@@ -176,8 +192,7 @@ export class HomePage {
         produtos: this.produtos,
         condicoes: this.condicoesPagamento,
         formasCobranca: this.formasCobranca,
-        cartoes: this.cartoes,
-        cidades: this.cidades
+        cartoes: this.cartoes
       });
   }
 
@@ -187,8 +202,7 @@ export class HomePage {
         produtos: this.produtos,
         condicoes: this.condicoesPagamento,
         formasCobranca: this.formasCobranca,
-        cartoes: this.cartoes,
-        cidades: this.cidades
+        cartoes: this.cartoes
       });
   }
 
@@ -214,17 +228,16 @@ export class HomePage {
 
   async syncServer() {
 
-    let loaderSync = this.loadingCtrl.create({
-      content: 'Sincronizando Clientes e Produtos... Essa operação pode levar alguns minutos...',
-      dismissOnPageChange: true
-    });
-
     let resultSyncProdutos: any;
     let resultSyncClientes: any;
     let resultSyncFormas: any;
     let resultSyncCondicoes: any;
     let resultSyncCartoes: any;
 
+    let loaderSync = this.loadingCtrl.create({
+      content: 'Sincronizando dados com o servidor... Essa operação pode levar alguns minutos...',
+      dismissOnPageChange: true
+    });
     loaderSync.present();
 
     try {
@@ -258,17 +271,20 @@ export class HomePage {
     }
 
     let self = this;
-
     let condicoesApi: CondicaoPagamento[] = result[0].result;
 
     await condicoesApi.forEach(async function (condicao) {
 
-      let condicaoDadoId = self.condicoesPagamento.filter(element => {
-        return element.id === condicao.id;
-      })
+      let condicaoDadoId: any = self.condicoesPagamento.reduce((retorno, c) => {
+        if (c.id == condicao.id) {
+          return c;
+        } else {
+          return retorno;
+        }
+      }, null);
 
-      if (condicaoDadoId.length > 0) {
-        let condicaoPagamento = { 'idFirebase': condicaoDadoId[0].idFirebase, ...condicao } as CondicaoPagamento;
+      if (condicaoDadoId != null) {
+        let condicaoPagamento = { 'idFirebase': condicaoDadoId.idFirebase, ...condicao } as CondicaoPagamento;
         self.condicoesProvider.atualizar(condicaoPagamento).then((result: any) => {
           console.log("Atualizando condicao pagamento: " + condicaoPagamento.id);
         })
@@ -288,17 +304,20 @@ export class HomePage {
     console.log('sequence retornada api cartoescredito  = ' + result[0].sequence);
 
     let self = this;
-
     let cartoesCreditoApi: CartaoCredito[] = result[0].result;
 
     cartoesCreditoApi.forEach(function (cartao) {
 
-      let planoDadoId = self.cartoes.filter(element => {
-        return element.id === cartao.id;
-      })
+      let planoDadoId: any = self.cartoes.reduce((retorno, p) => {
+        if (p.id == cartao.id) {
+          return p;
+        } else {
+          return retorno;
+        }
+      }, null);
 
-      if (planoDadoId.length > 0) {
-        let cartaoCredito = { 'idFirebase': planoDadoId[0].idFirebase, ...cartao } as CartaoCredito;
+      if (planoDadoId != null) {
+        let cartaoCredito = { 'idFirebase': planoDadoId.idFirebase, ...cartao } as CartaoCredito;
         self.condicoesProvider.atualizarCartao(cartaoCredito).then((result: any) => {
           console.log("Atualizando cartão crédito: " + cartaoCredito.id);
         })
@@ -312,7 +331,6 @@ export class HomePage {
     console.log('atualizando sequence condicoes pagamento de ' + this.sequenceApiCondicoes + ' para ' + result[0].sequence);
     this.storage.set('sequenceApiCondicoes', result[0].sequence);
     this.sequenceApiCondicoes = result[0].sequence;
-
   }
 
   async processaFormasAPI(result) {
@@ -323,17 +341,20 @@ export class HomePage {
     }
 
     let self = this;
-
     let formasApi: FormaCobranca[] = result[0].result;
 
     formasApi.forEach(async function (forma) {
 
-      let formaDadoId = self.formasCobranca.filter(element => {
-        return element.id === forma.id;
-      })
+      let formaDadoId: any = self.formasCobranca.reduce((retorno, f) => {
+        if (f.id == forma.id) {
+          return f;
+        } else {
+          return retorno;
+        }
+      }, null);
 
-      if (formaDadoId.length > 0) {
-        let formaCobranca = { 'idFirebase': formaDadoId[0].idFirebase, ...forma } as FormaCobranca;
+      if (formaDadoId != null) {
+        let formaCobranca = { 'idFirebase': formaDadoId.idFirebase, ...forma } as FormaCobranca;
         self.formasProvider.atualizar(formaCobranca).then((result: any) => {
           console.log("Atualizando forma cobranca: " + formaCobranca.id);
         })
@@ -357,19 +378,21 @@ export class HomePage {
     }
 
     let self = this;
-
     let clientesApi: Cliente[] = result[0].result;
 
     clientesApi.forEach(function (cli) {
 
-      let clientesDadoId = self.clientes.filter(element => {
-        return element.cpfCnpj === cli.cpfCnpj;
-      })
-      
+      let clienteDadoId = null;
+      self.clientes.forEach(c => {
+        if (c.cpfCnpj == cli.cpfCnpj) {
+          clienteDadoId = c;
+        }
+      });
+
       cli.isNovo = false;
 
-      if (clientesDadoId.length > 0) {
-        let cliente = { 'id': clientesDadoId[0].id, ...cli } as Cliente;
+      if (clienteDadoId != null) {
+        let cliente = { 'id': clienteDadoId.id, ...cli } as Cliente;
         self.clientesProvider.atualizar(cliente).then((result: any) => {
           console.log("Atualizando cliente: " + cli.cpfCnpj);
         })
@@ -386,6 +409,7 @@ export class HomePage {
   }
 
   async processaProdutosAPI(result) {
+    
     if (this.sequenceApiProduto != null && this.sequenceApiProduto >= result[0].sequence) {
       console.log('sequence atual = ' + this.sequenceApiProduto + ', sequence retornada = ' + result[0].sequence);
       console.log('Nenhuma atualização de produtos disponível');
@@ -393,7 +417,6 @@ export class HomePage {
     }
 
     let self = this;
-
     let produtosApiMap = result[0].result.map(p => {
       return {
         "idReduzido": p.idReduzido,
@@ -412,30 +435,40 @@ export class HomePage {
       }
     })
 
-    produtosApiMap.forEach(function (item) {
-      item.grupo = !item.grupo ? '' : item.grupo;
-      item.subgrupo = !item.subgrupo ? '' : item.subgrupo;
-      item.modelo = !item.modelo ? '' : item.modelo;
+    let produtosTemp:any = await this.produtosProvider.todos();
 
-      let produtosDadoId = self.produtos.filter(element => {
-        return element.idReduzido === item.idReduzido;
-      })
-
-      if (produtosDadoId.length > 0) {
-        let prod = { 'id': produtosDadoId[0].id, ...item } as Produto;
-        self.produtosProvider.atualizar(prod).then((result: any) => {
-          console.log("Atualizando produto: " + item.idReduzido);
-        })
-      } else {
-        self.produtosProvider.adicionar(item).then((result: any) => {
-          console.log("Salvando novo produto: " + item.idReduzido);
-        })
+    produtosApiMap.forEach(async function (item) {
+      
+      let produtoDadoId = null;
+      
+      if (produtosTemp && produtosTemp != null) {
+        produtosTemp.forEach(p => {
+          if (p.idReduzido == item.idReduzido) {
+            produtoDadoId = p.id;
+          }
+        });
       }
+
+      self.updateProduto(produtoDadoId, item);
     })
 
     console.log('atualizando sequence produto de ' + this.sequenceApiProduto + ' para ' + result[0].sequence);
     this.storage.set('sequenceApiProduto', result[0].sequence);
     this.sequenceApiProduto = result[0].sequence;
+  }
+
+  async updateProduto(prodId, prod) {
+    
+    prod.grupo = !prod.grupo ? '' : prod.grupo;
+    prod.subgrupo = !prod.subgrupo ? '' : prod.subgrupo;
+    prod.modelo = !prod.modelo ? '' : prod.modelo;
+    
+    if (prodId != null) {
+      let prodUpdate = { 'id': prodId, ...prod } as Produto;
+      await this.produtosProvider.atualizar(prodUpdate);
+    } else {
+      await this.produtosProvider.adicionar(prod);
+    }
   }
 
   toastAlert(message) {

@@ -65,12 +65,10 @@ export class NovoPedidoPage {
     this.formasCobranca = this.navParams.get('formasCobranca') || [];
     this.cartoes = this.navParams.get('cartoes') || [];
     this.planosCartao = [];
-    console.log(this.condicoesPagamento)
-    console.log(this.formasCobranca)
-    console.log(this.cartoes)
 
     let pedidoEdit = this.navParams.get('pedido');
     if (pedidoEdit) {
+      console.log(pedidoEdit);
       this.passo = "produtos";
       this.pedido = pedidoEdit;
       this.calcQtde();
@@ -78,7 +76,6 @@ export class NovoPedidoPage {
     } else {
       this.carregarClientes()
     }
-
 
     this.ev.subscribe('adicionarProdutoCarrinho', produto => {
       console.log('adicionou ao carrinho idReduzido ' + produto.idReduzido);
@@ -115,7 +112,8 @@ export class NovoPedidoPage {
     let cidadesParam = this.navParams.get('cidades')
     this.navCtrl.push(NovoClientePage, {
       titulo: 'Adicionar',
-      cidades: cidadesParam
+      cidades: cidadesParam,
+      fromPedido: true
     });
   }
 
@@ -129,21 +127,21 @@ export class NovoPedidoPage {
     this.navCtrl.push(HomePage);
   }
 
-  validarPedido(ped) {
+  async validarPedido(ped) {
 
     if (!this.pedido.formaCobrancaId) {
       this.toastAlert("Informe uma forma de cobrança");
-      return;
+      return false;
     }
 
     if (!this.pedido.condicaoPagamentoId && !this.isFormaCobrancaCartao) {
       this.toastAlert("Informe uma condição de pagamento");
-      return;
+      return false;
     }
 
     if ((!this.pedido.cartaoId || !this.pedido.planoOperadoraId) && this.isFormaCobrancaCartao) {
       this.toastAlert("Informe um cartão e plano operadora");
-      return;
+      return false;
     }
 
     if (ped.total <= 0) {
@@ -157,12 +155,13 @@ export class NovoPedidoPage {
       return false;
     }
 
-    return this.calcDesconto();
+    await this.calcDesconto();
+    return true;
   }
 
-  salvar() {
-
-    if (!this.validarPedido(this.pedido)) {
+  async salvar() {
+    let retorno = await this.validarPedido(this.pedido);
+    if (!retorno) {
       return;
     }
 
@@ -255,7 +254,7 @@ export class NovoPedidoPage {
       return;
     } else {
       this.pedido.emissao = new Date().toISOString();
-      this.pedido.descontoTotal = 0;
+      this.pedido.descontoTotal = '0,00';
       this.passo = "dataEmissao";
     }
   }
@@ -350,15 +349,16 @@ export class NovoPedidoPage {
     });
   }
 
-  calcDesconto() {
+  async calcDesconto() {
     console.log('calculando desconto...');
-
+    console.log(this.pedido.descontoTotal);
     let totalItens = this.calcTotalPedidoCompleto();
     let desconto = this.pedido.descontoTotal.replace(',', '.');
     let descontoMaximo = null;
+    let percentualVariacao = null;
 
     if (this.pedido.condicaoPagamentoId) {
-      let condicao:any = this.condicoesPagamento.reduce((retorno, c) => {
+      let condicao: any = this.condicoesPagamento.reduce((retorno, c) => {
         if (c.id == this.pedido.condicaoPagamentoId) {
           return c;
         } else {
@@ -367,14 +367,14 @@ export class NovoPedidoPage {
       }, null);
       console.log(condicao)
       if (condicao.percentualDescontoMaximo && condicao.percentualDescontoMaximo > 0) {
-        descontoMaximo = totalItens * (condicao.percentualDescontoMaximo/100);
+        descontoMaximo = totalItens * (condicao.percentualDescontoMaximo / 100);
         console.log('desconto máximo: ' + descontoMaximo);
         descontoMaximo = descontoMaximo.toFixed(2);
       }
     }
 
     if (this.pedido.planoOperadoraId) {
-      let plano:any = this.planosCartao.reduce((retorno, c) => {
+      let plano: any = this.planosCartao.reduce((retorno, c) => {
         if (c.id == this.pedido.planoOperadoraId) {
           return c;
         } else {
@@ -383,9 +383,11 @@ export class NovoPedidoPage {
       }, null);
       console.log(plano)
       if (plano.percentualDescontoMaximo && plano.percentualDescontoMaximo > 0) {
-        descontoMaximo = totalItens * (plano.percentualDescontoMaximo/100);
+        descontoMaximo = totalItens * (plano.percentualDescontoMaximo / 100);
         console.log('desconto máximo: ' + descontoMaximo);
         descontoMaximo = descontoMaximo.toFixed(2);
+        console.log('percentual variacao: ' + plano.percentualVariacao);
+        percentualVariacao = plano.percentualVariacao;
       }
     }
 
@@ -394,17 +396,18 @@ export class NovoPedidoPage {
     console.log('desconto máximo fixed: ' + descontoMaximo);
     console.log(descontoMaximo);
     console.log(+desconto > +descontoMaximo)
-    if (desconto && descontoMaximo && +desconto > +descontoMaximo) {
+    if (desconto && descontoMaximo && + desconto > +descontoMaximo) {
       this.toastAlert('Desconto máximo para essas condições de pagamento é R$ ' + descontoMaximo)
       return false;
     }
 
     let total = totalItens - desconto;
-    console.log(total)
+    let totalVariacao = total + (total * (percentualVariacao / 100));
     if (total > 0) {
-      this.pedido.total = total;
+      this.pedido.percentualVariacao = (total * (percentualVariacao / 100));
+      this.pedido.total = percentualVariacao > 0 ? totalVariacao.toFixed(3) : total.toFixed(3);
     } else {
-      this.pedido.descontoTotal = '0,00'
+      this.pedido.descontoTotal = '0,00';
       this.toastAlert("Valor de desconto inválido");
       return false;
     }
@@ -412,11 +415,17 @@ export class NovoPedidoPage {
     return true;
   }
 
-  calcPlanosCartao() {
+  async calcPlanosCartao() {
     if (this.pedido.cartaoId) {
       let cardArray = this.cartoes.filter(c => c.id == this.pedido.cartaoId);
       this.planosCartao = cardArray.length > 0 ? cardArray[0].planos : [];
     }
+
+    await this.calcDesconto();
+  }
+
+  async changePlano() {
+    await this.calcDesconto();
   }
 
   calcCondicaoPgto() {
@@ -440,11 +449,15 @@ export class NovoPedidoPage {
     loader.dismiss();
   }
 
-  calcFormaCobranca() {
+  async calcFormaCobranca() {
     let formaDescricaoArray = this.formasCobranca.filter(
       f => f.id == this.pedido.formaCobrancaId);
 
-      console.log(formaDescricaoArray)
+    console.log(formaDescricaoArray)
+    if (!formaDescricaoArray || formaDescricaoArray.length == 0) {
+      return;
+    }
+
     if (formaDescricaoArray[0].descricaoReduzido === 'DIN') {
       this.isFormaCobrancaDinheiro = true;
 
@@ -456,8 +469,10 @@ export class NovoPedidoPage {
     if (formaDescricaoArray[0].descricaoReduzido === 'CRT') {
       this.isFormaCobrancaCartao = true;
     }
-    
-    this.calcPlanosCartao();
+
+    await this.calcPlanosCartao();
+    await this.calcDesconto();
+
   }
 
   ionViewCanEnter() {

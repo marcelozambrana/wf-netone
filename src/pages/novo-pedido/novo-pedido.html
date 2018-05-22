@@ -6,9 +6,9 @@
       <button ion-button icon-only (click)="adicionarItemPedido()" *ngIf="passo=='produtos' && !pedido.enviado">
         <ion-icon name="pricetags"></ion-icon>
       </button>
-      <button ion-button icon-only (click)="adicionarCliente()" *ngIf="passo=='selecionarCliente' && !pedido.enviado">
+      <!--<button ion-button icon-only (click)="adicionarCliente()" *ngIf="passo=='selecionarCliente' && !pedido.enviado">
         <ion-icon name="person-add"></ion-icon>
-      </button>
+      </button>-->
       <button ion-button icon-only (click)="voltarAdicionarItens()" *ngIf="passo=='dadosPagamento'">
         <ion-icon name="md-cart"></ion-icon>
       </button>
@@ -76,7 +76,7 @@
 
         <ion-item *ngFor="let item of pedido.itens">
           <h2 style="font-weight: bold; color: black">{{ item.nome }}</h2>
-          <p>Tamanho: {{ item.tamanho }}</p>
+          <p>Tam: {{ item.tamanho }}</p>
           <p>Cor: {{ item.cor }} </p>
           <p>Qtde: {{ item.quantidade}}</p>
           <p>Valor: {{ item.valor | number }}</p>
@@ -120,7 +120,7 @@
           </ion-row>
           <ion-row>
             <ion-col col-8>
-              <span style="font-weight: bold">Cidade:</span> {{pedido.cliente.endereco.cidade}}</ion-col>
+              <span style="font-weight: bold">Cidade:</span> {{pedido.cliente.endereco.cidade.nome}}</ion-col>
             <ion-col col-4>
               <span style="font-weight: bold">UF:</span> {{pedido.cliente.endereco.uf}}</ion-col>
           </ion-row>
@@ -151,7 +151,7 @@
 
         <ion-item *ngIf="isFormaCobrancaCartao && pedido.cartaoId">
             <ion-label floating>Plano Operadora</ion-label>
-            <ion-select [(ngModel)]="pedido.planoOperadoraId" [disabled]="pedido.enviado">
+            <ion-select [(ngModel)]="pedido.planoOperadoraId" [disabled]="pedido.enviado" (ionChange)="changePlano()">
               <ion-option value="{{plano.id}}" *ngFor="let plano of planosCartao">{{plano.descricao}}</ion-option>
             </ion-select>
           </ion-item>
@@ -176,6 +176,8 @@
       <ion-item>
         <h2>Valor Total: R$ {{pedido.total | number}}</h2>
         <p>Qtde: {{qtdTotal | number}}</p>
+        <p>*Desconto: R$ {{pedido.descontoTotal}}</p>
+        <p>*Taxa cartão: R$ {{pedido.percentualVariacao | number}}</p>
         <p *ngIf="pedido.enviado">Desconto: {{pedido.descontoTotal | number}}</p>
       </ion-item>
     </ion-list>

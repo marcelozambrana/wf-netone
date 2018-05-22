@@ -18,7 +18,6 @@ export class CondicaoPagamentoProvider {
   private cartaoDoc: AngularFirestoreDocument<CartaoCredito>;
   public cartoes: Observable<CartaoCredito[]>;
 
-
   rootPathFirebase;
   
   constructor(private afs: AngularFirestore, private storage: Storage) { }
@@ -29,7 +28,6 @@ export class CondicaoPagamentoProvider {
       this.rootPathFirebase = path;
 
       this.condicaoCollection = this.afs.collection(this.rootPathFirebase + '/condicoes'); //ref()
-
       this.condicoes = this.condicaoCollection.snapshotChanges().map(changes => {
         return changes.map(a => {
           const data = a.payload.doc.data() as CondicaoPagamento;
@@ -39,7 +37,6 @@ export class CondicaoPagamentoProvider {
       });
 
       this.cartaoCollection = this.afs.collection(this.rootPathFirebase + '/cartoes'); //ref()
-
       this.cartoes = this.cartaoCollection.snapshotChanges().map(changes => {
         return changes.map(a => {
           const data = a.payload.doc.data() as CartaoCredito;
@@ -74,7 +71,6 @@ export class CondicaoPagamentoProvider {
   }
 
   atualizar(condicao: CondicaoPagamento) {
-
     this.condicaoDoc = this.afs.doc(this.rootPathFirebase + `/condicoes/${condicao.idFirebase}`);
     return this.condicaoDoc.update(condicao);
   }

@@ -14,16 +14,18 @@ const CONDICAO_PAGAMENTO = 'condicaopagamento/';
 const CARTAO_CREDITO = 'cartaocredito/';
 const CIDADE = 'cidade/';
 
+
 @Injectable()
 export class ApiProvider {
-
+  
+  private isMock:boolean = false;
+  
   constructor(public http: HttpClient) {
   }
 
   public login(email: string, password: string) {
 
-    let isMock = false;
-    if (isMock) {
+    if (this.isMock) {
       return new Promise(resolve => {
         setTimeout(() => {
           resolve({ token: 'asdero567hjaq33029dvnvz900mn2iofiAAA11a', email: email });
@@ -52,6 +54,15 @@ export class ApiProvider {
   }
 
   public autorizar(next_token) {
+    
+    if (this.isMock) {
+      return new Promise(resolve => {
+        setTimeout(() => {
+          resolve({ requestToken: 'asdero567hjaq33029dvnvz900mn2iofiAAA11a' });
+        }, 2000);
+      });
+    }
+
     return new Promise((resolve, reject) => {
       this.http.post(API + AUTH + 'autorizar',
         {
@@ -180,7 +191,6 @@ export class ApiProvider {
             'netone-next-request-token': next_token
           }
         }).subscribe(res => {
-          console.log('resolve cidades promise');
           resolve(res);
         }, err => {
           reject(err.error);

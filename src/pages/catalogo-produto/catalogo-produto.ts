@@ -77,7 +77,6 @@ export class CatalogoProdutoPage {
       .map(prod => {
         let tamanhos = prod.agrupamento.reduce((x, prodReduce) => (prodReduce.tamanho.length === 0 || x.includes(prodReduce.tamanho[0])) ? x : [...x, prodReduce.tamanho[0]], []);
         let cores = prod.agrupamento.reduce((x, prodReduce) => (prodReduce.cor.length === 0 || x.includes(prodReduce.cor[0])) ? x : [...x, prodReduce.cor[0]], []);
-        console.log(cores)
         return {
           ...prod,
           tamanho: tamanhos.sort((a, b) => {
@@ -143,36 +142,37 @@ export class CatalogoProdutoPage {
 </ion-header>
 
 <ion-content style="background: darkmagenta">
-
   <ion-list>
-    <ion-item *ngFor="let item of grade">
-      <h2 style="font-weight: bold; color: black">{{ item.descricao }}</h2>
-      <p style="padding: 3px">Cor: {{ item.cor }}</p>
-      <p style="padding: 3px">Tamanho: {{ item.tamanho }}</p>
-      <p style="padding: 3px">Valor: {{ item.preco | number }}</p>
-      <p>
-        <span style="padding: 3px">Qtde: {{ item.quantidade }}</span>
-        <button ion-button item-end (tap)="tapAddQtde(item)">
-          <ion-icon name="add-circle"></ion-icon>
-        </button>
-        <button ion-button item-end (tap)="tapRemoveQtde(item)">
-          <ion-icon name="remove-circle"></ion-icon>
-        </button>
-      </p>
-    </ion-item>
+      <ion-item style="background: darkmagenta">
+        <h2 style="color: black">{{ produto.mascara }}</h2>
+        <h2 style="font-weight: bold; color: black">{{ produto.descricao }}</h2>
+      </ion-item>
+
+      <ion-item *ngFor="let item of grade">
+        <div style="padding: 5px">Cor: {{ item.cor }}</div>
+        <div style="padding: 5px">Tam: {{ item.tamanho }}</div>
+        <div style="padding: 5px">Valor: {{ item.preco | number }}</div>
+        <div style="padding: 5px">
+          <span>Qtde: {{ item.quantidade }}</span>
+          <span style="padding-left: 15px" item-end (tap)="tapAddQtde(item)">
+            <ion-icon name="add-circle"></ion-icon>
+          </span>
+          <span style="padding-left: 10px" item-end (tap)="tapRemoveQtde(item)">
+            <ion-icon name="remove-circle"></ion-icon>
+          </span>
+        </div>
+      </ion-item>
   </ion-list>
-  </ion-content>
+</ion-content>
 
-  <ion-footer>
-    <ion-toolbar>
-
+<ion-footer>
+  <ion-toolbar>
     <ion-buttons end>
       <button ion-button block (click)="dismiss()">Cancelar</button>
       <button ion-button block (click)="salvarModalAdicionar()">Adicionar</button>
     </ion-buttons>
-
-    </ion-toolbar>
-  </ion-footer>
+  </ion-toolbar>
+</ion-footer>
 `
 })
 export class ModalAdicionarProdutoPage {

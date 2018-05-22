@@ -51,11 +51,11 @@ export class ProdutosProvider {
     })
   }
 
-  adicionar(produto: Produto) {
+  async adicionar(produto: Produto) {
     return this.produtosCollection.add(produto);
   }
 
-  atualizar(produto: Produto) {
+  async atualizar(produto: Produto) {
     if (!produto || !produto.id) {
       console.log('Não é possível atualizar produto sem id');
     }

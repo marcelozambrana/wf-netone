@@ -1,11 +1,13 @@
 import { Component } from '@angular/core';
-import { IonicPage, NavController, NavParams, AlertController, ToastController } from 'ionic-angular';
+import { IonicPage, NavController, NavParams, AlertController, ToastController, LoadingController } from 'ionic-angular';
 import { FormBuilder, Validators } from '@angular/forms';
+import { SelectSearchable } from 'ionic-select-searchable';
 
 import { ClientesProvider } from '../../providers/clientes/clientes';
+import { CIDADES } from '../../providers/cidades/cidades';
+import { ESTADOS } from '../../providers/cidades/estados';
 
 import { Cliente } from '../../models/cliente';
-
 import { ValidarCpf } from '../../pages/novo-cliente/valida-cpf';
 
 @IonicPage()
@@ -15,50 +17,29 @@ import { ValidarCpf } from '../../pages/novo-cliente/valida-cpf';
 })
 export class NovoClientePage {
 
-  isClienteCpfExistente = false;
-
-  passo = "1";
-
-  cidades = [];
-  estados = [];
-  cidadesEstado = [];
-  cliente: any = { endereco: {} } as Cliente;
   titulo: string = "";
+  passo = "1";
+  isClienteCpfExistente: boolean = false;
   isPessoaJuridica: boolean = false;
 
   public clienteForm: any;
+  cliente: any = { endereco: {} } as Cliente;
+  estados = ESTADOS;
+  cidadesEstado = [];
 
   constructor(public navCtrl: NavController,
     public navParams: NavParams,
     public formBuilder: FormBuilder,
     private clientesProvider: ClientesProvider,
+    private loadingCtrl: LoadingController,
     private alertCtrl: AlertController,
     private toastCtrl: ToastController) {
 
     this.titulo = this.navParams.get('titulo');
-    this.cidades = this.navParams.get('cidades');
-    this.estados = this.cidades.reduce((x, cidadeReduce) =>
-      (x.includes(cidadeReduce.estado.sigla) || cidadeReduce.estado.sigla === 'EX')
-        ? x : [...x, cidadeReduce.estado.sigla], [])
-      .sort((a, b) => {
-        return a > b ? 1 : -1;
-      });
-
-    this.isPessoaJuridica = false;
-
-    let idCliente = this.navParams.get('idCliente');
-    if (idCliente) {
-      this.isClienteCpfExistente = true;
-      this.passo = "2";
-      
-      this.clientesProvider.buscarId(idCliente).subscribe(cliente => {
-        this.cliente = cliente;
-        if (cliente) {
-          this.cliente.id = idCliente;
-          this.isPessoaJuridica = this.cliente.cpfCnpj.length === 14;
-          this.onSelectChangeUf();
-        }
-      });
+    let clienteEdit = this.navParams.get('clienteEdit');
+    console.log(clienteEdit);
+    if (clienteEdit) {
+      this.carregarCliente(clienteEdit);
     }
 
     this.clienteForm = formBuilder.group({
@@ -69,53 +50,19 @@ export class NovoClientePage {
       email: ['', Validators.compose([Validators.maxLength(70), Validators.pattern('^[_A-Za-z0-9-\\+]+(\\.[_A-Za-z0-9-]+)*@[A-Za-z0-9-]+(\\.[A-Za-z0-9]+)*(\\.[A-Za-z]{2,})$'), Validators.required])],
       telefone: ['', Validators.required],
       celular: ['', Validators.required],
-      endereco: ['', Validators.compose([Validators.minLength(5), Validators.maxLength(100), Validators.required])],
+      endereco: ['', Validators.compose([Validators.minLength(5), Validators.required])],
       numero: ['', Validators.required],
-      bairro: ['', Validators.compose([Validators.minLength(2), Validators.maxLength(40), Validators.required])],
-      cep: ['', Validators.compose([Validators.minLength(8), Validators.maxLength(12), Validators.required])],
-      cidade: ['', Validators.compose([Validators.minLength(2), Validators.maxLength(40), Validators.required])],
-      uf: ['', Validators.compose([Validators.minLength(1), Validators.maxLength(2), Validators.required])]
+      bairro: ['', Validators.required],
+      cep: ['', Validators.required],
+      cidade: [''],
+      uf: ['', Validators.required]
     })
   }
 
-  alert(title, message) {
-    let al = this.alertCtrl.create({
-      title: title,
-      subTitle: message,
-      buttons: ['Fechar']
-    });
-    al.present();
-  }
-
-  toastAlert(message) {
-    let toast = this.toastCtrl.create({
-      message: message,
-      showCloseButton: true,
-      duration: 3000,
-      closeButtonText: 'Fechar',
-      dismissOnPageChange: true,
-      cssClass: 'toast-error'
-    });
-    toast.present();
-  }
-
-  atualizar(cliente: Cliente) {
-
-    if (!this.validaDadosPreSalvamento(cliente)) {
-      return;
-    }
-
-    this.normalizar(cliente);
-
-    this.clientesProvider.atualizar(cliente)
-      .then((result: any) => {
-        this.alert("Sucesso", "Cliente atualizado com sucesso.");
-        this.navCtrl.pop();
-      })
-      .catch((error) => {
-        console.error("Error update document: ", error);
-        this.toastAlert("Falha ao atualizar cliente." + ' Error: ' + error);
-      });
+  carregarCliente(cli) {
+    this.cliente = cli;
+    this.isClienteCpfExistente = true;
+    this.avancaPasso2();
   }
 
   adicionar(cliente: Cliente) {
@@ -123,7 +70,6 @@ export class NovoClientePage {
     if (!this.validaDadosPreSalvamento(cliente)) {
       return;
     }
-
     this.normalizar(cliente);
 
     this.clientesProvider.adicionar(cliente)
@@ -135,6 +81,24 @@ export class NovoClientePage {
       .catch((error) => {
         console.error("Error adding document: ", error);
         this.toastAlert("Falha ao salvar cliente." + ' Error: ' + error);
+      });
+  }
+
+  atualizar(cliente: Cliente) {
+
+    if (!this.validaDadosPreSalvamento(cliente)) {
+      return;
+    }
+    this.normalizar(cliente);
+
+    this.clientesProvider.atualizar(cliente)
+      .then((result: any) => {
+        this.alert("Sucesso", "Cliente atualizado com sucesso.");
+        this.navCtrl.pop();
+      })
+      .catch((error) => {
+        console.error("Error update document: ", error);
+        this.toastAlert("Falha ao atualizar cliente." + ' Error: ' + error);
       });
   }
 
@@ -184,16 +148,18 @@ export class NovoClientePage {
     this.buscarCliente(cpfCnpj)
       .subscribe(queriedItems => {
         if (queriedItems.length > 0) {
-          this.cliente = queriedItems[0];
-          this.isClienteCpfExistente = true;
-          this.onSelectChangeUf();
+          this.carregarCliente(queriedItems[0]);
           return;
-
         } else {
           this.isClienteCpfExistente = false;
         }
       });
 
+    this.avancaPasso2();
+
+  }
+
+  avancaPasso2() {
     let cpfCnpjTemp = this.cliente.cpfCnpj.replace(/\D/g, "");
     this.isPessoaJuridica = cpfCnpjTemp.length === 14;
     this.passo = "2";
@@ -221,6 +187,7 @@ export class NovoClientePage {
       return false;
     }
 
+    this.onSelectChangeUf(true);
     this.passo = "3";
   }
 
@@ -228,38 +195,38 @@ export class NovoClientePage {
     return this.clientesProvider.buscarCpfCnpj(cpfCnpj);
   }
 
-  buscarClienteId(id) {
-    return this.clientesProvider.buscarId(id);
+  async buscarClienteId(id) {
+    return await this.clientesProvider.buscarId(id);
   }
 
   validaDadosPreSalvamento(cliente: Cliente) {
-    if (!this.clienteForm.controls.endereco.valid) {
+    if (!this.cliente.endereco.endereco) {
       this.toastAlert("Logradouro deve ter no mínimo 5 caracteres");
       return false;
     }
 
-    if (!this.clienteForm.controls.numero.valid) {
+    if (!this.cliente.endereco.numero) {
       this.toastAlert("Número é um campo obrigatório");
       return false;
     }
 
-    if (!this.clienteForm.controls.cep.valid) {
+    if (!this.cliente.endereco.cep) {
       this.toastAlert("CEP não preenchido ou com tamanho inválido");
       return false;
     }
 
-    if (!this.clienteForm.controls.bairro.valid) {
+    if (!this.cliente.endereco.bairro) {
       this.toastAlert("Bairro é um campo obrigatório");
       return false;
     }
 
-    if (!this.clienteForm.controls.cidade.valid) {
-      this.toastAlert("Cidade é um campo obrigatório");
+    if (!this.cliente.endereco.uf) {
+      this.toastAlert("UF é um campo obrigatório");
       return false;
     }
 
-    if (!this.clienteForm.controls.uf.valid) {
-      this.toastAlert("UF é um campo obrigatório");
+    if (!this.cliente.endereco.codigoIbge) {
+      this.toastAlert("Cidade é um campo obrigatório");
       return false;
     }
 
@@ -271,15 +238,62 @@ export class NovoClientePage {
     return true;
   }
 
-  onSelectChangeUf() {
-    this.cidadesEstado = this.cidades
-    .filter( cid => cid.estado.sigla === this.cliente.endereco.uf)
-    .sort((a, b) => {
-      return a.nome > b.nome ? 1 : -1;
+  onSelectChangeUf(carregandoCliente) {
+    let loader = this.loadingCtrl.create({
+      content: 'Buscando cidades...',
+      dismissOnPageChange: true
     });
+
+    if (!carregandoCliente) {
+      this.limparCidade();
+    }
+
+    loader.present();
+
+    let cidades = CIDADES;
+    this.cidadesEstado = cidades
+      .filter(cid => cid.estado.sigla === this.cliente.endereco.uf)
+      .sort((a, b) => {
+        return a.nome > b.nome ? 1 : -1;
+      });
+
+    loader.dismiss();
+  }
+
+  cidadeChange(event: { component: SelectSearchable, value: any }) {
+    console.log('cidade selecionada:', event.value);
+    this.cliente.endereco.codigoIbge = event.value.codigoIbge;
+    this.cliente.endereco.cidade = event.value;
+  }
+
+  limparCidade() {
+    this.cliente.endereco.codigoIbge = null;
+    this.cliente.endereco.cidade = null;
   }
 
   cancelar() {
     this.navCtrl.pop();
   }
+
+  alert(title, message) {
+    let al = this.alertCtrl.create({
+      title: title,
+      subTitle: message,
+      buttons: ['Fechar']
+    });
+    al.present();
+  }
+
+  toastAlert(message) {
+    let toast = this.toastCtrl.create({
+      message: message,
+      showCloseButton: true,
+      duration: 3000,
+      closeButtonText: 'Fechar',
+      dismissOnPageChange: true,
+      cssClass: 'toast-error'
+    });
+    toast.present();
+  }
+
 }

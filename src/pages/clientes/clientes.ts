@@ -1,5 +1,4 @@
 import { Component } from '@angular/core';
-
 import { IonicPage, NavController, NavParams, AlertController } from 'ionic-angular';
 import { Observable } from 'rxjs/Observable';
 
@@ -15,21 +14,61 @@ import { ClientesProvider } from '../../providers/clientes/clientes';
 })
 export class ClientesPage {
 
+  clientes: Observable<Cliente[]>;
   searchTerm: string = '';
 
-  clientesFiltro: Observable<Cliente[]>;
-  clientes: Observable<Cliente[]>;
-
-  cidades = [];
-
-  constructor(public navCtrl: NavController, 
+  constructor(public navCtrl: NavController,
     public navParams: NavParams,
     private alertCtrl: AlertController,
     private clientesProvider: ClientesProvider) {
 
-      this.clientes = this.clientesProvider.todos();
-      this.clientesFiltro = this.clientes;
-      this.cidades = this.navParams.get('cidades');
+    this.clientes = this.clientesProvider.todos();
+  }
+
+  adicionarCliente() {
+    this.navCtrl.push(NovoClientePage, {
+      titulo: 'Novo'
+    });
+  }
+
+  editar(cli: Cliente) {
+    console.log('editando cliente ' + cli.id);
+    let clienteEditar = {...cli};
+    clienteEditar.endereco = {...cli.endereco};
+    
+    if (clienteEditar.id) {
+      this.navCtrl.push(NovoClientePage, {
+        titulo: 'Editar',
+        clienteEdit: clienteEditar
+      });
+    }
+  }
+
+  excluir(cli: Cliente) {
+    console.log('excluir ' + cli.id);
+    if (cli.id) {
+      this.clientesProvider.remover(cli.id)
+        .then((result: any) => {
+          this.alert("Sucesso", "Cliente excluído com sucesso.");
+        })
+        .catch((error) => {
+          console.error("Error delete document: ", error);
+          this.alert("Error", "Falha ao excluir cliente.");
+        });
+    }
+  }
+
+  filtrarClientes() {
+    console.log('filtrando clientes: ' + this.searchTerm);
+
+    if (this.searchTerm.length === 0 || this.searchTerm.length > 3) {
+      this.clientes = this.clientes.map(clientes => {
+        return clientes.filter(cli => {
+          return ((cli.nome.toLowerCase().indexOf(this.searchTerm.toLowerCase()) > -1) ||
+            (cli.cpfCnpj.toLowerCase().indexOf(this.searchTerm.toLowerCase()) > -1));
+        })
+      })
+    }
   }
 
   alert(title, message) {
@@ -41,49 +80,8 @@ export class ClientesPage {
     al.present();
   }
 
-  adicionarCliente() {
-    this.navCtrl.push(NovoClientePage, { 
-      titulo: 'Novo',
-      cidades: this.cidades 
-    });
-  }
-
-  editar(id: string) {
-    if (id) {
-      this.navCtrl.push(NovoClientePage, { 
-        titulo: 'Editar', 
-        idCliente: id,
-        cidades: this.cidades 
-      });
-    }
-  }
-
-  excluir(id: string) {
-    console.log('excluir ' + id);
-    if (id) {
-      this.clientesProvider.remover(id)
-        .then((result: any) => {
-          this.alert("Sucesso", "Cliente excluído com sucesso.");
-        })
-        .catch((error) => {
-          console.error("Error delete document: ", error);
-          this.alert("Error", "Falha ao excluir cliente.");
-        });
-    }
-  }
-
-  filtrarClientes(event) {
-    console.log('filtrando clientes: ' + this.searchTerm);
-    
-    this.clientes = this.clientes
-    .map(clients => {
-      let fl = clients.filter((cli) => {
-        return cli.nome.toLowerCase().indexOf(
-          this.searchTerm.toLowerCase()) > -1;
-      })
-
-      return fl;
-    });
+  ionViewDidLoad() {
+    this.filtrarClientes();
   }
 
 }

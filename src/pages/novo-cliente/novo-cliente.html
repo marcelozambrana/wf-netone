@@ -20,7 +20,6 @@
 
         <button ion-button block *ngIf="!isClienteCpfExistente" (click)="validaCpfEContinua(cliente)">Continuar</button>
       </ion-list>
-
     </div>
 
 
@@ -89,16 +88,25 @@
 
       <ion-item>
         <ion-label floating>UF</ion-label>
-        <ion-select formControlName="uf" [(ngModel)]="cliente.endereco.uf" (ionChange)="onSelectChangeUf()">
-          <ion-option text-uppercase value="{{sigla}}" *ngFor="let sigla of estados">{{sigla}}</ion-option>
+        <ion-select formControlName="uf" [(ngModel)]="cliente.endereco.uf" (ionChange)="onSelectChangeUf(false)">
+          <ion-option text-uppercase value="{{uf.Sigla}}" *ngFor="let uf of estados">{{uf.Sigla}} - {{uf.Nome}}</ion-option>
         </ion-select>
       </ion-item>
 
-      <ion-item>
-          <ion-label floating>Cidade</ion-label>
-        <ion-select text-uppercase formControlName="cidade" [(ngModel)]="cliente.endereco.codigoIbge">
-          <ion-option value="{{cid.codigoIbge}}" *ngFor="let cid of cidadesEstado">{{cid.nome}}</ion-option>
-        </ion-select>
+
+      <ion-item *ngIf="!cliente.endereco.codigoIbge || cliente.endereco.codigoIbge == null">
+        <select-searchable formControlName="cidade" searchPlaceholder="Cidade" [(ngModel)]="cliente.endereco.cidade" [items]="cidadesEstado"
+          itemValueField="codigoIbge" itemTextField="nome" [canSearch]="true" [noItemsFoundText]="'Nenhuma cidade encontrada'" (onChange)="cidadeChange($event)">
+          <ng-template selectSearchableLabelTemplate>
+              Cidade
+          </ng-template>
+        </select-searchable>
+      </ion-item>
+
+      <ion-item *ngIf="cliente.endereco.codigoIbge && cliente.endereco.codigoIbge != null">
+        <ion-input *ngIf="false" type="text" formControlName="cidade" [(ngModel)]="cliente.endereco.cidade.nome"></ion-input>
+        <h2>{{cliente.endereco.cidade.nome}}</h2>
+        <ion-icon name="md-close-circle" (click)="limparCidade()" item-end></ion-icon>
       </ion-item>
 
       <button *ngIf="!isClienteCpfExistente" ion-button block (click)="adicionar(cliente)">Salvar</button>
