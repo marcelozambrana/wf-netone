@@ -1,11 +1,8 @@
 <ion-header>
-
   <ion-navbar>
     <ion-title>Catálogo de Produtos</ion-title>
   </ion-navbar>
-
 </ion-header>
-
 
 <ion-content padding class="catalogo-content">
 
@@ -15,26 +12,24 @@
     <ion-card>
 
       <ion-slides paginationClickable=true loop=false>
-
         <ion-slide *ngFor="let img of prod.urlImgs">
           <img [src]="img" alt="prod.titulo" />
         </ion-slide>
       </ion-slides>
 
       <ion-card-content>
-        <ion-title text-center tex-wrap>{{ prod.descricao }}</ion-title>
-        <ion-title text-center tex-wrap>{{ prod.mascara }}</ion-title>
+        <ion-title text-center tex-wrap>{{ prod.mascara }} - {{ prod.descricao }}</ion-title>
         <p text-center>{{ prod.grupo }}</p>
         <p text-center>{{ prod.subgrupo }}</p>
-        <br />
+        <br/>
         <p text-center>Tamanho: {{ prod.tamanho.toString() }}</p>
         <p text-center>Cor: {{ prod.cor.toString() }}</p>
         <p text-center *ngIf="prod.comprimento">Comprimento: {{ prod.comprimento }}</p>
         <p text-center *ngIf="prod.largura">Largura: {{ prod.largura }}</p>
         <p text-center *ngIf="prod.altura">Altura: {{ prod.altura }}</p>
-        <br />
+        <br/>
         <h2 text-center>R$ {{prod.preco}}</h2>
-        <br />
+        <br/>
         <p>
           <button *ngIf="isFromPedido" ion-button secondary color="dark" block (click)="adicionarCarrinho(prod)" [disabled]="!prod.preco">Comprar</button>
         </p>
@@ -42,11 +37,8 @@
     </ion-card>
   </div>
 
-
   <ion-infinite-scroll (ionInfinite)="doInfinite($event)" *ngIf="page < totalPage">
     <ion-infinite-scroll-content loadingSpinner="bubbles" loadingText="Carregando mais produtos..."></ion-infinite-scroll-content>
   </ion-infinite-scroll>
 
 </ion-content>
-
->

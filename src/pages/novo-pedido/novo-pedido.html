@@ -65,30 +65,43 @@
     </div>
 
     <div *ngIf="passo == 'produtos'">
-      <ion-list>
-
-        <h6>Produtos</h6>
+      <ion-list inset>
 
         <a *ngIf="pedido.itens.length == 0" (click)="adicionarItemPedido()">
           <ion-icon name="pricetags"></ion-icon>
           <span>Começar a adicionar itens</span>
         </a>
 
-        <ion-item *ngFor="let item of pedido.itens">
-          <h2 style="font-weight: bold; color: black">{{ item.nome }}</h2>
-          <p>Tam: {{ item.tamanho }}</p>
-          <p>Cor: {{ item.cor }} </p>
-          <p>Qtde: {{ item.quantidade}}</p>
-          <p>Valor: {{ item.valor | number }}</p>
-          <button clear="" ion-button item-end *ngIf="!pedido.enviado" (tap)="tapAddQuantidade($event, item)">
-            <ion-icon name="add-circle"></ion-icon>
-          </button>
-          <button clear="" ion-button item-end *ngIf="!pedido.enviado" (tap)="tapRemoveQuantidade($event, item)">
-            <ion-icon name="remove-circle"></ion-icon>
-          </button>
-          <button clear="" ion-button item-end *ngIf="!pedido.enviado" color="danger" (click)="excluirItem(item)">
-            <ion-icon name="trash"></ion-icon>
-          </button>
+        <ion-item class="item-pedido" *ngFor="let item of pedido.itens">
+          <ion-grid>
+            <ion-row style="font-weight: bold; color: black">
+              <ion-col col-6>{{ item.mascara }}</ion-col>
+              <ion-col col-5 offset-1>{{ item.nome }}</ion-col>
+            </ion-row>
+            <ion-row>
+              <ion-col col-2 style="overflow: hidden">Tam: {{ item.tamanho }}</ion-col>
+              <ion-col col-4 style="overflow: hidden">Cor: {{ item.cor }}</ion-col>
+              <ion-col col-3 style="overflow: hidden">Unit: {{ item.valor | number }}</ion-col>
+              <ion-col col-3 style="overflow: hidden">{{ item.quantidade }} item(ns)</ion-col>
+            </ion-row>
+            <ion-row>
+              <ion-col col-3 offset-1>
+                <span style="font-size: xx-large" *ngIf="!pedido.enviado" (tap)="tapAddQuantidade($event, item)">
+                  <ion-icon name="add-circle"></ion-icon>
+                </span>
+              </ion-col>
+              <ion-col col-3 offset-1>
+                <span style="font-size: xx-large" *ngIf="!pedido.enviado" (tap)="tapRemoveQuantidade($event, item)">
+                  <ion-icon name="remove-circle"></ion-icon>
+                </span>
+              </ion-col>
+              <ion-col col-3 offset-1>
+                <span style="font-size: xx-large" *ngIf="!pedido.enviado" color="danger" (click)="excluirItem(item)">
+                  <ion-icon name="trash"></ion-icon>
+                </span>
+              </ion-col>
+            </ion-row>
+          </ion-grid>
         </ion-item>
       </ion-list>
     </div>
@@ -150,16 +163,16 @@
         </ion-item>
 
         <ion-item *ngIf="isFormaCobrancaCartao && pedido.cartaoId">
-            <ion-label floating>Plano Operadora</ion-label>
-            <ion-select [(ngModel)]="pedido.planoOperadoraId" [disabled]="pedido.enviado" (ionChange)="changePlano()">
-              <ion-option value="{{plano.id}}" *ngFor="let plano of planosCartao">{{plano.descricao}}</ion-option>
-            </ion-select>
-          </ion-item>
+          <ion-label floating>Plano Operadora</ion-label>
+          <ion-select [(ngModel)]="pedido.planoOperadoraId" [disabled]="pedido.enviado" (ionChange)="changePlano()">
+            <ion-option value="{{plano.id}}" *ngFor="let plano of planosCartao">{{plano.descricao}}</ion-option>
+          </ion-select>
+        </ion-item>
 
         <ion-item>
           <ion-label floating>(R$) Desconto total</ion-label>
-          <ion-input type="text" [disabled]="(!pedido.condicaoPagamentoId && !pedido.planoOperadoraId) || !pedido.formaCobrancaId || pedido.enviado" [(ngModel)]="pedido.descontoTotal"
-            [brmasker]="{money: true}" (ionBlur)="calcDesconto()"></ion-input>
+          <ion-input type="text" [disabled]="(!pedido.condicaoPagamentoId && !pedido.planoOperadoraId) || !pedido.formaCobrancaId || pedido.enviado"
+            [(ngModel)]="pedido.descontoTotal" [brmasker]="{money: true}" (ionBlur)="calcDesconto()"  clearInput="true" clearOnEdit="true"></ion-input>
         </ion-item>
 
       </ion-list>
@@ -176,8 +189,6 @@
       <ion-item>
         <h2>Valor Total: R$ {{pedido.total | number}}</h2>
         <p>Qtde: {{qtdTotal | number}}</p>
-        <p>*Desconto: R$ {{pedido.descontoTotal}}</p>
-        <p>*Taxa cartão: R$ {{pedido.percentualVariacao | number}}</p>
         <p *ngIf="pedido.enviado">Desconto: {{pedido.descontoTotal | number}}</p>
       </ion-item>
     </ion-list>

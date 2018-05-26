@@ -69,7 +69,7 @@ export class HomePage {
       this.rootPathFirebase = values[0];
       this.netoneAuthToken = values[1];
       this.netoneNextToken = values[2];
-      this.sequenceApiProduto = null;
+      this.sequenceApiProduto = values[3];
       this.sequenceApiCliente = values[4];
       this.sequenceApiCondicoes = values[5];
       this.sequenceApiFormas = values[6];
@@ -90,7 +90,6 @@ export class HomePage {
       this.buscarCondicoesEPlanosOperadora();
       this.buscarFormas();
     });
-
   }
 
   async buscarProdutos() {
@@ -131,7 +130,7 @@ export class HomePage {
     this.condicoesPagamento = await this.condicoesProvider.todos();
     this.cartoes = await this.condicoesProvider.todosCartoes();
 
-    this.condicoesPagamento = !this.condicoesPagamento ? [] : this.condicoesPagamento;
+    this.condicoesPagamento = this.condicoesPagamento ? this.condicoesPagamento: [];
     this.cartoes = !this.cartoes ? [] : this.cartoes;
 
     console.log('condições pagamento:');
@@ -155,17 +154,8 @@ export class HomePage {
   }
 
   async catalogoPage() {
-    if (this.produtos.length === 0) {
-      let loader = this.loadingCtrl.create({
-        content: 'Atualizando produtos...',
-        dismissOnPageChange: true
-      });
-      loader.present();
-
-      await this.buscarProdutos();
-
-      loader.dismiss();
-    }
+    
+    this.atualizaProdutos();
 
     this.navCtrl.push(CatalogoProdutoPage, {
       produtos: this.produtos
@@ -173,19 +163,8 @@ export class HomePage {
   }
 
   async novoPedidoPage() {
-    if (this.produtos.length === 0) {
-      let loader = this.loadingCtrl.create({
-        content: 'Atualizando produtos...',
-        dismissOnPageChange: true
-      });
-      loader.present();
-  
-      await this.buscarProdutos();
-
-      loader.dismiss();
-
-
-    }
+    
+    this.atualizaProdutos();
 
     this.navCtrl.push(NovoPedidoPage,
       {
@@ -196,6 +175,20 @@ export class HomePage {
       });
   }
 
+  async atualizaProdutos() {
+    if (this.produtos.length === 0) {
+      let loader = this.loadingCtrl.create({
+        content: 'Atualizando produtos...',
+        dismissOnPageChange: true
+      });
+      loader.present();
+
+      await this.buscarProdutos();
+
+      loader.dismiss();
+    }    
+  }
+
   pedidosPage() {
     this.navCtrl.push(ListagemPedidoPage,
       {
@@ -204,9 +197,6 @@ export class HomePage {
         formasCobranca: this.formasCobranca,
         cartoes: this.cartoes
       });
-  }
-
-  relatorios() {
   }
 
   async logout() {
@@ -409,7 +399,7 @@ export class HomePage {
   }
 
   async processaProdutosAPI(result) {
-    
+
     if (this.sequenceApiProduto != null && this.sequenceApiProduto >= result[0].sequence) {
       console.log('sequence atual = ' + this.sequenceApiProduto + ', sequence retornada = ' + result[0].sequence);
       console.log('Nenhuma atualização de produtos disponível');
@@ -435,12 +425,12 @@ export class HomePage {
       }
     })
 
-    let produtosTemp:any = await this.produtosProvider.todos();
+    let produtosTemp: any = await this.produtosProvider.todos();
 
     produtosApiMap.forEach(async function (item) {
-      
+
       let produtoDadoId = null;
-      
+
       if (produtosTemp && produtosTemp != null) {
         produtosTemp.forEach(p => {
           if (p.idReduzido == item.idReduzido) {
@@ -458,11 +448,11 @@ export class HomePage {
   }
 
   async updateProduto(prodId, prod) {
-    
+
     prod.grupo = !prod.grupo ? '' : prod.grupo;
     prod.subgrupo = !prod.subgrupo ? '' : prod.subgrupo;
     prod.modelo = !prod.modelo ? '' : prod.modelo;
-    
+
     if (prodId != null) {
       let prodUpdate = { 'id': prodId, ...prod } as Produto;
       await this.produtosProvider.atualizar(prodUpdate);

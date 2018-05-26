@@ -6,7 +6,6 @@ import { NovoClientePage } from '../novo-cliente/novo-cliente';
 import { Cliente } from '../../models/cliente';
 import { ClientesProvider } from '../../providers/clientes/clientes';
 
-
 @IonicPage()
 @Component({
   selector: 'page-clientes',

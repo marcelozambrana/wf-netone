@@ -1,11 +1,5 @@
 page-novo-pedido {
 
-    .list  {
-        .list-md{
-            margin: 0;
-        }
-    }
-
     .pedido-content {
         background: darkmagenta;
 
@@ -16,12 +10,21 @@ page-novo-pedido {
         .form {
             ion-item {
                 border-radius: 30px !important;
-                padding-left: 30px !important;
+                padding-left: 30px;
                 font-size: 0.9em;
                 margin-bottom: 10px;
                 border: 1px solid #ffffff;
                 border-bottom: 0px !important;
                 box-shadow: none !important;
+            }
+        }
+
+        .item-pedido {
+            padding-left: 5px !important;
+
+            ion-label {
+                margin-top: 0px !important;
+                margin-bottom: 0px !important;
             }
         }
 

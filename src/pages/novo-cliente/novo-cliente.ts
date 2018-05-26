@@ -4,11 +4,12 @@ import { FormBuilder, Validators } from '@angular/forms';
 import { SelectSearchable } from 'ionic-select-searchable';
 
 import { ClientesProvider } from '../../providers/clientes/clientes';
+import { ViacepProvider } from '../../providers/viacep/viacep';
+import { ValidarCpf } from '../../pages/novo-cliente/valida-cpf';
 import { CIDADES } from '../../providers/cidades/cidades';
 import { ESTADOS } from '../../providers/cidades/estados';
 
 import { Cliente } from '../../models/cliente';
-import { ValidarCpf } from '../../pages/novo-cliente/valida-cpf';
 
 @IonicPage()
 @Component({
@@ -31,6 +32,7 @@ export class NovoClientePage {
     public navParams: NavParams,
     public formBuilder: FormBuilder,
     private clientesProvider: ClientesProvider,
+    private viacepProvider: ViacepProvider,
     private loadingCtrl: LoadingController,
     private alertCtrl: AlertController,
     private toastCtrl: ToastController) {
@@ -238,7 +240,7 @@ export class NovoClientePage {
     return true;
   }
 
-  onSelectChangeUf(carregandoCliente) {
+  async onSelectChangeUf(carregandoCliente) {
     let loader = this.loadingCtrl.create({
       content: 'Buscando cidades...',
       dismissOnPageChange: true
@@ -294,6 +296,34 @@ export class NovoClientePage {
       cssClass: 'toast-error'
     });
     toast.present();
+  }
+
+  getEndereco() {
+    let self = this;
+
+    if (!this.cliente.endereco.cep || this.cliente.endereco.cep.length < 9) {
+      return;
+    } 
+
+    this.viacepProvider.callService(this.cliente.endereco.cep)
+      .subscribe(async function (data) {
+        console.log(data);
+        if (data && data.erro) {
+          self.cliente.endereco.endereco = '';
+          self.cliente.endereco.bairro = '';
+          self.cliente.endereco.uf = null;
+          await self.onSelectChangeUf(false);
+        } else {
+          self.cliente.endereco.endereco = data.logradouro;
+          self.cliente.endereco.bairro = data.bairro;
+          self.cliente.endereco.uf = data.uf;
+          await self.onSelectChangeUf(true);
+          self.cliente.endereco.codigoIbge = data.ibge;
+          self.cliente.endereco.cidade = {};
+          self.cliente.endereco.cidade.codigoIbge = data.ibge;
+          self.cliente.endereco.cidade.nome = data.localidade;
+        }
+      });
   }
 
 }

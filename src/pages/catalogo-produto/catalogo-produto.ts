@@ -12,12 +12,11 @@ export class CatalogoProdutoPage {
   produtos = [];
 
   searchTerm: string = '';
+  isFromPedido: boolean = false;
 
-  page = 0;
-  totalPage = 0;
-  quantidadeFetch = 5;
-
-  isFromPedido = false;
+  page: number = 0;
+  totalPage: number = 0;
+  quantidadeFetch: number = 7;
 
   constructor(public navCtrl: NavController,
     public navParams: NavParams,
@@ -29,15 +28,6 @@ export class CatalogoProdutoPage {
     this.produtos = this.navParams.get('produtos') || [];
     this.totalPage = (this.produtos.length / this.quantidadeFetch) < 1 ? 1 : (this.produtos.length / this.quantidadeFetch);
     this.buscaMaisProdutos(this.page);
-  }
-
-  alert(title, message) {
-    let al = this.alertCtrl.create({
-      title: title,
-      subTitle: message,
-      buttons: ['Fechar']
-    });
-    al.present();
   }
 
   filtrarProdutos() {
@@ -55,8 +45,7 @@ export class CatalogoProdutoPage {
     }
 
     this.items = this.produtos.filter((item) => {
-      return item.descricao.toLowerCase().indexOf(
-        this.searchTerm.toLowerCase()) > -1;
+      item.descricao.toLowerCase().contains(this.searchTerm.toLowerCase());
     })
   }
 
@@ -64,8 +53,9 @@ export class CatalogoProdutoPage {
     console.log('page: ' + numeroPagina + ', this.produtos.length: ' + this.produtos.length + ', quantidadeFetch: ' + this.quantidadeFetch)
     console.log('start index to fetch: ' + numeroPagina * this.quantidadeFetch)
 
-    if (numeroPagina > this.totalPage)
+    if (numeroPagina > this.totalPage) {
       return;
+    }
 
     if (this.produtos.length > ((this.totalPage * this.quantidadeFetch) + this.quantidadeFetch)) {
       return;
@@ -80,17 +70,16 @@ export class CatalogoProdutoPage {
         return {
           ...prod,
           tamanho: tamanhos.sort((a, b) => {
-              return a > b ? -1 : 1;
-            }),
+            return a > b ? -1 : 1;
+          }),
           cor: cores.sort((a, b) => {
-              return a > b ? -1 : 1;
-            })
+            return a > b ? -1 : 1;
+          })
         }
       });
 
     console.log(resultArray);
     this.items.push(...resultArray);
-
   }
 
   doInfinite(infiniteScroll) {
@@ -120,7 +109,15 @@ export class CatalogoProdutoPage {
       this.ev.publish('adicionarProdutoCarrinho', produto);
       this.alert("Sucesso", "Produto adicionado ao pedido");
     }
+  }
 
+  alert(title, message) {
+    let al = this.alertCtrl.create({
+      title: title,
+      subTitle: message,
+      buttons: ['Fechar']
+    });
+    al.present();
   }
 }
 
@@ -149,15 +146,17 @@ export class CatalogoProdutoPage {
       </ion-item>
 
       <ion-item *ngFor="let item of grade">
-        <div style="padding: 5px">Cor: {{ item.cor }}</div>
-        <div style="padding: 5px">Tam: {{ item.tamanho }}</div>
-        <div style="padding: 5px">Valor: {{ item.preco | number }}</div>
         <div style="padding: 5px">
+          <span style="padding-right: 25px">Cor: {{ item.cor }}</span>
+          <span style="padding-right: 25px">Tam: {{ item.tamanho }}</span> 
+          <span>Valor Unit: {{ item.preco | number }}</span>
+        </div>
+        <div style="padding: 5px; display: flex; align-items: center;">
           <span>Qtde: {{ item.quantidade }}</span>
-          <span style="padding-left: 15px" item-end (tap)="tapAddQtde(item)">
+          <span style="padding-left: 25px; font-size: xx-large" (tap)="tapAddQtde(item)">
             <ion-icon name="add-circle"></ion-icon>
           </span>
-          <span style="padding-left: 10px" item-end (tap)="tapRemoveQtde(item)">
+          <span style="padding-left: 25px; font-size: xx-large" (tap)="tapRemoveQtde(item)">
             <ion-icon name="remove-circle"></ion-icon>
           </span>
         </div>
@@ -176,6 +175,7 @@ export class CatalogoProdutoPage {
 `
 })
 export class ModalAdicionarProdutoPage {
+
   produto;
   grade = [];
 
@@ -184,14 +184,17 @@ export class ModalAdicionarProdutoPage {
     public params: NavParams,
     public viewCtrl: ViewController,
     private alertCtrl: AlertController,
-    private ev: Events
-  ) {
+    private ev: Events) {
+
     this.produto = this.params.get('produtoAdicionar');
     console.log(this.produto);
-    this.grade = this.produto.agrupamento;
+    let gradeFilter = this.produto.agrupamento.filter(p => {
+      return (p.preco && p.preco != null)
+    });
 
-    this.grade = this.produto.agrupamento.map(p => {
+    this.grade = gradeFilter.map(p => {
       return {
+        mascara: p.mascara,
         idReduzido: p.idReduzido,
         descricao: p.descricao,
         preco: p.preco,
@@ -218,15 +221,12 @@ export class ModalAdicionarProdutoPage {
 
   salvarModalAdicionar() {
     console.log(this.grade)
-    let produtosAdicionados = this.grade.filter(p => {
-      return p.quantidade > 0
-    })
+    let produtosAdicionados = this.grade.filter(p =>  p.quantidade > 0);
 
     produtosAdicionados.forEach(prodAdd => {
       this.ev.publish('adicionarProdutoCarrinho', prodAdd);
     })
 
-    console.log(produtosAdicionados);
     this.viewCtrl.dismiss();
     this.alert("Sucesso", "Produto adicionado ao pedido");
   }

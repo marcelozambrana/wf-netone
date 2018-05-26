@@ -8,48 +8,49 @@
 
 
 <ion-content class="content">
-    <div padding-vertical>
-      <ion-segment [(ngModel)]="status" color="light">
-        <ion-segment-button value="done" (click)="filter('done')">
-          Realizados
-        </ion-segment-button>
-        <ion-segment-button value="sent" (click)="filter('sent')">
-          Enviados
-        </ion-segment-button>
-      </ion-segment>
-    </div>
-    
-    <div [ngSwitch]="status">
-      
-      <div >        
-        <ion-card *ngFor="let item of items | async">            
-          <ion-item>
-            <ion-icon name="md-person" item-left large ></ion-icon>
-            <h2>{{item.cliente.nome}}</h2>
-            <p>{{item.cliente.cpfCnpj}}</p>
-            
-            <button ion-button icon-left clear item-end *ngIf="!item.enviado" (click)="enviar(item)">
+  <div padding-vertical>
+    <ion-segment [(ngModel)]="status" color="light">
+      <ion-segment-button value="done" (click)="filter('done')">
+        Realizados
+      </ion-segment-button>
+      <ion-segment-button value="sent" (click)="filter('sent')">
+        Enviados
+      </ion-segment-button>
+    </ion-segment>
+  </div>
+
+  <div [ngSwitch]="status">
+
+    <div>
+      <ion-card *ngFor="let item of items | async">
+        <ion-grid>
+          <ion-row>
+            <ion-col col-4>0000010</ion-col>
+            <ion-col col-8>{{item.cliente.nome}}</ion-col>
+          </ion-row>
+          <ion-row>
+            <ion-col col-4>{{item.itens.length}} item(ns)</ion-col>
+            <ion-col col-8>R$ {{item.total.toFixed(2) }}</ion-col>
+            <!--<ion-col col-6>Emissão: {{item.emissao | date: 'dd/MM/yy'}}</ion-col>
+            <ion-col col-6>Entrega: {{item.previsaoEntrega | date: 'dd/MM/yy' }}</ion-col>-->
+          </ion-row>
+          <ion-row>
+            <ion-col col-6>
+              <button ion-button icon-left clear (click)="visualizar(item)">
+                <ion-icon name="ios-redo"></ion-icon>
+                {{ item.enviado ? 'VIZUALIZAR' : 'EDITAR' }}
+              </button>
+            </ion-col>
+            <ion-col col-6>
+              <button ion-button icon-left clear *ngIf="!item.enviado" (click)="enviar(item)">
                 <ion-icon name="send"></ion-icon>
                 ENVIAR
-              </button>                        
-          </ion-item>
-        
-          <ion-item>
-              <p>Realizado em: {{item.emissao  | date: 'dd/MM/yyyy HH:mm'}}</p>
-              <p>Previsão entrega: {{item.previsaoEntrega  | date: 'dd/MM/yyyy' }}</p>
-          </ion-item>
-
-          <ion-item> 
-            <span item-left>{{item.itens.length}} item(ns)</span>
-            <span item-left>(R$ {{item.total | number}})</span>
-            <button ion-button icon-left clear item-end (click)="visualizar(item)">
-              <ion-icon name="ios-redo"></ion-icon>
-              Visualizar
-            </button>
-            
-          </ion-item>
-        </ion-card>                    
-      </div>  
+              </button>
+            </ion-col>
+          </ion-row>
+        </ion-grid>
+      </ion-card>
     </div>
+  </div>
 
 </ion-content>

@@ -80,6 +80,7 @@ export class NovoPedidoPage {
     this.ev.subscribe('adicionarProdutoCarrinho', produto => {
       console.log('adicionou ao carrinho idReduzido ' + produto.idReduzido);
       let novoItem = {
+        'mascara': produto.mascara,
         'idReduzido': produto.idReduzido,
         'nome': produto.descricao,
         'quantidade': produto.quantidade ? produto.quantidade : 1,
@@ -144,19 +145,20 @@ export class NovoPedidoPage {
       return false;
     }
 
-    if (ped.total <= 0) {
-      this.toastAlert("Pedido não pode ter valor total menor ou igual a zero");
-      return false;
-    }
-
     if (!ped.previsaoEntrega) {
       console.log(ped.previsaoEntrega)
       this.toastAlert("Data previsão entrega não informada");
       return false;
     }
 
-    await this.calcDesconto();
-    return true;
+    let descontoValido = await this.calcDesconto();
+
+    if (ped.total <= 0) {
+      this.toastAlert("Pedido não pode ter valor total menor ou igual a zero");
+      return false;
+    }
+
+    return descontoValido;
   }
 
   async salvar() {
@@ -366,7 +368,7 @@ export class NovoPedidoPage {
         }
       }, null);
       console.log(condicao)
-      if (condicao.percentualDescontoMaximo && condicao.percentualDescontoMaximo > 0) {
+      if (condicao != null && condicao.percentualDescontoMaximo && condicao.percentualDescontoMaximo > 0) {
         descontoMaximo = totalItens * (condicao.percentualDescontoMaximo / 100);
         console.log('desconto máximo: ' + descontoMaximo);
         descontoMaximo = descontoMaximo.toFixed(2);
@@ -405,7 +407,7 @@ export class NovoPedidoPage {
     let totalVariacao = total + (total * (percentualVariacao / 100));
     if (total > 0) {
       this.pedido.percentualVariacao = (total * (percentualVariacao / 100));
-      this.pedido.total = percentualVariacao > 0 ? totalVariacao.toFixed(3) : total.toFixed(3);
+      this.pedido.total = percentualVariacao > 0 ? totalVariacao : total;
     } else {
       this.pedido.descontoTotal = '0,00';
       this.toastAlert("Valor de desconto inválido");

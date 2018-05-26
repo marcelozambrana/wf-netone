@@ -66,6 +66,12 @@
       <br/>
       <h6>Dados de endereco</h6>
       <ion-item>
+        <ion-label floating>CEP</ion-label>
+        <ion-input type="text" [brmasker]="{mask:'00000-000', len:9}" formControlName="cep" [(ngModel)]="cliente.endereco.cep"
+          (input)="getEndereco()"></ion-input>
+      </ion-item>
+
+      <ion-item>
         <ion-label floating>Logradouro</ion-label>
         <ion-input text-uppercase type="text" maxlengthmax="100" formControlName="endereco" [(ngModel)]="cliente.endereco.endereco"></ion-input>
       </ion-item>
@@ -75,11 +81,6 @@
         <ion-input type="number" pattern="\\d*" formControlName="numero" [(ngModel)]="cliente.endereco.numero"></ion-input>
       </ion-item>
 
-
-      <ion-item>
-        <ion-label floating>CEP</ion-label>
-        <ion-input type="text" [brmasker]="{mask:'00.000-000', len:10}" formControlName="cep" [(ngModel)]="cliente.endereco.cep"></ion-input>
-      </ion-item>
 
       <ion-item>
         <ion-label floating>Bairro</ion-label>
@@ -96,9 +97,10 @@
 
       <ion-item *ngIf="!cliente.endereco.codigoIbge || cliente.endereco.codigoIbge == null">
         <select-searchable formControlName="cidade" searchPlaceholder="Cidade" [(ngModel)]="cliente.endereco.cidade" [items]="cidadesEstado"
-          itemValueField="codigoIbge" itemTextField="nome" [canSearch]="true" [noItemsFoundText]="'Nenhuma cidade encontrada'" (onChange)="cidadeChange($event)">
+          itemValueField="codigoIbge" itemTextField="nome" [canSearch]="true" [noItemsFoundText]="'Nenhuma cidade encontrada'"
+          (onChange)="cidadeChange($event)">
           <ng-template selectSearchableLabelTemplate>
-              Cidade
+            Cidade
           </ng-template>
         </select-searchable>
       </ion-item>
