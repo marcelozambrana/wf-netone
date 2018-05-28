@@ -1,7 +1,7 @@
 import { Observable } from 'rxjs/Observable';
 import { Component } from '@angular/core';
 
-import { IonicPage, NavController, NavParams } from 'ionic-angular';
+import { IonicPage, NavController, NavParams, ToastController } from 'ionic-angular';
 
 import { File } from '@ionic-native/file';
 
@@ -35,6 +35,7 @@ export class ListagemPedidoPage {
   public cartoes: CartaoCredito[];
 
   constructor(public navCtrl: NavController,
+    private toastCtrl: ToastController,
     public navParams: NavParams,
     public file: File,
     public apiProvider: ApiProvider,
@@ -168,26 +169,42 @@ export class ListagemPedidoPage {
       defaultStyle: {
       }
     };
-    pdfmake.createPdf(docDefinition).open();
-  }
 
-  async enviar(pedido) {
-    console.log(pedido);
-
-    pedido.descontoTotal = pedido.descontoTotal.replace(',', '.');
-    /*pedido.cliente.celular = pedido.cliente.celular.replace('()-', '');
-    pedido.cliente.telefone = pedido.cliente.telefone.replace('()-', '');
-
-    await this.apiProvider.enviarPedido('', '', pedido);*/
-
-    pedido.enviado = true;
-    this.pedidosProvider.atualizar(pedido).then((result: any) => {
-      console.log("Pedido enviado com sucesso!");
-    }).catch((error) => {
-      pedido.enviado = false;
-      pedido.descontoTotal = pedido.descontoTotal.replace('.', ',');
-      console.log("Falha ao enviar pedido!");
+    let self = this;
+    pdfmake.createPdf(docDefinition).getBuffer(function (buffer) {
+      let utf8 = new Uint8Array(buffer);
+      let binaryArray = utf8.buffer;
+      self.saveToDevice(binaryArray, "pedido-" + pedido.numero + ".pdf")
     });
-  }
+}
+
+saveToDevice(data: any, savefile: any) {
+  let self = this;
+  self.file.writeFile(self.file.externalDataDirectory, savefile, data, { replace: false });
+  const toast = self.toastCtrl.create({
+    message: 'Salvando pdf...',
+    duration: 3000
+  });
+  toast.present();
+}
+
+async enviar(pedido) {
+  console.log(pedido);
+
+  pedido.descontoTotal = pedido.descontoTotal.replace(',', '.');
+  /*pedido.cliente.celular = pedido.cliente.celular.replace('()-', '');
+  pedido.cliente.telefone = pedido.cliente.telefone.replace('()-', '');
+
+  await this.apiProvider.enviarPedido('', '', pedido);*/
+
+  pedido.enviado = true;
+  this.pedidosProvider.atualizar(pedido).then((result: any) => {
+    console.log("Pedido enviado com sucesso!");
+  }).catch((error) => {
+    pedido.enviado = false;
+    pedido.descontoTotal = pedido.descontoTotal.replace('.', ',');
+    console.log("Falha ao enviar pedido!");
+  });
+}
 
 }
