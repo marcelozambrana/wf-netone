@@ -1,9 +1,11 @@
+import { Platform } from 'ionic-angular';
 import { Observable } from 'rxjs/Observable';
 import { Component } from '@angular/core';
 
-import { IonicPage, NavController, NavParams, ToastController } from 'ionic-angular';
+import { IonicPage, NavController, NavParams, ToastController, AlertController } from 'ionic-angular';
 
 import { File } from '@ionic-native/file';
+import { FileOpener } from '@ionic-native/file-opener';
 
 import * as pdfmake from 'pdfmake/build/pdfmake';
 import * as pdfFonts from 'pdfmake/build/vfs_fonts';
@@ -34,12 +36,15 @@ export class ListagemPedidoPage {
   public formasCobrancaSelect: FormaCobranca[];
   public cartoes: CartaoCredito[];
 
-  constructor(public navCtrl: NavController,
-    private toastCtrl: ToastController,
+  constructor(public platform: Platform,
+    public navCtrl: NavController,
     public navParams: NavParams,
-    public file: File,
-    public apiProvider: ApiProvider,
-    public pedidosProvider: PedidosProvider) {
+    private toastCtrl: ToastController,
+    private alertCtrl: AlertController,
+    private file: File,
+    private fileOpener: FileOpener,
+    private apiProvider: ApiProvider,
+    private pedidosProvider: PedidosProvider) {
 
     this.produtosSelect = this.navParams.get('produtos') || [];
     this.condicoesPagamentoSelect = this.navParams.get('condicoes') || [];
@@ -170,41 +175,76 @@ export class ListagemPedidoPage {
       }
     };
 
-    let self = this;
-    pdfmake.createPdf(docDefinition).getBuffer(function (buffer) {
-      let utf8 = new Uint8Array(buffer);
-      let binaryArray = utf8.buffer;
-      self.saveToDevice(binaryArray, "pedido-" + pedido.numero + ".pdf")
+    let fileName = "teste1.pdf";
+
+    if (this.platform.is('cordova')) {
+      // FOR MOBILE DEVICES
+      pdfmake.createPdf(docDefinition).getBuffer((buffer) => {
+        var utf8 = new Uint8Array(buffer); // Convert to UTF-8...
+        let binaryArray = utf8.buffer; // Convert to Binary...
+
+        let dirPath = "";
+        if (this.platform.is('android')) {
+          dirPath = this.file.externalRootDirectory;
+        } else if (this.platform.is('ios')) {
+          dirPath = this.file.documentsDirectory;
+        }
+
+        let dirName = 'DailySheet';
+
+        this.file.createDir(dirPath, dirName, true).then((dirEntry) => {
+          let saveDir = dirPath + '/' + dirName + '/';
+          this.file.createFile(saveDir, fileName, true).then((fileEntry) => {
+            fileEntry.createWriter((fileWriter) => {
+              fileWriter.onwriteend = () => {
+                this.showAlert('Report downloaded', saveDir + fileName);
+                this.fileOpener.open(saveDir + fileName, 'application/pdf')
+                  .then(() => console.log('File is opened'))
+                  .catch(e => console.log('Error openening file', e));
+              };
+              fileWriter.onerror = (e) => {
+                this.showAlert('Cannot write report', e.toString());
+              };
+              fileWriter.write(binaryArray);
+            });
+          }).catch((error) => { this.showAlert('Cannot create file', error); });
+        }).catch((error) => { this.showAlert('Cannot create folder', error); });
+      }).catch((error) => { this.showAlert('Error while creating pdf', error); });
+    }
+    else {
+      //FOR BROWSERS
+      pdfmake.createPdf(docDefinition).download(fileName);
+    }
+
+  }
+
+  async enviar(pedido) {
+    console.log(pedido);
+
+    pedido.descontoTotal = pedido.descontoTotal.replace(',', '.');
+    pedido.cliente.celular = pedido.cliente.celular.replace('()-', '');
+    pedido.cliente.telefone = pedido.cliente.telefone.replace('()-', '');
+    pedido.cliente.endereco.cep = pedido.cliente.endereco.cep.replace('()-', '');
+    await this.apiProvider.enviarPedido('', '', pedido);
+
+    pedido.enviado = true;
+    this.pedidosProvider.atualizar(pedido).then((result: any) => {
+      console.log("Pedido enviado com sucesso!");
+    }).catch((error) => {
+      pedido.enviado = false;
+      pedido.descontoTotal = pedido.descontoTotal.replace('.', ',');
+      console.log("Falha ao enviar pedido!");
     });
-}
+  }
 
-saveToDevice(data: any, savefile: any) {
-  let self = this;
-  self.file.writeFile(self.file.externalDataDirectory, savefile, data, { replace: false });
-  const toast = self.toastCtrl.create({
-    message: 'Salvando pdf...',
-    duration: 3000
-  });
-  toast.present();
-}
-
-async enviar(pedido) {
-  console.log(pedido);
-
-  pedido.descontoTotal = pedido.descontoTotal.replace(',', '.');
-  /*pedido.cliente.celular = pedido.cliente.celular.replace('()-', '');
-  pedido.cliente.telefone = pedido.cliente.telefone.replace('()-', '');
-
-  await this.apiProvider.enviarPedido('', '', pedido);*/
-
-  pedido.enviado = true;
-  this.pedidosProvider.atualizar(pedido).then((result: any) => {
-    console.log("Pedido enviado com sucesso!");
-  }).catch((error) => {
-    pedido.enviado = false;
-    pedido.descontoTotal = pedido.descontoTotal.replace('.', ',');
-    console.log("Falha ao enviar pedido!");
-  });
-}
+  showAlert(title, message) {
+    let al = this.alertCtrl.create({
+      title: title,
+      subTitle: message,
+      buttons: ['Fechar']
+    });
+    al.present();
+  }
+  
 
 }

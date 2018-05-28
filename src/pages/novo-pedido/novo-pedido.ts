@@ -2,7 +2,6 @@ import { Component } from '@angular/core';
 import { IonicPage, NavController, NavParams, LoadingController, Events, AlertController, ToastController } from 'ionic-angular';
 import { FormBuilder } from '@angular/forms';
 
-import { Observable } from 'rxjs/Observable';
 import { SelectSearchable } from 'ionic-select-searchable';
 
 import { Cliente } from '../../models/cliente';
@@ -15,7 +14,6 @@ import { NovoClientePage } from '../novo-cliente/novo-cliente';
 import { CatalogoProdutoPage } from '../catalogo-produto/catalogo-produto';
 
 import { PedidosProvider } from '../../providers/pedidos/pedidos';
-import { CondicaoPagamentoProvider } from '../../providers/condicao-pagamento/condicao-pagamento';
 import { ClientesProvider } from '../../providers/clientes/clientes';
 import { CartaoCredito } from '../../models/cartoes-credito';
 import { PlanoOperadora } from '../../models/plano-operadora';
@@ -54,7 +52,6 @@ export class NovoPedidoPage {
   constructor(public navCtrl: NavController, public navParams: NavParams,
     public formBuilder: FormBuilder, private ev: Events,
     private loadingCtrl: LoadingController,
-    private condicaoPagamentoService: CondicaoPagamentoProvider,
     private pedidoService: PedidosProvider,
     private clientesProvider: ClientesProvider,
     private alertCtrl: AlertController, private toastCtrl: ToastController) {
