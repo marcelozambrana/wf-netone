@@ -7,11 +7,10 @@
 
 <ion-content padding class="cliente-content">
 
-  <form padding [formGroup]="clienteForm" novalidate>
+  <form [formGroup]="clienteForm" novalidate>
 
     <div *ngIf="passo==1 || isClienteCpfExistente">
 
-      <h6>Informe seu CPF/CNPJ</h6>
       <ion-list inset>
         <ion-item>
           <ion-label floating>CPF/CNPJ</ion-label>
@@ -24,7 +23,7 @@
 
 
     <div *ngIf="passo==2">
-      <br/>
+
       <h6>Dados gerais</h6>
       <ion-list inset>
         <ion-item>
@@ -63,12 +62,12 @@
     </div>
 
     <ion-list inset *ngIf="passo==3">
-      <br/>
+
       <h6>Dados de endereco</h6>
       <ion-item>
         <ion-label floating>CEP</ion-label>
         <ion-input type="text" [brmasker]="{mask:'00000-000', len:9}" formControlName="cep" [(ngModel)]="cliente.endereco.cep"
-          (input)="getEndereco()"></ion-input>
+          (ionChange)="getEndereco()"></ion-input>
       </ion-item>
 
       <ion-item>
@@ -89,13 +88,13 @@
 
       <ion-item>
         <ion-label floating>UF</ion-label>
-        <ion-select formControlName="uf" [(ngModel)]="cliente.endereco.uf" (ionChange)="onSelectChangeUf(false)">
+        <ion-select formControlName="uf" [(ngModel)]="cliente.endereco.uf" (ionChange)="onSelectChangeUf($event)">
           <ion-option text-uppercase value="{{uf.Sigla}}" *ngFor="let uf of estados">{{uf.Sigla}} - {{uf.Nome}}</ion-option>
         </ion-select>
       </ion-item>
 
 
-      <ion-item *ngIf="!cliente.endereco.codigoIbge || cliente.endereco.codigoIbge == null">
+      <ion-item *ngIf="!cliente.endereco.ibgeCidade || cliente.endereco.ibgeCidade == null">
         <select-searchable formControlName="cidade" searchPlaceholder="Cidade" [(ngModel)]="cliente.endereco.cidade" [items]="cidadesEstado"
           itemValueField="codigoIbge" itemTextField="nome" [canSearch]="true" [noItemsFoundText]="'Nenhuma cidade encontrada'"
           (onChange)="cidadeChange($event)">
@@ -105,7 +104,7 @@
         </select-searchable>
       </ion-item>
 
-      <ion-item *ngIf="cliente.endereco.codigoIbge && cliente.endereco.codigoIbge != null">
+      <ion-item *ngIf="cliente.endereco.ibgeCidade && cliente.endereco.ibgeCidade != null">
         <ion-input *ngIf="false" type="text" formControlName="cidade" [(ngModel)]="cliente.endereco.cidade.nome"></ion-input>
         <h2>{{cliente.endereco.cidade.nome}}</h2>
         <ion-icon name="md-close-circle" (click)="limparCidade()" item-end></ion-icon>

@@ -19,6 +19,8 @@ import { firebaseConfig } from '../config';
 
 import { IonicStorageModule } from '@ionic/storage';
 
+import { File } from '@ionic-native/file';
+
 import { SelectSearchableModule } from 'ionic-select-searchable';
 import { BrMaskerModule } from 'brmasker-ionic-3';
 
@@ -84,6 +86,7 @@ import { ViacepProvider } from '../providers/viacep/viacep';
     StatusBar,
     SplashScreen,
     { provide: ErrorHandler, useClass: IonicErrorHandler },
+    File,
     ApiProvider,
     ClientesProvider,
     CondicaoPagamentoProvider,

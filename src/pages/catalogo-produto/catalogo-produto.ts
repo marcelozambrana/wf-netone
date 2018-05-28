@@ -147,9 +147,9 @@ export class CatalogoProdutoPage {
 
       <ion-item *ngFor="let item of grade">
         <div style="padding: 5px">
-          <span style="padding-right: 25px">Cor: {{ item.cor }}</span>
           <span style="padding-right: 25px">Tam: {{ item.tamanho }}</span> 
-          <span>Valor Unit: {{ item.preco | number }}</span>
+          <span style="padding-right: 25px">Cor: {{ item.cor }}</span>
+          <span>Unit: {{ item.preco | number }}</span>
         </div>
         <div style="padding: 5px; display: flex; align-items: center;">
           <span>Qtde: {{ item.quantidade }}</span>

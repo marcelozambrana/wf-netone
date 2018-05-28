@@ -36,14 +36,13 @@ export class NovoPedidoPage {
   isFormaCobrancaDinheiro = false;
   isFormaCobrancaCartao = false;
 
-  passo = "selecionarCliente";
-  pedirConfirmacaoParaSairDoPedido = true;
+  passo: string = "selecionarCliente";
+  pedirConfirmacaoParaSairDoPedido: boolean = true;
 
-  mensagemClienteNaoEncontrado = "Cliente não encontrado";
+  mensagemClienteNaoEncontrado: string = "Cliente não encontrado";
 
   clientSearch: boolean = false;
   clientFound: boolean = false;
-
   qtdTotal: number = 0;
 
   public pedidoForm: any;
@@ -308,7 +307,7 @@ export class NovoPedidoPage {
     console.log(item);
   }
 
-  resumoPedido() {
+  async resumoPedido() {
     if (this.qtdTotal <= 0) {
       this.toastAlert("Informe pelo menos um produto!");
       return;
@@ -318,6 +317,8 @@ export class NovoPedidoPage {
       this.pedido.cliente.endereco.complemento ? this.pedido.cliente.endereco.complemento : '';
 
     console.log(this.pedido);
+
+    await this.calcDesconto();
 
     this.passo = "dadosPagamento";
   }
@@ -463,9 +464,10 @@ export class NovoPedidoPage {
     if (formaDescricaoArray[0].descricaoReduzido === 'DIN') {
       this.isFormaCobrancaDinheiro = true;
 
-      let condicoes = this.condicoesPagamento.filter(
-        c => c.descricao.toUpperCase() === 'A VISTA');
-      this.pedido.condicaoPagamentoId = condicoes[0].id;
+      let condicoes = this.condicoesPagamento.filter(c => c.descricao.toUpperCase().includes('VISTA'));
+      if (condicoes && condicoes.length > 0) {
+        this.pedido.condicaoPagamentoId = condicoes[0].id;
+      }
     }
 
     if (formaDescricaoArray[0].descricaoReduzido === 'CRT') {

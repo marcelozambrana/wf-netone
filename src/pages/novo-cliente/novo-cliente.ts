@@ -189,7 +189,7 @@ export class NovoClientePage {
       return false;
     }
 
-    this.onSelectChangeUf(true);
+    this.carregarCidades();
     this.passo = "3";
   }
 
@@ -227,7 +227,7 @@ export class NovoClientePage {
       return false;
     }
 
-    if (!this.cliente.endereco.codigoIbge) {
+    if (!this.cliente.endereco.ibgeCidade) {
       this.toastAlert("Cidade é um campo obrigatório");
       return false;
     }
@@ -240,36 +240,37 @@ export class NovoClientePage {
     return true;
   }
 
-  async onSelectChangeUf(carregandoCliente) {
-    let loader = this.loadingCtrl.create({
-      content: 'Buscando cidades...',
-      dismissOnPageChange: true
-    });
-
-    if (!carregandoCliente) {
-      this.limparCidade();
-    }
-
-    loader.present();
-
+  carregarCidades() {
     let cidades = CIDADES;
     this.cidadesEstado = cidades
       .filter(cid => cid.estado.sigla === this.cliente.endereco.uf)
       .sort((a, b) => {
         return a.nome > b.nome ? 1 : -1;
       });
+  }
+
+  async onSelectChangeUf(event) {
+
+    let loader = this.loadingCtrl.create({
+      content: 'Buscando cidades...',
+      dismissOnPageChange: true
+    });
+
+    loader.present();
+
+    this.carregarCidades();
 
     loader.dismiss();
   }
 
   cidadeChange(event: { component: SelectSearchable, value: any }) {
     console.log('cidade selecionada:', event.value);
-    this.cliente.endereco.codigoIbge = event.value.codigoIbge;
+    this.cliente.endereco.ibgeCidade = event.value.codigoIbge;
     this.cliente.endereco.cidade = event.value;
   }
 
   limparCidade() {
-    this.cliente.endereco.codigoIbge = null;
+    this.cliente.endereco.ibgeCidade = null;
     this.cliente.endereco.cidade = null;
   }
 
@@ -298,32 +299,31 @@ export class NovoClientePage {
     toast.present();
   }
 
-  getEndereco() {
-    let self = this;
+  async getEndereco() {
 
-    if (!this.cliente.endereco.cep || this.cliente.endereco.cep.length < 9) {
+    if (!this.cliente.endereco.cep || this.cliente.endereco.cep.length != 9) {
       return;
-    } 
+    }
 
-    this.viacepProvider.callService(this.cliente.endereco.cep)
-      .subscribe(async function (data) {
-        console.log(data);
-        if (data && data.erro) {
-          self.cliente.endereco.endereco = '';
-          self.cliente.endereco.bairro = '';
-          self.cliente.endereco.uf = null;
-          await self.onSelectChangeUf(false);
-        } else {
-          self.cliente.endereco.endereco = data.logradouro;
-          self.cliente.endereco.bairro = data.bairro;
-          self.cliente.endereco.uf = data.uf;
-          await self.onSelectChangeUf(true);
-          self.cliente.endereco.codigoIbge = data.ibge;
-          self.cliente.endereco.cidade = {};
-          self.cliente.endereco.cidade.codigoIbge = data.ibge;
-          self.cliente.endereco.cidade.nome = data.localidade;
-        }
-      });
+    let data:any = await this.viacepProvider.callService(this.cliente.endereco.cep);
+    console.log(data);
+
+    if (data && data.erro) {
+      this.cliente.endereco.endereco = '';
+      this.cliente.endereco.bairro = '';
+      this.cliente.endereco.uf = null;
+      this.cliente.endereco.ibgeCidade = null;
+      this.cliente.endereco.cidade = {};
+    } else {
+      this.cliente.endereco.endereco = data.logradouro;
+      this.cliente.endereco.bairro = data.bairro;
+      this.cliente.endereco.uf = data.uf;
+      this.carregarCidades();
+      this.cliente.endereco.ibgeCidade = data.ibge;
+      this.cliente.endereco.cidade = {};
+      this.cliente.endereco.cidade.codigoIbge = data.ibge;
+      this.cliente.endereco.cidade.nome = data.localidade;
+    }
   }
 
 }

@@ -1,5 +1,6 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
+import { timeout } from 'rxjs/operators/timeout';
 
 @Injectable()
 export class ViacepProvider {
@@ -8,8 +9,15 @@ export class ViacepProvider {
     console.log('Hello ViacepProvider Provider');
   }
 
-  callService(cep: String): any {
-    return this.http.get(`http://viacep.com.br/ws/` + cep + `/json/`)
+  callService(cep: String) {
+    return new Promise((resolve, reject) => {
+      this.http.get(`http://viacep.com.br/ws/` + cep + `/json/`)
+        .subscribe(response => {
+          resolve(response);
+        }, err => {
+          resolve({erro: true});
+        })
+    })
   }
 
 }

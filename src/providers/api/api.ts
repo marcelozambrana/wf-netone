@@ -3,6 +3,7 @@ import { Injectable } from '@angular/core';
 
 import { timeout } from 'rxjs/operators/timeout';
 import { Cliente } from '../../models/cliente';
+import { Pedido } from '../../models/pedido';
 
 const API = 'http://201.86.95.126:8081/app-web/api/';
 const AUTH = 'auth/';
@@ -220,28 +221,18 @@ export class ApiProvider {
     });
   }
 
-  async criarCliente(auth_token, next_token, cliente: Cliente) {
-    let clienteNovo = {
-      cpfCnpj: cliente.cpfCnpj,
-      rgInscricaoEstadual: cliente.rgInscricaoEstadual,
-      nome: cliente.nome,
-      fantasia: cliente.fantasia,
-      telefone: cliente.telefone, //somente número
-      celular: cliente.celular, //somente número
-      email: cliente.email,
-      endereco: {
-        ibgeCidade: cliente.endereco.ibgeCidade,
-        endereco: cliente.endereco.endereco,
-        complemento: cliente.endereco.complemento,
-        numero: cliente.endereco.numero,
-        bairro: cliente.endereco.bairro,
-        cep: cliente.endereco.cep //somente número
-      }
-    }
+  async enviarPedido(auth_token, next_token, pedido: Pedido) {
+
+     //diluir desconto nos itens
+     //formatar numero 
+     //formatar dt-emissao 
+     //formatar dt-entrega
+     //formatar telefone
+     //formatar celular
 
     return new Promise((resolve, reject) => {
-      this.http.post(API + CLIENTE + 'novo',
-        JSON.stringify(clienteNovo),
+      this.http.post(API + PEDIDO + 'incluir',
+        JSON.stringify(pedido),
         {
           headers: {
             'Content-Type': 'application/json',
