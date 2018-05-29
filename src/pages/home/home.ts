@@ -10,6 +10,7 @@ import { CatalogoProdutoPage } from '../catalogo-produto/catalogo-produto';
 import { ListagemPedidoPage } from './../listagem-pedido/listagem-pedido';
 
 import { ApiProvider } from '../../providers/api/api';
+import { UsuariosProvider } from '../../providers/usuarios/usuarios';
 import { ProdutosProvider } from '../../providers/produtos/produtos';
 import { ClientesProvider } from '../../providers/clientes/clientes';
 import { CondicaoPagamentoProvider } from '../../providers/condicao-pagamento/condicao-pagamento';
@@ -28,16 +29,12 @@ import { Produto } from '../../models/produto';
 })
 export class HomePage {
 
-  mensagem: string;
+  usuarioLogado: any = null;
 
   //storage properties
   netoneAuthToken;
   netoneNextToken;
   rootPathFirebase;
-  sequenceApiProduto;
-  sequenceApiCliente;
-  sequenceApiCondicoes;
-  sequenceApiFormas;
 
   produtos: any = [];
   clientes: any = [];
@@ -45,41 +42,38 @@ export class HomePage {
   condicoesPagamento: any = [];
   cartoes: any = [];
 
-  constructor(public navCtrl: NavController, public navParams: NavParams,
+  constructor(public navCtrl: NavController,
+    public navParams: NavParams,
     private loadingCtrl: LoadingController,
     private toastCtrl: ToastController,
     private storage: Storage,
     private apiProvider: ApiProvider,
+    private usuariosProvider: UsuariosProvider,
     private clientesProvider: ClientesProvider,
     private produtosProvider: ProdutosProvider,
     private condicoesProvider: CondicaoPagamentoProvider,
     private formasProvider: FormaCobrancaProvider,
     private pedidosProvider: PedidosProvider) {
 
+    let loaderInit = this.loadingCtrl.create({
+      content: 'Carregando dados...',
+    });
+    loaderInit.present();
+
+    this.usuarioLogado = this.navParams.get('usuarioLogado');
+
     Promise.all([
       this.storage.get("caminhoFirestone"),
       this.storage.get("netone-auth-token"),
       this.storage.get("netone-next-request-token"),
-      this.storage.get("sequenceApiProduto"),
-      this.storage.get("sequenceApiCliente"),
-      this.storage.get("sequenceApiCondicoes"),
-      this.storage.get("sequenceApiFormas")
     ]).then(async values => {
 
       this.rootPathFirebase = values[0];
       this.netoneAuthToken = values[1];
       this.netoneNextToken = values[2];
-      this.sequenceApiProduto = values[3];
-      this.sequenceApiCliente = values[4];
-      this.sequenceApiCondicoes = values[5];
-      this.sequenceApiFormas = values[6];
       console.log('Root path storage firebase: ' + this.rootPathFirebase);
       console.log('Auth token: ' + this.netoneAuthToken);
       console.log('Next token: ' + this.netoneNextToken);
-      console.log('sequenceApiProduto: ' + this.sequenceApiProduto);
-      console.log('sequenceApiCliente: ' + this.sequenceApiCliente);
-      console.log('sequenceApiCondicoes: ' + this.sequenceApiCondicoes);
-      console.log('sequenceApiFormas: ' + this.sequenceApiFormas);
 
       await this.clientesProvider.init();
       await this.produtosProvider.init();
@@ -89,12 +83,14 @@ export class HomePage {
       this.buscarProdutos();
       this.buscarCondicoesEPlanosOperadora();
       this.buscarFormas();
+
+      loaderInit.dismiss();
     });
   }
 
   async buscarProdutos() {
     let produtosTemp = await this.produtosProvider.todos();
-    if (!produtosTemp || produtosTemp === null) {
+    if (!produtosTemp || produtosTemp == null) {
       this.produtos = [];
       return;
     }
@@ -130,7 +126,7 @@ export class HomePage {
     this.condicoesPagamento = await this.condicoesProvider.todos();
     this.cartoes = await this.condicoesProvider.todosCartoes();
 
-    this.condicoesPagamento = this.condicoesPagamento ? this.condicoesPagamento: [];
+    this.condicoesPagamento = this.condicoesPagamento ? this.condicoesPagamento : [];
     this.cartoes = !this.cartoes ? [] : this.cartoes;
 
     console.log('condições pagamento:');
@@ -148,24 +144,17 @@ export class HomePage {
     console.log(this.formasCobranca);
   }
 
-  async clientesPage() {
-    await this.clientesProvider.init();
+  clientesPage() {
     this.navCtrl.push(ClientesPage);
   }
 
-  async catalogoPage() {
-    
-    this.atualizaProdutos();
-
+  catalogoPage() {
     this.navCtrl.push(CatalogoProdutoPage, {
       produtos: this.produtos
     });
   }
 
-  async novoPedidoPage() {
-    
-    this.atualizaProdutos();
-
+  novoPedidoPage() {
     this.navCtrl.push(NovoPedidoPage,
       {
         produtos: this.produtos,
@@ -175,27 +164,17 @@ export class HomePage {
       });
   }
 
-  async atualizaProdutos() {
-    if (this.produtos.length === 0) {
-      let loader = this.loadingCtrl.create({
-        content: 'Atualizando produtos...',
-        dismissOnPageChange: true
-      });
-      loader.present();
-
-      await this.buscarProdutos();
-
-      loader.dismiss();
-    }    
-  }
-
   pedidosPage() {
     this.navCtrl.push(ListagemPedidoPage,
       {
         produtos: this.produtos,
         condicoes: this.condicoesPagamento,
         formasCobranca: this.formasCobranca,
-        cartoes: this.cartoes
+        cartoes: this.cartoes,
+        rootPathFirebase: this.rootPathFirebase,
+        netoneAuthToken: this.netoneAuthToken,
+        netoneNextToken: this.netoneNextToken,
+        usuarioLogado: this.usuarioLogado
       });
   }
 
@@ -207,7 +186,8 @@ export class HomePage {
     this.storage.set('netone-next-request-token', null);
 
     try {
-      const result: any = await this.apiProvider.logout(this.netoneAuthToken, this.netoneNextToken);
+      const result: any = await this.apiProvider.logout(this.netoneAuthToken,
+        this.netoneNextToken);
       console.log(result);
     } catch (error) {
       console.log(error);
@@ -231,20 +211,32 @@ export class HomePage {
     loaderSync.present();
 
     try {
-
-      resultSyncProdutos = await this.apiProvider.syncProdutos(this.netoneAuthToken, this.netoneNextToken, this.sequenceApiProduto);
-      resultSyncClientes = await this.apiProvider.syncClientes(this.netoneAuthToken, this.netoneNextToken, this.sequenceApiCliente);
-      resultSyncFormas = await this.apiProvider.syncFormas(this.netoneAuthToken, this.netoneNextToken, this.sequenceApiFormas);
-      resultSyncCondicoes = await this.apiProvider.syncCondicoes(this.netoneAuthToken, this.netoneNextToken, this.sequenceApiCondicoes);
-      resultSyncCartoes = await this.apiProvider.syncCartoesPlanos(this.netoneAuthToken, this.netoneNextToken);
-
       console.log('sincronizando...')
-      await this.processaProdutosAPI(resultSyncProdutos);
-      await this.processaClientesAPI(resultSyncClientes);
-      await this.processaFormasAPI(resultSyncFormas);
-      await this.processaCondicoesAPI(resultSyncCondicoes);
+
+      resultSyncProdutos = await this.apiProvider.syncProdutos(this.netoneAuthToken,
+        this.netoneNextToken, this.usuarioLogado.sequenceApiProduto);
+
+      resultSyncClientes = await this.apiProvider.syncClientes(this.netoneAuthToken,
+        this.netoneNextToken, this.usuarioLogado.sequenceApiCliente);
+
+      resultSyncFormas = await this.apiProvider.syncFormas(this.netoneAuthToken,
+        this.netoneNextToken, this.usuarioLogado.sequenceApiFormaCob);
+
+      resultSyncCondicoes = await this.apiProvider.syncCondicoes(this.netoneAuthToken,
+        this.netoneNextToken, this.usuarioLogado.sequenceApiCondPgto);
+
+      resultSyncCartoes = await this.apiProvider.syncCartoesPlanos(this.netoneAuthToken,
+        this.netoneNextToken);
+
+      this.usuarioLogado.sequenceApiProduto = await this.processaProdutosAPI(resultSyncProdutos);
+      this.usuarioLogado.sequenceApiCliente = await this.processaClientesAPI(resultSyncClientes);
+      this.usuarioLogado.sequenceApiFormaCob = await this.processaFormasAPI(resultSyncFormas);
+      this.usuarioLogado.sequenceApiCondPgto = await this.processaCondicoesAPI(resultSyncCondicoes);
       await this.processaCartoesPlanosAPI(resultSyncCartoes);
-      console.log('final sincronizacao ...')
+
+      await this.usuariosProvider.atualizar(this.usuarioLogado);
+      console.log('final sincronizacao ...');
+
     } catch (error) {
       console.log(error);
       this.toastAlert(error.message);
@@ -254,10 +246,13 @@ export class HomePage {
   }
 
   async processaCondicoesAPI(result) {
-    if (this.sequenceApiCondicoes != null && this.sequenceApiCondicoes >= result[0].sequence) {
-      console.log('sequence atual = ' + this.sequenceApiCondicoes + ', sequence retornada = ' + result[0].sequence);
+
+    let sequenceCP = this.usuarioLogado.sequenceApiCondPgto;
+
+    if (sequenceCP != null && sequenceCP >= result[0].sequence) {
+      console.log('sequence atual = ' + sequenceCP + ', sequence retornada = ' + result[0].sequence);
       console.log('Nenhuma atualização de condicoes de pagamento disponível');
-      return false;
+      return sequenceCP;
     }
 
     let self = this;
@@ -265,69 +260,45 @@ export class HomePage {
 
     await condicoesApi.forEach(async function (condicao) {
 
-      let condicaoDadoId: any = self.condicoesPagamento.reduce((retorno, c) => {
-        if (c.id == condicao.id) {
-          return c;
-        } else {
-          return retorno;
-        }
-      }, null);
+      let condicaoDadoId: any = self.condicoesPagamento.reduce((retorno, c) =>
+        c.id == condicao.id ? c : retorno, null);
 
-      if (condicaoDadoId != null) {
-        let condicaoPagamento = { 'idFirebase': condicaoDadoId.idFirebase, ...condicao } as CondicaoPagamento;
-        self.condicoesProvider.atualizar(condicaoPagamento).then((result: any) => {
-          console.log("Atualizando condicao pagamento: " + condicaoPagamento.id);
-        })
-      } else {
-        self.condicoesProvider.adicionar(condicao).then((result: any) => {
-          console.log("Salvando novo condicao pagamento: " + condicao.id);
-        })
-      }
+      await self.updateCondicao(condicaoDadoId, condicao);
+
     })
 
-    console.log('atualizando sequence condicoes pagamento de ' + this.sequenceApiCondicoes + ' para ' + result[0].sequence);
-    this.storage.set('sequenceApiCondicoes', result[0].sequence);
-    this.sequenceApiCondicoes = result[0].sequence;
+    console.log('atualizando sequence condicoes pagamento de ' + sequenceCP + ' para ' + result[0].sequence);
+    return result[0].sequence;
   }
 
   async processaCartoesPlanosAPI(result) {
+
     console.log('sequence retornada api cartoescredito  = ' + result[0].sequence);
 
     let self = this;
     let cartoesCreditoApi: CartaoCredito[] = result[0].result;
 
-    cartoesCreditoApi.forEach(function (cartao) {
+    cartoesCreditoApi.forEach(async function (cartao) {
 
-      let planoDadoId: any = self.cartoes.reduce((retorno, p) => {
-        if (p.id == cartao.id) {
-          return p;
-        } else {
-          return retorno;
-        }
-      }, null);
+      let planoDadoId: any = self.cartoes.reduce((retorno, p) =>
+        p.id == cartao.id ? p : retorno, null);
 
-      if (planoDadoId != null) {
-        let cartaoCredito = { 'idFirebase': planoDadoId.idFirebase, ...cartao } as CartaoCredito;
-        self.condicoesProvider.atualizarCartao(cartaoCredito).then((result: any) => {
-          console.log("Atualizando cartão crédito: " + cartaoCredito.id);
-        })
-      } else {
-        self.condicoesProvider.adicionarCartao(cartao).then((result: any) => {
-          console.log("Salvando novo cartão crédito: " + cartao.id);
-        })
-      }
+      await self.updateCartaoCred(planoDadoId, cartao);
+
     })
 
-    console.log('atualizando sequence condicoes pagamento de ' + this.sequenceApiCondicoes + ' para ' + result[0].sequence);
-    this.storage.set('sequenceApiCondicoes', result[0].sequence);
-    this.sequenceApiCondicoes = result[0].sequence;
+    console.log('atualizando sequence plano operadora  para ' + result[0].sequence);
+    return result[0].sequence;
   }
 
   async processaFormasAPI(result) {
-    if (this.sequenceApiFormas != null && this.sequenceApiFormas >= result[0].sequence) {
-      console.log('sequence atual = ' + this.sequenceApiFormas + ', sequence retornada = ' + result[0].sequence);
+
+    let sequenceF = this.usuarioLogado.sequenceApiFormaCob;
+
+    if (sequenceF != null && sequenceF >= result[0].sequence) {
+      console.log('sequence atual = ' + sequenceF + ', sequence retornada = ' + result[0].sequence);
       console.log('Nenhuma atualização de formas de pagamento disponível');
-      return false;
+      return sequenceF;
     }
 
     let self = this;
@@ -335,42 +306,31 @@ export class HomePage {
 
     formasApi.forEach(async function (forma) {
 
-      let formaDadoId: any = self.formasCobranca.reduce((retorno, f) => {
-        if (f.id == forma.id) {
-          return f;
-        } else {
-          return retorno;
-        }
-      }, null);
+      let formaDadoId: any = self.formasCobranca.reduce((retorno, f) =>
+        f.id == forma.id ? f : retorno, null);
 
-      if (formaDadoId != null) {
-        let formaCobranca = { 'idFirebase': formaDadoId.idFirebase, ...forma } as FormaCobranca;
-        self.formasProvider.atualizar(formaCobranca).then((result: any) => {
-          console.log("Atualizando forma cobranca: " + formaCobranca.id);
-        })
-      } else {
-        self.formasProvider.adicionar(forma).then((result: any) => {
-          console.log("Salvando novo forma cobranca: " + forma.id);
-        })
-      }
+      await self.updateForma(formaDadoId, forma);
+
     })
 
-    console.log('atualizando sequence formas cobranca de ' + this.sequenceApiFormas + ' para ' + result[0].sequence);
-    this.storage.set('sequenceApiFormas', result[0].sequence);
-    this.sequenceApiFormas = result[0].sequence;
+    console.log('atualizando sequence formas cobranca de ' + sequenceF + ' para ' + result[0].sequence);
+    return result[0].sequence;
   }
 
   async processaClientesAPI(result) {
-    if (this.sequenceApiCliente != null && this.sequenceApiCliente >= result[0].sequence) {
-      console.log('sequence atual = ' + this.sequenceApiCliente + ', sequence retornada = ' + result[0].sequence);
+
+    let sequenceC = this.usuarioLogado.sequenceApiCliente;
+
+    if (sequenceC != null && sequenceC >= result[0].sequence) {
+      console.log('sequence atual = ' + sequenceC + ', sequence retornada = ' + result[0].sequence);
       console.log('Nenhuma atualização de clientes disponível');
-      return false;
+      return sequenceC;
     }
 
     let self = this;
     let clientesApi: Cliente[] = result[0].result;
 
-    clientesApi.forEach(function (cli) {
+    clientesApi.forEach(async function (cli) {
 
       let clienteDadoId = null;
       self.clientes.forEach(c => {
@@ -379,38 +339,29 @@ export class HomePage {
         }
       });
 
-      cli.isNovo = false;
+      await self.updateCliente(clienteDadoId, cli);
 
-      if (clienteDadoId != null) {
-        let cliente = { 'id': clienteDadoId.id, ...cli } as Cliente;
-        self.clientesProvider.atualizar(cliente).then((result: any) => {
-          console.log("Atualizando cliente: " + cli.cpfCnpj);
-        })
-      } else {
-        self.clientesProvider.adicionar(cli).then((result: any) => {
-          console.log("Salvando novo cliente: " + cli.cpfCnpj);
-        })
-      }
     })
 
-    console.log('atualizando sequence cliente de ' + this.sequenceApiCliente + ' para ' + result[0].sequence);
-    this.storage.set('sequenceApiCliente', result[0].sequence);
-    this.sequenceApiCliente = result[0].sequence;
+    console.log('atualizando sequence cliente de ' + sequenceC + ' para ' + result[0].sequence);
+    return result[0].sequence;
   }
 
   async processaProdutosAPI(result) {
 
-    if (this.sequenceApiProduto != null && this.sequenceApiProduto >= result[0].sequence) {
-      console.log('sequence atual = ' + this.sequenceApiProduto + ', sequence retornada = ' + result[0].sequence);
+    let sequenceP = this.usuarioLogado.sequenceApiProduto;
+
+    if (sequenceP != null && sequenceP >= result[0].sequence) {
+      console.log('sequence atual = ' + sequenceP + ', sequence retornada = ' + result[0].sequence);
       console.log('Nenhuma atualização de produtos disponível');
-      return false;
+      return sequenceP;
     }
 
     let self = this;
     let produtosApiMap = result[0].result.map(p => {
       return {
-        "idReduzido": p.idReduzido,
         "mascara": p.mascara,
+        "idReduzido": p.idReduzido,
         "descricao": p.descricao,
         "grupo": p.grupoDescricao,
         "subgrupo": p.subgrupoDescricao,
@@ -439,12 +390,54 @@ export class HomePage {
         });
       }
 
-      self.updateProduto(produtoDadoId, item);
+      await self.updateProduto(produtoDadoId, item);
+      
     })
 
-    console.log('atualizando sequence produto de ' + this.sequenceApiProduto + ' para ' + result[0].sequence);
-    this.storage.set('sequenceApiProduto', result[0].sequence);
-    this.sequenceApiProduto = result[0].sequence;
+    console.log('atualizando sequence produto de ' + sequenceP + ' para ' + result[0].sequence);
+    return result[0].sequence;
+  }
+
+  async updateForma(formaDadoId, forma) {
+
+    if (formaDadoId != null) {
+      let formaCobranca = { 'idFirebase': formaDadoId.idFirebase, ...forma } as FormaCobranca;
+      this.formasProvider.atualizar(formaCobranca);
+    } else {
+      this.formasProvider.adicionar(forma);
+    }
+  }
+
+  async updateCartaoCred(planoDadoId, cartao) {
+
+    if (planoDadoId != null) {
+      let cartaoCredito = { 'idFirebase': planoDadoId.idFirebase, ...cartao } as CartaoCredito;
+      this.condicoesProvider.atualizarCartao(cartaoCredito);
+    } else {
+      this.condicoesProvider.adicionarCartao(cartao);
+    }
+  }
+
+  async updateCondicao(condicaoDadoId, condicao) {
+
+    if (condicaoDadoId != null) {
+      let condicaoPgto = { 'idFirebase': condicaoDadoId.idFirebase, ...condicao } as CondicaoPagamento;
+      await this.condicoesProvider.atualizar(condicaoPgto);
+    } else {
+      await this.condicoesProvider.adicionar(condicao);
+    }
+  }
+
+  async updateCliente(clienteDadoId, cli) {
+
+    cli.isNovo = false;
+
+    if (clienteDadoId != null) {
+      let cliente = { 'id': clienteDadoId.id, ...cli } as Cliente;
+      await this.clientesProvider.atualizar(cliente);
+    } else {
+      await this.clientesProvider.adicionar(cli);
+    }
   }
 
   async updateProduto(prodId, prod) {
@@ -469,17 +462,6 @@ export class HomePage {
       closeButtonText: 'Fechar',
       dismissOnPageChange: true,
       cssClass: 'toast-error'
-    });
-    toast.present();
-  }
-
-  toastMessage(message) {
-    let toast = this.toastCtrl.create({
-      message: message,
-      duration: 3000,
-      dismissOnPageChange: true,
-      showCloseButton: true,
-      closeButtonText: 'Fechar'
     });
     toast.present();
   }

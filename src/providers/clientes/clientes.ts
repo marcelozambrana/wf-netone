@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs/Observable';
 import { Storage } from '@ionic/storage';
 import { AngularFirestore, AngularFirestoreCollection, AngularFirestoreDocument } from 'angularfire2/firestore';
+
 import { Cliente } from '../../models/cliente';
 
 @Injectable()
@@ -11,7 +12,6 @@ export class ClientesProvider {
   private cliDoc: AngularFirestoreDocument<Cliente>;
   public clientes: Observable<Cliente[]>;
 
-  isMock = false;
   rootPathFirebase;
 
   constructor(private afs: AngularFirestore, private storage: Storage) { }
@@ -41,7 +41,7 @@ export class ClientesProvider {
 
   todosParaPedido() {
     this.cliCollection = this.afs.collection(this.rootPathFirebase + '/clientes'); //ref()
-    
+
     return new Promise(resolve => {
       this.cliCollection.snapshotChanges().map(changes => {
         return changes.map(a => {
@@ -97,46 +97,6 @@ export class ClientesProvider {
           resolve(null);
         });
     });
-  }
-
-  //TODO: move to user provider
-  public async buscarUsuario(email: string) {
-
-    if (this.isMock) {
-      return new Promise(resolve => {
-        setTimeout(() => {
-          resolve({ id: 'abcdef123456' });
-        }, 2000);
-      });
-    }
-
-    return new Promise(resolve => {
-      this.afs.collection('usuarios', ref => ref.where('email', '==', email))
-        .snapshotChanges().map(changes => {
-          return changes.map(a => {
-            const data = a.payload.doc.data() as any;
-            data.id = a.payload.doc.id;
-            return data;
-          })
-        })
-        .subscribe(docs => {
-          if (docs.length === 0) {
-            resolve(null)
-          }
-          docs.forEach(doc => {
-            resolve(doc)
-          })
-        })
-    });
-  }
-
-  public adicionarUsuario(email: string) {
-    let user = {
-      email: email,
-      dataCriacao: new Date()
-    }
-
-    return this.afs.collection('usuarios').add(user);
   }
 
 }

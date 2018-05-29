@@ -3,8 +3,8 @@ import { IonicPage, NavController, NavParams, AlertController } from 'ionic-angu
 import { Observable } from 'rxjs/Observable';
 
 import { NovoClientePage } from '../novo-cliente/novo-cliente';
-import { Cliente } from '../../models/cliente';
 import { ClientesProvider } from '../../providers/clientes/clientes';
+import { Cliente } from '../../models/cliente';
 
 @IonicPage()
 @Component({
@@ -32,9 +32,9 @@ export class ClientesPage {
 
   editar(cli: Cliente) {
     console.log('editando cliente ' + cli.id);
-    let clienteEditar = {...cli};
-    clienteEditar.endereco = {...cli.endereco};
-    
+    let clienteEditar = { ...cli };
+    clienteEditar.endereco = { ...cli.endereco };
+
     if (clienteEditar.id) {
       this.navCtrl.push(NovoClientePage, {
         titulo: 'Editar',
@@ -60,7 +60,7 @@ export class ClientesPage {
   filtrarClientes() {
     console.log('filtrando clientes: ' + this.searchTerm);
 
-    if (this.searchTerm.length === 0 || this.searchTerm.length > 3) {
+    if (this.searchTerm.length === 0 || this.searchTerm.length > 2) {
       this.clientes = this.clientes.map(clientes => {
         return clientes.filter(cli => {
           return ((cli.nome.toLowerCase().indexOf(this.searchTerm.toLowerCase()) > -1) ||

@@ -14,4 +14,6 @@ export interface Pedido {
     descontoTotal?: number;
     total: number;
     enviado: boolean;
+    numeroOrigem?: number; 
+    numeroEnvio?: number; 
 }

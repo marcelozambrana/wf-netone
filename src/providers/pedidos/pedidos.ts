@@ -18,7 +18,7 @@ export class PedidosProvider {
 
   async init() {
     await this.storage.get('caminhoFirestone').then((path) => {
-      
+
       this.rootPathFirebase = path;
       this.pedidosCollection = this.afs.collection(this.rootPathFirebase + '/pedidos'); //ref()
 

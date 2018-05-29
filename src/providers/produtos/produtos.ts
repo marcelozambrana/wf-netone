@@ -18,7 +18,7 @@ export class ProdutosProvider {
 
   async init() {
     await this.storage.get('caminhoFirestone').then((path) => {
-      
+
       this.rootPathFirebase = path;
       this.produtosCollection = this.afs.collection(this.rootPathFirebase + '/produtos'); //ref()
 

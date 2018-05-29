@@ -141,14 +141,14 @@ export class CatalogoProdutoPage {
 <ion-content style="background: darkmagenta">
   <ion-list>
       <ion-item style="background: darkmagenta">
-        <h2 style="color: black">{{ produto.mascara }}</h2>
+        <h2 style="font-weight: bold; color: black">{{ produto.mascara }}</h2>
         <h2 style="font-weight: bold; color: black">{{ produto.descricao }}</h2>
       </ion-item>
 
       <ion-item *ngFor="let item of grade">
         <div style="padding: 5px">
-          <span style="padding-right: 25px">Tam: {{ item.tamanho }}</span> 
-          <span style="padding-right: 25px">Cor: {{ item.cor }}</span>
+          <span style="padding-right: 15px">Tam: {{ item.tamanho }}</span> 
+          <span style="padding-right: 15px">Cor: {{ item.cor.substring(0, 15) }}</span>
           <span>Unit: {{ item.preco | number }}</span>
         </div>
         <div style="padding: 5px; display: flex; align-items: center;">

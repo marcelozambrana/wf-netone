@@ -42,6 +42,7 @@ import { PedidosProvider } from '../providers/pedidos/pedidos';
 import { ProdutosProvider } from '../providers/produtos/produtos';
 import { FormaCobrancaProvider } from '../providers/forma-cobranca/forma-cobranca';
 import { ViacepProvider } from '../providers/viacep/viacep';
+import { UsuariosProvider } from '../providers/usuarios/usuarios';
 
 @NgModule({
   declarations: [
@@ -94,7 +95,8 @@ import { ViacepProvider } from '../providers/viacep/viacep';
     PedidosProvider,
     ProdutosProvider,
     FormaCobrancaProvider,
-    ViacepProvider
+    ViacepProvider,
+    UsuariosProvider
   ]
 })
 export class AppModule { }

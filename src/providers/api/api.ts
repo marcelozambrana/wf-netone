@@ -2,10 +2,12 @@ import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 
 import { timeout } from 'rxjs/operators/timeout';
+
 import { Cliente } from '../../models/cliente';
 import { Pedido } from '../../models/pedido';
 
 const API = 'http://201.86.95.126:8081/app-web/api/';
+
 const AUTH = 'auth/';
 const PRODUTO = 'produto/';
 const CLIENTE = 'cliente/';
@@ -18,21 +20,10 @@ const CIDADE = 'cidade/';
 
 @Injectable()
 export class ApiProvider {
-  
-  private isMock:boolean = false;
-  
-  constructor(public http: HttpClient) {
-  }
+
+  constructor(public http: HttpClient) { }
 
   public login(email: string, password: string) {
-
-    if (this.isMock) {
-      return new Promise(resolve => {
-        setTimeout(() => {
-          resolve({ token: 'asdero567hjaq33029dvnvz900mn2iofiAAA11a', email: email });
-        }, 2000);
-      });
-    }
 
     return new Promise((resolve, reject) => {
       this.http.post(API + AUTH + 'login',
@@ -55,14 +46,6 @@ export class ApiProvider {
   }
 
   public autorizar(next_token) {
-    
-    if (this.isMock) {
-      return new Promise(resolve => {
-        setTimeout(() => {
-          resolve({ requestToken: 'asdero567hjaq33029dvnvz900mn2iofiAAA11a' });
-        }, 2000);
-      });
-    }
 
     return new Promise((resolve, reject) => {
       this.http.post(API + AUTH + 'autorizar',
@@ -221,14 +204,12 @@ export class ApiProvider {
     });
   }
 
-  async enviarPedido(auth_token, next_token, pedido: Pedido) {
+  async enviarPedido(auth_token, next_token, pedido: any) {
 
-     //diluir desconto nos itens
-     //formatar numero 
-     //formatar dt-emissao 
-     //formatar dt-entrega
-     //formatar telefone
-     //formatar celular
+    //diluir desconto nos itens
+    //formatar numero 
+    //formatar dt-emissao 
+    //formatar dt-entrega
 
     return new Promise((resolve, reject) => {
       this.http.post(API + PEDIDO + 'incluir',

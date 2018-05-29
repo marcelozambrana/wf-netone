@@ -1,7 +1,7 @@
 <ion-header>
 
   <ion-navbar>
-    <ion-title>Pedids</ion-title>
+    <ion-title>Pedidos</ion-title>
   </ion-navbar>
 
 </ion-header>
@@ -52,11 +52,11 @@
 
         <ion-grid *ngIf="item.enviado" no-padding>
           <ion-row style="align-items: center; padding-left: 15px; font-weight: bold">
-            <ion-col col-9>{{item.cliente.nome}}</ion-col>
-            <ion-col col-3>
+            <ion-col col-6>Número: {{item.numeroEnvio}}</ion-col>
+            <ion-col col-6>
               <button ion-button icon-left clear (click)="visualizar(item)">
                 <ion-icon name="ios-redo"></ion-icon>
-                PDF
+                Download PDF
               </button>
             </ion-col>
           </ion-row>

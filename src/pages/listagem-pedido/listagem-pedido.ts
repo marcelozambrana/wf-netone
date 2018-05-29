@@ -10,14 +10,16 @@ import { FileOpener } from '@ionic-native/file-opener';
 import * as pdfmake from 'pdfmake/build/pdfmake';
 import * as pdfFonts from 'pdfmake/build/vfs_fonts';
 
+import { NovoPedidoPage } from './../novo-pedido/novo-pedido';
+
 import { Pedido } from './../../models/pedido';
 import { CondicaoPagamento } from '../../models/condicao-pagamento';
 import { FormaCobranca } from '../../models/forma-cobranca';
 import { CartaoCredito } from '../../models/cartoes-credito';
 
-import { NovoPedidoPage } from './../novo-pedido/novo-pedido';
-import { PedidosProvider } from './../../providers/pedidos/pedidos';
 import { ApiProvider } from './../../providers/api/api';
+import { PedidosProvider } from './../../providers/pedidos/pedidos';
+import { UsuariosProvider } from '../../providers/usuarios/usuarios';
 
 
 @IonicPage()
@@ -36,6 +38,10 @@ export class ListagemPedidoPage {
   public formasCobrancaSelect: FormaCobranca[];
   public cartoes: CartaoCredito[];
 
+  private usuarioLogado: any = null;
+  private netoneAuthToken: string = '';
+  private netoneNextToken: string = '';
+
   constructor(public platform: Platform,
     public navCtrl: NavController,
     public navParams: NavParams,
@@ -44,12 +50,17 @@ export class ListagemPedidoPage {
     private file: File,
     private fileOpener: FileOpener,
     private apiProvider: ApiProvider,
+    private usuariosProvider: UsuariosProvider,
     private pedidosProvider: PedidosProvider) {
 
     this.produtosSelect = this.navParams.get('produtos') || [];
     this.condicoesPagamentoSelect = this.navParams.get('condicoes') || [];
     this.formasCobrancaSelect = this.navParams.get('formasCobranca') || [];
     this.cartoes = this.navParams.get('cartoes') || [];
+
+    this.usuarioLogado = this.navParams.get('usuarioLogado');
+    this.netoneAuthToken = this.navParams.get('netoneAuthToken');
+    this.netoneNextToken = this.navParams.get('netoneNextToken');
 
     this.filter(status);
   }
@@ -97,7 +108,7 @@ export class ListagemPedidoPage {
           alignment: 'right'
         },
         { text: 'Empresa', style: 'subheader' },
-        'Empresa LTDA',
+        'Empresa TESTE LTDA',
         '97.869.812/0001-00',
         'Avenida Brasil, 123 - Maringá/PR',
         '(44) 3030-3333',
@@ -175,7 +186,7 @@ export class ListagemPedidoPage {
       }
     };
 
-    let fileName = "teste1.pdf";
+    let fileName = "pedido-" + pedido.numeroEnvio + ".pdf";
 
     if (this.platform.is('cordova')) {
       // FOR MOBILE DEVICES
@@ -190,14 +201,13 @@ export class ListagemPedidoPage {
           dirPath = this.file.documentsDirectory;
         }
 
-        let dirName = 'DailySheet';
+        let dirName = 'WfmNetone';
 
         this.file.createDir(dirPath, dirName, true).then((dirEntry) => {
           let saveDir = dirPath + '/' + dirName + '/';
           this.file.createFile(saveDir, fileName, true).then((fileEntry) => {
             fileEntry.createWriter((fileWriter) => {
               fileWriter.onwriteend = () => {
-                this.showAlert('Report downloaded', saveDir + fileName);
                 this.fileOpener.open(saveDir + fileName, 'application/pdf')
                   .then(() => console.log('File is opened'))
                   .catch(e => console.log('Error openening file', e));
@@ -207,9 +217,9 @@ export class ListagemPedidoPage {
               };
               fileWriter.write(binaryArray);
             });
-          }).catch((error) => { this.showAlert('Cannot create file', error); });
-        }).catch((error) => { this.showAlert('Cannot create folder', error); });
-      }).catch((error) => { this.showAlert('Error while creating pdf', error); });
+          })
+        })
+      })
     }
     else {
       //FOR BROWSERS
@@ -219,21 +229,65 @@ export class ListagemPedidoPage {
   }
 
   async enviar(pedido) {
-    console.log(pedido);
 
-    pedido.descontoTotal = pedido.descontoTotal.replace(',', '.');
-    pedido.cliente.celular = pedido.cliente.celular.replace('()-', '');
-    pedido.cliente.telefone = pedido.cliente.telefone.replace('()-', '');
-    pedido.cliente.endereco.cep = pedido.cliente.endereco.cep.replace('()-', '');
-    await this.apiProvider.enviarPedido('', '', pedido);
+    if (this.usuarioLogado == null) {
+      this.showAlert("Error", "Falha ao enviar pedido - Sequência inválida.");
+      return;
+    }
 
+    let pedidoEnviar = {
+      numero: this.usuarioLogado.sequencePedido + 1,
+      emissao: "2018-05-28T12:00:00.000",
+      previsaoEntrega: "2018-08-20T12:00:00.000",
+      cliente: {
+        nome: pedido.cliente.nome,
+        email: pedido.cliente.email,
+        cpfCnpj: pedido.cliente.cpfCnpj,
+        rgInscricaoEstadual: pedido.cliente.rgInscricaoEstadual,
+        fantasia: pedido.cliente.fantasia,
+        telefone: pedido.cliente.telefone.replace(/\(|\)|-|\s/g, ''),
+        celular: pedido.cliente.celular.replace(/\(|\)|-|\s/g, ''),
+        endereco: {
+          ibgeCidade: parseInt(pedido.cliente.endereco.ibgeCidade),
+          cep: pedido.cliente.endereco.cep.replace(/\(|\)|-|\s/g, ''),
+          endereco: pedido.cliente.endereco.endereco,
+          bairro: pedido.cliente.endereco.bairro,
+          numero: pedido.cliente.endereco.numero
+        }
+      },
+      itens: pedido.itens.map((i) => {
+        return {
+          idReduzido: i.idReduzido,
+          quantidade: i.quantidade,
+          valor: i.valor
+        }
+      }),
+      formaCobrancaId: pedido.formaCobrancaId != null ? parseInt(pedido.formaCobrancaId) : null,
+      condicaoPagamentoId: pedido.condicaoPagamentoId != null ? parseInt(pedido.condicaoPagamentoId) : null,
+      planoOperadoraId: pedido.planoOperadoraId != null ? parseInt(pedido.planoOperadoraId) : null
+    }
+
+    console.log(JSON.stringify(pedidoEnviar));
+    let retornoEnvio: any = await this.apiProvider.enviarPedido(this.netoneAuthToken,
+      this.netoneNextToken, [pedidoEnviar]);
+
+    console.log(retornoEnvio);
     pedido.enviado = true;
+    pedido.descontoTotal = pedido.descontoTotal.replace(',', '.');
+    pedido.numeroOrigem = retornoEnvio.pedidos[0].numeroOrigem;
+    pedido.numeroEnvio = retornoEnvio.pedidos[0].numero;
+    let self = this;
     this.pedidosProvider.atualizar(pedido).then((result: any) => {
       console.log("Pedido enviado com sucesso!");
+      self.showAlert("Sucesso", "Pedido enviado com sucesso!");
+
+      this.usuarioLogado.sequenceEnvio = pedido.numeroOrigem;
+      this.usuariosProvider.atualizar(this.usuarioLogado);
     }).catch((error) => {
       pedido.enviado = false;
       pedido.descontoTotal = pedido.descontoTotal.replace('.', ',');
       console.log("Falha ao enviar pedido!");
+      self.showAlert("Error", "Falha ao enviar pedido!");
     });
   }
 
@@ -245,6 +299,6 @@ export class ListagemPedidoPage {
     });
     al.present();
   }
-  
+
 
 }

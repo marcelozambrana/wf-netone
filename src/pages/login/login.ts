@@ -5,8 +5,9 @@ import { FormBuilder, Validators } from '@angular/forms';
 import { Storage } from '@ionic/storage';
 
 import { HomePage } from '../home/home';
+
 import { ApiProvider } from '../../providers/api/api';
-import { ClientesProvider } from '../../providers/clientes/clientes';
+import { UsuariosProvider } from '../../providers/usuarios/usuarios';
 
 
 @IonicPage()
@@ -17,10 +18,10 @@ import { ClientesProvider } from '../../providers/clientes/clientes';
 export class LoginPage {
 
   public loginForm: any;
-  mensagemErroEmail = "";
-  mensagemErroPassword = "";
-  isErroEmail = false;
-  isErroPassword = false;
+  mensagemErroEmail: string = "";
+  mensagemErroPassword: string = "";
+  isErroEmail: boolean = false;
+  isErroPassword: boolean = false;
 
   constructor(public navCtrl: NavController,
     public navParams: NavParams,
@@ -28,13 +29,12 @@ export class LoginPage {
     private loadingCtrl: LoadingController,
     private alertCtrl: AlertController,
     private storage: Storage,
-    private clientesProvider: ClientesProvider,
+    private usuariosProvider: UsuariosProvider,
     private apiProvider: ApiProvider) {
 
     this.loginForm = formBuilder.group({
       email: ['', Validators.required],
-      password: ['', Validators.compose([Validators.minLength(4), Validators.maxLength(20),
-      Validators.required])]
+      password: ['', Validators.compose([Validators.minLength(4), Validators.maxLength(20), Validators.required])]
     });
 
     this.storage.get('usuarioAutenticado').then((isAuth) => {
@@ -47,6 +47,7 @@ export class LoginPage {
   }
 
   async login() {
+
     let { email, password } = this.loginForm.controls;
 
     if (!this.loginForm.valid) {
@@ -72,7 +73,6 @@ export class LoginPage {
         content: 'Logando...',
         dismissOnPageChange: true
       });
-
       loader.present();
 
       try {
@@ -87,7 +87,7 @@ export class LoginPage {
           this.storage.set('netone-auth-token', resultLogin.token);
           this.storage.set('netone-next-request-token', resultAutorizar.requestToken);
 
-          let user: any = await this.clientesProvider.buscarUsuario(email.value);
+          let user: any = await this.usuariosProvider.buscarUsuario(email.value);
           console.log(user);
 
           if (user) {
@@ -95,18 +95,21 @@ export class LoginPage {
             this.storage.set('caminhoFirestone', rootPathFirebase);
           } else {
             console.log("Primeiro acesso, criando usuário: " + email.value);
-            let newDocUser = await this.clientesProvider.adicionarUsuario(email.value);
+            let newDocUser = await this.usuariosProvider.adicionarUsuario(email.value);
             this.storage.set('caminhoFirestone', newDocUser.path);
           }
-          
-          this.navCtrl.setRoot(HomePage);
+
+          if (user == null) {
+            user = await this.usuariosProvider.buscarUsuario(email.value);
+          }
+          this.navCtrl.setRoot(HomePage, { usuarioLogado: user });
         }
 
       } catch (e) {
         loader.dismiss();
-        console.log(e)
-        this.alert('Erro ao logar', e.message ? e.message : 'Não foi possível alcançar o servidor. Tente novamente.');
-
+        console.log(e);
+        this.alert('Erro ao logar',
+          e.message ? e.message : 'Não foi possível alcançar o servidor. Tente novamente.');
       }
     }
   }
