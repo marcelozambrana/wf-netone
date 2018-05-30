@@ -85,9 +85,7 @@ export class NovoPedidoPage {
         'cor': produto.cor.length > 0 ? produto.cor : ''
       };
 
-      let result = this.pedido.itens.filter(element => {
-        return element.idReduzido === produto.idReduzido
-      })
+      let result = this.pedido.itens.filter(element => element.idReduzido === produto.idReduzido)
 
       if (result.length > 0) {
         result[0].quantidade++;
@@ -450,8 +448,7 @@ export class NovoPedidoPage {
   }
 
   async calcFormaCobranca() {
-    let formaDescricaoArray = this.formasCobranca.filter(
-      f => f.id == this.pedido.formaCobrancaId);
+    let formaDescricaoArray = this.formasCobranca.filter(f => f.id == this.pedido.formaCobrancaId);
 
     console.log(formaDescricaoArray)
     if (!formaDescricaoArray || formaDescricaoArray.length == 0) {

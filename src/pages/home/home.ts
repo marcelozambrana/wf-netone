@@ -80,9 +80,9 @@ export class HomePage {
       await this.condicoesProvider.init();
       await this.formasProvider.init();
       await this.pedidosProvider.init();
-      this.buscarProdutos();
-      this.buscarCondicoesEPlanosOperadora();
-      this.buscarFormas();
+      await this.buscarProdutos();
+      await this.buscarCondicoesEPlanosOperadora();
+      await this.buscarFormas();
 
       loaderInit.dismiss();
     });
@@ -328,13 +328,14 @@ export class HomePage {
     }
 
     let self = this;
+
+    this.clientes = await this.clientesProvider.todosParaPedido();
     let clientesApi: Cliente[] = result[0].result;
 
     clientesApi.forEach(async function (cli) {
-
       let clienteDadoId = null;
       self.clientes.forEach(c => {
-        if (c.cpfCnpj == cli.cpfCnpj) {
+        if (c.cpfCnpj.replace(/\D/g, "") == cli.cpfCnpj.replace(/\D/g, "")) {
           clienteDadoId = c;
         }
       });
@@ -364,9 +365,10 @@ export class HomePage {
         "idReduzido": p.idReduzido,
         "descricao": p.descricao,
         "grupo": p.grupoDescricao,
-        "subgrupo": p.subgrupoDescricao,
+        "subgrupo": (p.subgrupoDescricao 
+            && (p.subgrupoDescricao.toLowerCase().indexOf('não definido') == -1)) ? p.subgrupoDescricao : null,
         "modelo": p.modelo,
-        "cor": p.cor ? [p.cor] : [],
+        "cor": (p.cor && (p.cor.toLowerCase().indexOf('não definida') == -1)) ? [p.cor] : [],
         "tamanho": p.tamanho ? [p.tamanho] : [],
         "largura": (p.largura && p.largura > 0) ? p.largura : null,
         "altura": (p.altura && p.altura > 0) ? p.altura : null,
@@ -430,12 +432,11 @@ export class HomePage {
 
   async updateCliente(clienteDadoId, cli) {
 
-    cli.isNovo = false;
-
     if (clienteDadoId != null) {
       let cliente = { 'id': clienteDadoId.id, ...cli } as Cliente;
       await this.clientesProvider.atualizar(cliente);
     } else {
+      cli.endereco = (cli.enderecos && cli.enderecos.length > 0) ? cli.enderecos[0] : {};
       await this.clientesProvider.adicionar(cli);
     }
   }

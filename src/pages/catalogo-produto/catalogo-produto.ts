@@ -44,9 +44,8 @@ export class CatalogoProdutoPage {
       return;
     }
 
-    this.items = this.produtos.filter((item) => {
-      item.descricao.toLowerCase().contains(this.searchTerm.toLowerCase());
-    })
+    this.items = this.produtos.filter((item) =>
+      item.descricao.toLowerCase().includes(this.searchTerm.toLowerCase()))
   }
 
   buscaMaisProdutos(numeroPagina) {
@@ -188,9 +187,7 @@ export class ModalAdicionarProdutoPage {
 
     this.produto = this.params.get('produtoAdicionar');
     console.log(this.produto);
-    let gradeFilter = this.produto.agrupamento.filter(p => {
-      return (p.preco && p.preco != null)
-    });
+    let gradeFilter = this.produto.agrupamento.filter(p => p.preco && p.preco != null);
 
     this.grade = gradeFilter.map(p => {
       return {
@@ -221,7 +218,7 @@ export class ModalAdicionarProdutoPage {
 
   salvarModalAdicionar() {
     console.log(this.grade)
-    let produtosAdicionados = this.grade.filter(p =>  p.quantidade > 0);
+    let produtosAdicionados = this.grade.filter(p => p.quantidade > 0);
 
     produtosAdicionados.forEach(prodAdd => {
       this.ev.publish('adicionarProdutoCarrinho', prodAdd);

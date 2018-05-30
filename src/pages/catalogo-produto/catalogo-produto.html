@@ -23,7 +23,7 @@
         <p text-center>{{ prod.subgrupo }}</p>
         <br/>
         <p text-center>Tamanho: {{ prod.tamanho.toString() }}</p>
-        <p text-center>Cor: {{ prod.cor.toString() }}</p>
+        <p text-center *ngIf="prod.cor.length > 0">Cor: {{ prod.cor.toString() }}</p>
         <p text-center *ngIf="prod.comprimento">Comprimento: {{ prod.comprimento }}</p>
         <p text-center *ngIf="prod.largura">Largura: {{ prod.largura }}</p>
         <p text-center *ngIf="prod.altura">Altura: {{ prod.altura }}</p>

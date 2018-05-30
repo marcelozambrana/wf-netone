@@ -206,11 +206,6 @@ export class ApiProvider {
 
   async enviarPedido(auth_token, next_token, pedido: any) {
 
-    //diluir desconto nos itens
-    //formatar numero 
-    //formatar dt-emissao 
-    //formatar dt-entrega
-
     return new Promise((resolve, reject) => {
       this.http.post(API + PEDIDO + 'incluir',
         JSON.stringify(pedido),

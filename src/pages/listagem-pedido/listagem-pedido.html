@@ -25,14 +25,12 @@
       <ion-card *ngFor="let item of items | async">
         <ion-grid *ngIf="!item.enviado">
           <ion-row>
-            <ion-col col-7>{{item.numero}}</ion-col>
-            <ion-col col-5>{{item.cliente.nome}}</ion-col>
+            <ion-col col-5>{{item.emissao | date: 'dd/MM/yy'}}</ion-col>
+            <ion-col col-7>{{item.cliente.nome}}</ion-col>
           </ion-row>
           <ion-row>
             <ion-col col-4>{{item.itens.length}} item(ns)</ion-col>
             <ion-col col-8>R$ {{item.total.toFixed(2) }}</ion-col>
-            <!--<ion-col col-6>Emissão: {{item.emissao | date: 'dd/MM/yy'}}</ion-col>
-            <ion-col col-6>Entrega: {{item.previsaoEntrega | date: 'dd/MM/yy' }}</ion-col>-->
           </ion-row>
           <ion-row>
             <ion-col col-6>

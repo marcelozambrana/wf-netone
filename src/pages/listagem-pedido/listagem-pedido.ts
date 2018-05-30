@@ -235,10 +235,18 @@ export class ListagemPedidoPage {
       return;
     }
 
+    let desconto = parseFloat(pedido.descontoTotal.replace(',', '.'));
+    let descontoPorItem: string = "0.00";
+    let qtdeTotalItens = pedido.itens.length;
+    if (desconto > 0) {
+      descontoPorItem = (desconto / qtdeTotalItens).toFixed(2);
+    }
+    console.log(parseFloat(descontoPorItem));
+
     let pedidoEnviar = {
       numero: this.usuarioLogado.sequencePedido + 1,
-      emissao: "2018-05-28T12:00:00.000",
-      previsaoEntrega: "2018-08-20T12:00:00.000",
+      emissao: new Date(pedido.emissao).toISOString(),
+      previsaoEntrega: new Date(pedido.previsaoEntrega).toISOString(),
       cliente: {
         nome: pedido.cliente.nome,
         email: pedido.cliente.email,
@@ -259,7 +267,8 @@ export class ListagemPedidoPage {
         return {
           idReduzido: i.idReduzido,
           quantidade: i.quantidade,
-          valor: i.valor
+          valor: i.valor,
+          desconto: parseFloat(descontoPorItem)
         }
       }),
       formaCobrancaId: pedido.formaCobrancaId != null ? parseInt(pedido.formaCobrancaId) : null,
@@ -267,21 +276,23 @@ export class ListagemPedidoPage {
       planoOperadoraId: pedido.planoOperadoraId != null ? parseInt(pedido.planoOperadoraId) : null
     }
 
+
     console.log(JSON.stringify(pedidoEnviar));
+
     let retornoEnvio: any = await this.apiProvider.enviarPedido(this.netoneAuthToken,
       this.netoneNextToken, [pedidoEnviar]);
 
     console.log(retornoEnvio);
     pedido.enviado = true;
     pedido.descontoTotal = pedido.descontoTotal.replace(',', '.');
-    pedido.numeroOrigem = retornoEnvio.pedidos[0].numeroOrigem;
-    pedido.numeroEnvio = retornoEnvio.pedidos[0].numero;
+    pedido.numeroOrigem = parseInt(retornoEnvio.pedidos[0].numeroOrigem);
+    pedido.numeroEnvio = parseInt(retornoEnvio.pedidos[0].numero);
     let self = this;
     this.pedidosProvider.atualizar(pedido).then((result: any) => {
       console.log("Pedido enviado com sucesso!");
       self.showAlert("Sucesso", "Pedido enviado com sucesso!");
 
-      this.usuarioLogado.sequenceEnvio = pedido.numeroOrigem;
+      this.usuarioLogado.sequencePedido = parseInt(pedido.numeroOrigem);
       this.usuariosProvider.atualizar(this.usuarioLogado);
     }).catch((error) => {
       pedido.enviado = false;

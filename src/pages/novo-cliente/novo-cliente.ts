@@ -64,6 +64,15 @@ export class NovoClientePage {
   carregarCliente(cli) {
     this.cliente = cli;
     this.isClienteCpfExistente = true;
+
+    let cidade = CIDADES.filter(c => cli.endereco && c.codigoIbge == cli.endereco.ibgeCidade)
+    if (cidade.length > 0) {
+      this.cliente.endereco.uf = cidade[0].estado.sigla;
+      this.cliente.endereco.cidade = {};
+      this.cliente.endereco.ibgeCidade = cidade[0].codigoIbge;
+      this.cliente.endereco.cidade.codigoIbge = cidade[0].codigoIbge;
+      this.cliente.endereco.cidade.nome = cidade[0].nome;
+    }
     this.avancaPasso2();
   }
 
@@ -272,6 +281,7 @@ export class NovoClientePage {
   limparCidade() {
     this.cliente.endereco.ibgeCidade = null;
     this.cliente.endereco.cidade = null;
+    this.carregarCidades();
   }
 
   cancelar() {
@@ -305,7 +315,7 @@ export class NovoClientePage {
       return;
     }
 
-    let data:any = await this.viacepProvider.callService(this.cliente.endereco.cep);
+    let data: any = await this.viacepProvider.callService(this.cliente.endereco.cep);
     console.log(data);
 
     if (data && data.erro) {
@@ -318,7 +328,7 @@ export class NovoClientePage {
       this.cliente.endereco.endereco = data.logradouro;
       this.cliente.endereco.bairro = data.bairro;
       this.cliente.endereco.uf = data.uf;
-      this.carregarCidades();
+      this.cidadesEstado = [];
       this.cliente.endereco.ibgeCidade = data.ibge;
       this.cliente.endereco.cidade = {};
       this.cliente.endereco.cidade.codigoIbge = data.ibge;

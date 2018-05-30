@@ -60,7 +60,6 @@ export class ClientesProvider {
   }
 
   async adicionar(cliente: Cliente) {
-    cliente.isNovo = true;
     cliente.cpfCnpj = cliente.cpfCnpj.replace(/\D/g, "");
     return this.cliCollection.add(cliente);
   }

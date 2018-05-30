@@ -16,5 +16,4 @@ export interface Cliente {
         cep: number;
         uf: string;
     };
-    isNovo: boolean;
 }
