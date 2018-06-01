@@ -82,7 +82,10 @@ export class NovoPedidoPage {
         'quantidade': produto.quantidade ? produto.quantidade : 1,
         'valor': produto.preco,
         'tamanho': produto.tamanho.length > 0 ? produto.tamanho : '',
-        'cor': produto.cor.length > 0 ? produto.cor : ''
+        'cor': produto.cor.length > 0 ? produto.cor : '',
+        'comprimento': produto.comprimento,
+        'largura': produto.largura,
+        'altura': produto.altura
       };
 
       let result = this.pedido.itens.filter(element => element.idReduzido === produto.idReduzido)
@@ -163,8 +166,11 @@ export class NovoPedidoPage {
 
     this.pedirConfirmacaoParaSairDoPedido = false;
 
+    console.log(this.pedido);
+    this.pedido.enviado = false;
+    this.pedido.numeroOrigem = null;
+    this.pedido.numeroEnvio = null;
     if (!this.pedido.numero) {
-      this.pedido.enviado = false;
 
       this.pedidoService.adicionar(this.pedido).then((result: any) => {
         this.alert("Sucesso", "Pedido realizado com sucesso.");

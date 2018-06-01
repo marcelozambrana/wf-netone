@@ -74,18 +74,19 @@
         <ion-item class="item-pedido" *ngFor="let item of pedido.itens">
           <ion-grid>
             <ion-row style="font-weight: bold; color: black">
-              <ion-col col-5>{{ item.mascara }}</ion-col>
-              <ion-col col-7>- {{ item.nome }}</ion-col>
+              <ion-col col-12>{{ item.mascara }} - {{ item.nome }}</ion-col>
             </ion-row>
             <ion-row>
-              <ion-col col-2 style="overflow: hidden">
+              <ion-col col-3 style="overflow: hidden">
                 <span style=" font-weight: bold">Tam: </span>{{ item.tamanho }}</ion-col>
-              <ion-col col-5 style="overflow: hidden">
-                <span style=" font-weight: bold" *ngIf="item.cor">Cor: </span>{{ item.cor }}</ion-col>
+              <ion-col col-4 style="overflow: hidden" *ngIf="item.cor">
+                <span style=" font-weight: bold">Cor: </span>{{ item.cor }}</ion-col>
+              <ion-col col-4 style="overflow: hidden" *ngIf="!item.cor">
+                {{ item.comprimento ? item.comprimento : 0 }}x{{ item.largura ? item.largura : 0 }}x{{ item.altura ? item.altura : 0 }}cm</ion-col>
               <ion-col col-3 style="overflow: hidden">
                 <span style=" font-weight: bold">Unit: </span>{{ item.valor | number }}</ion-col>
               <ion-col col-2 style="overflow: hidden">
-                  <span style=" font-weight: bold">Qtd: </span>{{ item.quantidade }}</ion-col>
+                <span style=" font-weight: bold">Qtd: </span>{{ item.quantidade }}</ion-col>
             </ion-row>
             <ion-row>
               <ion-col col-3 offset-1>
@@ -109,7 +110,7 @@
       </ion-list>
     </div>
   </div>
-  
+
   <div class="form" padding>
     <div *ngIf="passo=='dadosPagamento'">
       <ion-list>
@@ -138,8 +139,8 @@
           </ion-row>
           <ion-row>
             <ion-col col-8>
-              <span style="font-weight: bold">Cidade:</span> 
-                {{ (pedido.cliente.endereco && pedido.cliente.endereco.cidade) ? pedido.cliente.endereco.cidade.nome : '' }}</ion-col>
+              <span style="font-weight: bold">Cidade:</span>
+              {{ (pedido.cliente.endereco && pedido.cliente.endereco.cidade) ? pedido.cliente.endereco.cidade.nome : '' }}</ion-col>
             <ion-col col-4>
               <span style="font-weight: bold">UF:</span> {{pedido.cliente.endereco.uf}}</ion-col>
           </ion-row>
@@ -178,7 +179,7 @@
         <ion-item>
           <ion-label floating>(R$) Desconto total</ion-label>
           <ion-input type="text" [disabled]="(!pedido.condicaoPagamentoId && !pedido.planoOperadoraId) || !pedido.formaCobrancaId || pedido.enviado"
-            [(ngModel)]="pedido.descontoTotal" [brmasker]="{money: true}" (ionBlur)="calcDesconto()"  clearInput="true" clearOnEdit="true"></ion-input>
+            [(ngModel)]="pedido.descontoTotal" [brmasker]="{money: true}" (ionBlur)="calcDesconto()" clearInput="true" clearOnEdit="true"></ion-input>
         </ion-item>
 
       </ion-list>

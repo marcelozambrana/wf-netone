@@ -102,7 +102,8 @@ export class LoginPage {
           if (user == null) {
             user = await this.usuariosProvider.buscarUsuario(email.value);
           }
-          this.navCtrl.setRoot(HomePage, { usuarioLogado: user });
+          this.storage.set('usuarioLogado', user);
+          this.navCtrl.setRoot(HomePage);
         }
 
       } catch (e) {

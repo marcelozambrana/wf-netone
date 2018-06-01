@@ -45,7 +45,9 @@ export class CatalogoProdutoPage {
     }
 
     this.items = this.produtos.filter((item) =>
-      item.descricao.toLowerCase().includes(this.searchTerm.toLowerCase()))
+      item.descricao.toLowerCase().includes(this.searchTerm.toLowerCase()) ||
+      item.mascara.toLowerCase().includes(this.searchTerm.toLowerCase())
+    )
   }
 
   buscaMaisProdutos(numeroPagina) {
@@ -197,7 +199,10 @@ export class ModalAdicionarProdutoPage {
         preco: p.preco,
         tamanho: p.tamanho.length > 0 ? p.tamanho[0] : '',
         cor: p.tamanho.length > 0 ? p.cor[0] : '',
-        quantidade: 0
+        quantidade: 0,
+        altura: p.altura,
+        comprimento: p.comprimento,
+        largura: p.largura
       }
     })
   }

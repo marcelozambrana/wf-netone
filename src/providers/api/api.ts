@@ -16,6 +16,7 @@ const FORMA_COBRANCA = 'formacobranca/';
 const CONDICAO_PAGAMENTO = 'condicaopagamento/';
 const CARTAO_CREDITO = 'cartaocredito/';
 const CIDADE = 'cidade/';
+const EMPRESA = 'empresa/';
 
 
 @Injectable()
@@ -68,7 +69,7 @@ export class ApiProvider {
   public logout(auth_token, next_token) {
     return new Promise((resolve, reject) => {
       this.http.post(API + AUTH + 'logout',
-        JSON.stringify({}),
+        {},
         {
           headers: {
             'Content-Type': 'application/json',
@@ -217,6 +218,27 @@ export class ApiProvider {
             'netone-next-request-token': next_token
           }
         }).subscribe(res => {
+          resolve(res);
+        }, err => {
+          reject(err.error);
+        });
+    });
+  }
+
+  async getDadosEmpresa(auth_token, next_token) {
+    return new Promise((resolve, reject) => {
+      this.http.post(API + CIDADE + 'todos',
+        {},
+        {
+          headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json',
+            'netone-auth-token': auth_token,
+            'netone-next-request-token': next_token
+          }
+        }).subscribe(res => {
+          console.log("getDadosEmpresa resolve")
+          console.log(res)
           resolve(res);
         }, err => {
           reject(err.error);

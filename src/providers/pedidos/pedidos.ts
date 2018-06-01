@@ -55,7 +55,12 @@ export class PedidosProvider {
   }
 
   public buscarPedidosPorStatus(enviado: boolean): Observable<Pedido[]> {
-    let aux: AngularFirestoreCollection<Pedido> = this.afs.collection(this.rootPathFirebase + '/pedidos', ref => ref.where('enviado', '==', enviado));
+    let aux: AngularFirestoreCollection<Pedido>;
+    if (enviado) {
+      aux = this.afs.collection(this.rootPathFirebase + '/pedidos', ref => ref.where('enviado', '==', enviado).orderBy('numeroEnvio', 'desc'));
+    } else {
+      aux = this.afs.collection(this.rootPathFirebase + '/pedidos', ref => ref.where('enviado', '==', enviado).orderBy('emissao', 'desc'));
+    }
     return aux.snapshotChanges().map(changes => {
       return changes.map(a => {
         const data = a.payload.doc.data() as Pedido;

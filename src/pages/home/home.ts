@@ -60,20 +60,22 @@ export class HomePage {
     });
     loaderInit.present();
 
-    this.usuarioLogado = this.navParams.get('usuarioLogado');
-
+    
     Promise.all([
       this.storage.get("caminhoFirestone"),
       this.storage.get("netone-auth-token"),
       this.storage.get("netone-next-request-token"),
+      this.storage.get("usuarioLogado"),
     ]).then(async values => {
-
+      
       this.rootPathFirebase = values[0];
       this.netoneAuthToken = values[1];
       this.netoneNextToken = values[2];
+      this.usuarioLogado = values[3];
       console.log('Root path storage firebase: ' + this.rootPathFirebase);
       console.log('Auth token: ' + this.netoneAuthToken);
       console.log('Next token: ' + this.netoneNextToken);
+      console.log('Usuario logado: ' + this.usuarioLogado);
 
       await this.clientesProvider.init();
       await this.produtosProvider.init();
@@ -181,6 +183,7 @@ export class HomePage {
   async logout() {
 
     this.storage.set('usuarioAutenticado', false);
+    this.storage.set('usuarioLogado', null);
     this.storage.set('caminhoFirestone', null);
     this.storage.set('netone-auth-token', null);
     this.storage.set('netone-next-request-token', null);

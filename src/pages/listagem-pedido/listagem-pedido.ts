@@ -2,7 +2,7 @@ import { Platform } from 'ionic-angular';
 import { Observable } from 'rxjs/Observable';
 import { Component } from '@angular/core';
 
-import { IonicPage, NavController, NavParams, ToastController, AlertController } from 'ionic-angular';
+import { IonicPage, NavController, NavParams, AlertController } from 'ionic-angular';
 
 import { File } from '@ionic-native/file';
 import { FileOpener } from '@ionic-native/file-opener';
@@ -45,7 +45,6 @@ export class ListagemPedidoPage {
   constructor(public platform: Platform,
     public navCtrl: NavController,
     public navParams: NavParams,
-    private toastCtrl: ToastController,
     private alertCtrl: AlertController,
     private file: File,
     private fileOpener: FileOpener,
@@ -93,41 +92,112 @@ export class ListagemPedidoPage {
 
   gerarPdfPedido(pedido: Pedido) {
 
-    console.log(pedido)
+    console.log(pedido);
     let formaCobranca = this.formasCobrancaSelect.filter(f => f.id == pedido.formaCobrancaId.toString());
 
     let itens: any = pedido.itens;
-    let itensPdf = itens.map(item => [item.mascara, item.quantidade, item.valor]);
+    let itensPdf = itens.map(item =>
+      [item.idReduzido,
+      item.nome,
+      (item.comprimento ? item.comprimento : '0') + 'x' +
+      (item.largura ? item.largura : '0') + 'x' +
+      (item.altura ? item.altura : '0') + 'cm',
+      item.tamanho,
+      item.quantidade,
+      item.valor]);
 
     pdfmake.vfs = pdfFonts.pdfMake.vfs;
     var docDefinition = {
       content: [
-        { text: 'PEDIDO', style: 'header' },
+        { text: 'Pedido de Venda', style: 'header' },
+        { text: 'Nr. ' + pedido.numeroEnvio, style: 'header' },
         {
           text: new Date(pedido.emissao).toLocaleDateString("pt-BR", { year: "numeric", month: "long", day: "numeric" }),
           alignment: 'right'
         },
         { text: 'Empresa', style: 'subheader' },
-        'Empresa TESTE LTDA',
-        '97.869.812/0001-00',
-        'Avenida Brasil, 123 - Maringá/PR',
-        '(44) 3030-3333',
-
+        {
+          alignment: 'left',
+          columns: [
+            { text: 'Razão Social: ', width: 90 },
+            { text: 'Empresa TESTE LTDA', width: 200 },
+            { text: 'Fantasia: ', width: 90 },
+            { text: 'CARRARO - Colchões', width: 200 }
+          ]
+        },
+        {
+          alignment: 'left',
+          columns: [
+            { text: 'Endereço: ', width: 90 },
+            { text: 'Rua João Bettega 1586, Portão - Curitiba/PR - 81070-001', width: '*' }
+          ]
+        },
+        {
+          alignment: 'left',
+          columns: [
+            { text: 'Telefone: ', width: 90 },
+            { text: '(41) 3333-3333', width: 200 },
+            { text: 'Celular: ', width: 90 },
+            { text: '(41) 99999-9999', width: 120 }
+          ]
+        },
+        {
+          alignment: 'left',
+          columns: [
+            { text: 'Email:', width: 90 },
+            { text: 'carraro.ccj@gmail.com', width: 200 }
+          ]
+        },
         { text: 'Cliente', style: 'subheader' },
-        pedido.cliente.nome,
-        pedido.cliente.cpfCnpj,
-        pedido.cliente.telefone,
-
+        {
+          alignment: 'left',
+          columns: [
+            { text: 'Cliente: ', width: 90 },
+            { text: pedido.cliente.nome, width: '*' }
+          ]
+        },
+        {
+          alignment: 'left',
+          columns: [
+            { text: 'CPF/CNPJ: ', width: 90 },
+            { text: pedido.cliente.cpfCnpj, width: '*' }
+          ]
+        },
+        {
+          alignment: 'left',
+          columns: [
+            { text: 'Endereço: ', width: 90 },
+            {
+              text: pedido.cliente.endereco.endereco +
+                ', ' + pedido.cliente.endereco.numero +
+                ', ' + pedido.cliente.endereco.bairro +
+                ' - ' + pedido.cliente.endereco.cidade.nome + '/' + pedido.cliente.endereco.uf +
+                ' - ' + pedido.cliente.endereco.cep, width: '*'
+            }
+          ]
+        },
+        {
+          alignment: 'left',
+          columns: [
+            { text: 'Telefone: ', width: 90 },
+            { text: pedido.cliente.telefone, width: 200 },
+            { text: 'Celular: ', width: 90 },
+            { text: pedido.cliente.celular, width: 120 }
+          ]
+        },
         { text: 'Items', style: 'subheader' },
         {
           style: 'itemsTable',
           table: {
-            widths: ['*', 75, 75],
+            widths: [65, 220, 85, 30, 35, 55],
             body: [
               [
-                { text: 'Máscara', style: 'itemsTableHeader' },
-                { text: 'Quantidade', style: 'itemsTableHeader' },
-                { text: 'Valor Unit.', style: 'itemsTableHeader' },
+                { text: 'Código', style: 'itemsTableHeader' },
+                { text: 'Descrição dos Produtos / Serviços', style: 'itemsTableHeader' },
+                { text: 'Medidas', style: 'itemsTableHeader' },
+                { text: 'Tam.', style: 'itemsTableHeader' },
+                { text: 'Qtde.', style: 'itemsTableHeader' },
+                { text: 'R$ Unit.', style: 'itemsTableHeader' },
               ]
             ].concat(itensPdf)
           }
@@ -276,11 +346,21 @@ export class ListagemPedidoPage {
       planoOperadoraId: pedido.planoOperadoraId != null ? parseInt(pedido.planoOperadoraId) : null
     }
 
+    //let dadosEmpresa = await this.apiProvider.getDadosEmpresa(this.netoneAuthToken, this.netoneNextToken);
 
     console.log(JSON.stringify(pedidoEnviar));
 
     let retornoEnvio: any = await this.apiProvider.enviarPedido(this.netoneAuthToken,
       this.netoneNextToken, [pedidoEnviar]);
+
+    if (retornoEnvio.code != 200) {
+      this.usuarioLogado.sequencePedido = this.usuarioLogado.sequencePedido + 1;
+      pedido.enviado = false;
+      pedido.descontoTotal = pedido.descontoTotal.replace('.', ',');
+      console.log("Falha ao enviar pedido!");
+      this.showAlert("Error", retornoEnvio.message);
+      return;
+    }
 
     console.log(retornoEnvio);
     pedido.enviado = true;
