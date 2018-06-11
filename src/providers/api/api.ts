@@ -40,7 +40,7 @@ export class ApiProvider {
         .subscribe(res => {
           resolve(res);
         }, err => {
-          reject(err.error ? err.error : err);
+          resolve(err.error ? err.error : err);
         });
 
     });
@@ -61,7 +61,7 @@ export class ApiProvider {
         }).subscribe(res => {
           resolve(res);
         }, err => {
-          reject(err.error ? err.error : err);
+          resolve(err.error ? err.error : err);
         });
     });
   }
@@ -82,7 +82,7 @@ export class ApiProvider {
           resolve(res);
         }, err => {
           console.log('logout error: ' + err);
-          reject(err.error);
+          resolve(err.error);
         });
     });
   }
@@ -101,7 +101,7 @@ export class ApiProvider {
         }).subscribe(res => {
           resolve(res);
         }, err => {
-          reject(err.error);
+          resolve(err.error);
         });
     });
   }
@@ -121,7 +121,7 @@ export class ApiProvider {
         }).subscribe(res => {
           resolve(res);
         }, err => {
-          reject(err.error);
+          resolve(err.error);
         });
     });
   }
@@ -140,7 +140,7 @@ export class ApiProvider {
         }).subscribe(res => {
           resolve(res);
         }, err => {
-          reject(err.error);
+          resolve(err.error);
         });
     });
   }
@@ -159,7 +159,7 @@ export class ApiProvider {
         }).subscribe(res => {
           resolve(res);
         }, err => {
-          reject(err.error);
+          resolve(err.error);
         });
     });
   }
@@ -178,7 +178,7 @@ export class ApiProvider {
         }).subscribe(res => {
           resolve(res);
         }, err => {
-          reject(err.error);
+          resolve(err.error);
         });
     });
   }
@@ -200,7 +200,7 @@ export class ApiProvider {
           console.log(res)
           resolve(res);
         }, err => {
-          reject(err.error);
+          resolve(err.error);
         });
     });
   }
@@ -220,7 +220,7 @@ export class ApiProvider {
         }).subscribe(res => {
           resolve(res);
         }, err => {
-          reject(err.error);
+          resolve(err.error);
         });
     });
   }
@@ -241,7 +241,7 @@ export class ApiProvider {
           console.log(res)
           resolve(res);
         }, err => {
-          reject(err.error);
+          resolve(err.error);
         });
     });
   }

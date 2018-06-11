@@ -159,8 +159,16 @@ export class NovoPedidoPage {
   }
 
   async salvar() {
+
+    let loader = this.loadingCtrl.create({
+      content: 'Salvando...',
+      dismissOnPageChange: true
+    });
+    loader.present();
+
     let retorno = await this.validarPedido(this.pedido);
     if (!retorno) {
+      loader.dismiss();
       return;
     }
 

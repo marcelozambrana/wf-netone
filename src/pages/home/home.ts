@@ -219,6 +219,12 @@ export class HomePage {
       resultSyncProdutos = await this.apiProvider.syncProdutos(this.netoneAuthToken,
         this.netoneNextToken, this.usuarioLogado.sequenceApiProduto);
 
+      if (resultSyncProdutos.code != 200) {
+        //loaderSync.dismiss();
+        this.toastAlert('Falha ao sincronizar dados... retorno status: ' + resultSyncProdutos.code);
+        return;
+      }
+
       resultSyncClientes = await this.apiProvider.syncClientes(this.netoneAuthToken,
         this.netoneNextToken, this.usuarioLogado.sequenceApiCliente);
 
@@ -231,6 +237,7 @@ export class HomePage {
       resultSyncCartoes = await this.apiProvider.syncCartoesPlanos(this.netoneAuthToken,
         this.netoneNextToken);
 
+    
       this.usuarioLogado.sequenceApiProduto = await this.processaProdutosAPI(resultSyncProdutos);
       this.usuarioLogado.sequenceApiCliente = await this.processaClientesAPI(resultSyncClientes);
       this.usuarioLogado.sequenceApiFormaCob = await this.processaFormasAPI(resultSyncFormas);

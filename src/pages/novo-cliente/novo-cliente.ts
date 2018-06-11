@@ -78,7 +78,14 @@ export class NovoClientePage {
 
   adicionar(cliente: Cliente) {
 
+    let loader = this.loadingCtrl.create({
+      content: 'Salvando...',
+      dismissOnPageChange: true
+    });
+    loader.present();
+
     if (!this.validaDadosPreSalvamento(cliente)) {
+      loader.dismiss();
       return;
     }
     this.normalizar(cliente);
@@ -97,7 +104,14 @@ export class NovoClientePage {
 
   atualizar(cliente: Cliente) {
 
+    let loader = this.loadingCtrl.create({
+      content: 'Salvando...',
+      dismissOnPageChange: true
+    });
+    loader.present();
+
     if (!this.validaDadosPreSalvamento(cliente)) {
+      loader.dismiss();
       return;
     }
     this.normalizar(cliente);

@@ -2,7 +2,7 @@ import { Platform } from 'ionic-angular';
 import { Observable } from 'rxjs/Observable';
 import { Component } from '@angular/core';
 
-import { IonicPage, NavController, NavParams, AlertController } from 'ionic-angular';
+import { IonicPage, NavController, NavParams, LoadingController, AlertController } from 'ionic-angular';
 
 import { File } from '@ionic-native/file';
 import { FileOpener } from '@ionic-native/file-opener';
@@ -12,6 +12,7 @@ import * as pdfFonts from 'pdfmake/build/vfs_fonts';
 
 import { NovoPedidoPage } from './../novo-pedido/novo-pedido';
 
+import { CIDADES } from '../../providers/cidades/cidades';
 import { Pedido } from './../../models/pedido';
 import { CondicaoPagamento } from '../../models/condicao-pagamento';
 import { FormaCobranca } from '../../models/forma-cobranca';
@@ -45,6 +46,7 @@ export class ListagemPedidoPage {
   constructor(public platform: Platform,
     public navCtrl: NavController,
     public navParams: NavParams,
+    private loadingCtrl: LoadingController,
     private alertCtrl: AlertController,
     private file: File,
     private fileOpener: FileOpener,
@@ -93,6 +95,17 @@ export class ListagemPedidoPage {
   gerarPdfPedido(pedido: Pedido) {
 
     console.log(pedido);
+
+    let loader = this.loadingCtrl.create({
+      content: 'Aguarde...'
+    });
+
+    loader.present();
+
+    if (!pedido.cliente.endereco.cidade) {
+      let cidade = CIDADES.filter(c =>  pedido.cliente.endereco.ibgeCidade && c.codigoIbge == pedido.cliente.endereco.ibgeCidade);
+      pedido.cliente.endereco.cidade =  { nome: cidade[0].nome };
+    }
     let formaCobranca = this.formasCobrancaSelect.filter(f => f.id == pedido.formaCobrancaId.toString());
 
     let itens: any = pedido.itens;
@@ -296,11 +309,20 @@ export class ListagemPedidoPage {
       pdfmake.createPdf(docDefinition).download(fileName);
     }
 
+    loader.dismiss();
+
   }
 
   async enviar(pedido) {
 
+    let loader = this.loadingCtrl.create({
+      content: 'Enviando pedido...'
+    });
+
+    loader.present();
+
     if (this.usuarioLogado == null) {
+      loader.dismiss();
       this.showAlert("Error", "Falha ao enviar pedido - Sequência inválida.");
       return;
     }
@@ -313,10 +335,18 @@ export class ListagemPedidoPage {
     }
     console.log(parseFloat(descontoPorItem));
 
+    let emissao = new Date(pedido.emissao);
+    emissao.setHours(0);
+    emissao.setMinutes(0);
+    emissao.setSeconds(0);
+    emissao.setMilliseconds(0);
+
+    let previsaoEntrega = new Date(pedido.previsaoEntrega+'T03:00:00.000Z');
+
     let pedidoEnviar = {
       numero: this.usuarioLogado.sequencePedido + 1,
-      emissao: new Date(pedido.emissao).toISOString(),
-      previsaoEntrega: new Date(pedido.previsaoEntrega).toISOString(),
+      emissao: emissao.toISOString(),
+      previsaoEntrega: previsaoEntrega.toISOString(),
       cliente: {
         nome: pedido.cliente.nome,
         email: pedido.cliente.email,
@@ -358,6 +388,7 @@ export class ListagemPedidoPage {
       pedido.enviado = false;
       pedido.descontoTotal = pedido.descontoTotal.replace('.', ',');
       console.log("Falha ao enviar pedido!");
+      loader.dismiss();
       this.showAlert("Error", retornoEnvio.message);
       return;
     }
@@ -380,6 +411,8 @@ export class ListagemPedidoPage {
       console.log("Falha ao enviar pedido!");
       self.showAlert("Error", "Falha ao enviar pedido!");
     });
+
+    loader.dismiss();
   }
 
   showAlert(title, message) {
@@ -390,6 +423,5 @@ export class ListagemPedidoPage {
     });
     al.present();
   }
-
 
 }
