@@ -49,11 +49,11 @@
         </ion-grid>
 
         <ion-grid *ngIf="item.enviado" no-padding>
-          <ion-row style="align-items: center; padding-left: 15px; font-weight: bold">
+          <ion-row style="align-items: center; padding-left: 15px; font-weight: bold" (click)="visualizar(item)">
             <ion-col col-4>Nro.: {{item.numeroEnvio}}</ion-col>
             <ion-col col-5>Emissão: {{item.emissao | date: 'dd/MM/yy'}}</ion-col>
             <ion-col col-3>
-              <button ion-button icon-left clear (click)="visualizar(item)">
+              <button ion-button icon-left clear>
                 <ion-icon name="ios-redo"></ion-icon>
                 PDF
               </button>

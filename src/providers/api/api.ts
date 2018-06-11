@@ -3,9 +3,6 @@ import { Injectable } from '@angular/core';
 
 import { timeout } from 'rxjs/operators/timeout';
 
-import { Cliente } from '../../models/cliente';
-import { Pedido } from '../../models/pedido';
-
 const API = 'http://201.86.95.126:8081/app-web/api/';
 
 const AUTH = 'auth/';
@@ -40,7 +37,7 @@ export class ApiProvider {
         .subscribe(res => {
           resolve(res);
         }, err => {
-          resolve(err.error ? err.error : err);
+          reject(err.error ? err.error : err);
         });
 
     });
@@ -61,7 +58,7 @@ export class ApiProvider {
         }).subscribe(res => {
           resolve(res);
         }, err => {
-          resolve(err.error ? err.error : err);
+          reject(err.error ? err.error : err);
         });
     });
   }
@@ -101,7 +98,7 @@ export class ApiProvider {
         }).subscribe(res => {
           resolve(res);
         }, err => {
-          resolve(err.error);
+          reject(err.error);
         });
     });
   }
@@ -121,7 +118,7 @@ export class ApiProvider {
         }).subscribe(res => {
           resolve(res);
         }, err => {
-          resolve(err.error);
+          reject(err.error);
         });
     });
   }
@@ -140,7 +137,7 @@ export class ApiProvider {
         }).subscribe(res => {
           resolve(res);
         }, err => {
-          resolve(err.error);
+          reject(err.error);
         });
     });
   }
@@ -159,7 +156,7 @@ export class ApiProvider {
         }).subscribe(res => {
           resolve(res);
         }, err => {
-          resolve(err.error);
+          reject(err.error);
         });
     });
   }
@@ -172,13 +169,13 @@ export class ApiProvider {
           headers: {
             'Content-Type': 'application/json',
             'Accept': 'application/json',
-            'netone-auth-token': auth_token,
-            'netone-next-request-token': next_token
+            'netone-auth-token': (!auth_token ? '' : auth_token),
+            'netone-next-request-token': (!next_token ? '' :  next_token)
           }
         }).subscribe(res => {
           resolve(res);
         }, err => {
-          resolve(err.error);
+          reject(err.error);
         });
     });
   }
@@ -214,8 +211,8 @@ export class ApiProvider {
           headers: {
             'Content-Type': 'application/json',
             'Accept': 'application/json',
-            'netone-auth-token': auth_token,
-            'netone-next-request-token': next_token
+            'netone-auth-token': (!auth_token ? '' : auth_token),
+            'netone-next-request-token': (!next_token ? '' :  next_token)
           }
         }).subscribe(res => {
           resolve(res);

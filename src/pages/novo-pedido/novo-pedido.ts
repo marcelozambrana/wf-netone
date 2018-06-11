@@ -49,6 +49,11 @@ export class NovoPedidoPage {
   public cartoes: CartaoCredito[];
   public planosCartao: PlanoOperadora[];
 
+  loader = this.loadingCtrl.create({
+    content: 'Salvando...',
+    dismissOnPageChange: true
+  });
+
   constructor(public navCtrl: NavController, public navParams: NavParams,
     public formBuilder: FormBuilder, private ev: Events,
     private loadingCtrl: LoadingController,
@@ -160,15 +165,11 @@ export class NovoPedidoPage {
 
   async salvar() {
 
-    let loader = this.loadingCtrl.create({
-      content: 'Salvando...',
-      dismissOnPageChange: true
-    });
-    loader.present();
+    this.loader.present();
 
     let retorno = await this.validarPedido(this.pedido);
     if (!retorno) {
-      loader.dismiss();
+      this.loader.dismiss();
       return;
     }
 

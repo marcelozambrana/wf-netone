@@ -28,6 +28,11 @@ export class NovoClientePage {
   estados = ESTADOS;
   cidadesEstado = [];
 
+  loaderSave = this.loadingCtrl.create({
+    content: 'Salvando...',
+    dismissOnPageChange: true
+  });
+
   constructor(public navCtrl: NavController,
     public navParams: NavParams,
     public formBuilder: FormBuilder,
@@ -77,15 +82,11 @@ export class NovoClientePage {
   }
 
   adicionar(cliente: Cliente) {
-
-    let loader = this.loadingCtrl.create({
-      content: 'Salvando...',
-      dismissOnPageChange: true
-    });
-    loader.present();
+  
+    this.loaderSave.present();
 
     if (!this.validaDadosPreSalvamento(cliente)) {
-      loader.dismiss();
+      this.loaderSave.dismiss();
       return;
     }
     this.normalizar(cliente);
@@ -94,6 +95,7 @@ export class NovoClientePage {
       .then((result: any) => {
         console.log("Document addded with id >>> ", result.id);
         this.alert("Sucesso", "Cliente cadastrado com sucesso.");
+        this.loaderSave.dismiss();
         this.navCtrl.pop();
       })
       .catch((error) => {
@@ -104,14 +106,10 @@ export class NovoClientePage {
 
   atualizar(cliente: Cliente) {
 
-    let loader = this.loadingCtrl.create({
-      content: 'Salvando...',
-      dismissOnPageChange: true
-    });
-    loader.present();
+    this.loaderSave.present();
 
     if (!this.validaDadosPreSalvamento(cliente)) {
-      loader.dismiss();
+      this.loaderSave.dismiss();
       return;
     }
     this.normalizar(cliente);
@@ -119,6 +117,7 @@ export class NovoClientePage {
     this.clientesProvider.atualizar(cliente)
       .then((result: any) => {
         this.alert("Sucesso", "Cliente atualizado com sucesso.");
+        this.loaderSave.dismiss();
         this.navCtrl.pop();
       })
       .catch((error) => {
@@ -274,16 +273,16 @@ export class NovoClientePage {
 
   async onSelectChangeUf(event) {
 
-    let loader = this.loadingCtrl.create({
+    let loaderCidade = this.loadingCtrl.create({
       content: 'Buscando cidades...',
       dismissOnPageChange: true
     });
 
-    loader.present();
+    loaderCidade.present();
 
     this.carregarCidades();
 
-    loader.dismiss();
+    loaderCidade.dismiss();
   }
 
   cidadeChange(event: { component: SelectSearchable, value: any }) {

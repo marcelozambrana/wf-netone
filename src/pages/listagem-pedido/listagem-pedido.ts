@@ -43,6 +43,11 @@ export class ListagemPedidoPage {
   private netoneAuthToken: string = '';
   private netoneNextToken: string = '';
 
+  loader = this.loadingCtrl.create({
+    content: 'Aguarde...',
+    dismissOnPageChange: true
+  });
+
   constructor(public platform: Platform,
     public navCtrl: NavController,
     public navParams: NavParams,
@@ -96,11 +101,7 @@ export class ListagemPedidoPage {
 
     console.log(pedido);
 
-    let loader = this.loadingCtrl.create({
-      content: 'Aguarde...'
-    });
-
-    loader.present();
+    this.loader.present();
 
     if (!pedido.cliente.endereco.cidade) {
       let cidade = CIDADES.filter(c =>  pedido.cliente.endereco.ibgeCidade && c.codigoIbge == pedido.cliente.endereco.ibgeCidade);
@@ -309,20 +310,16 @@ export class ListagemPedidoPage {
       pdfmake.createPdf(docDefinition).download(fileName);
     }
 
-    loader.dismiss();
+    this.loader.dismiss();
 
   }
 
   async enviar(pedido) {
 
-    let loader = this.loadingCtrl.create({
-      content: 'Enviando pedido...'
-    });
-
-    loader.present();
+    this.loader.present();
 
     if (this.usuarioLogado == null) {
-      loader.dismiss();
+      this.loader.dismiss();
       this.showAlert("Error", "Falha ao enviar pedido - Sequência inválida.");
       return;
     }
@@ -388,7 +385,7 @@ export class ListagemPedidoPage {
       pedido.enviado = false;
       pedido.descontoTotal = pedido.descontoTotal.replace('.', ',');
       console.log("Falha ao enviar pedido!");
-      loader.dismiss();
+      this.loader.dismiss();
       this.showAlert("Error", retornoEnvio.message);
       return;
     }
@@ -412,7 +409,7 @@ export class ListagemPedidoPage {
       self.showAlert("Error", "Falha ao enviar pedido!");
     });
 
-    loader.dismiss();
+    this.loader.dismiss();
   }
 
   showAlert(title, message) {
