@@ -28,11 +28,6 @@ export class NovoClientePage {
   estados = ESTADOS;
   cidadesEstado = [];
 
-  loaderSave = this.loadingCtrl.create({
-    content: 'Salvando...',
-    dismissOnPageChange: true
-  });
-
   constructor(public navCtrl: NavController,
     public navParams: NavParams,
     public formBuilder: FormBuilder,
@@ -83,10 +78,14 @@ export class NovoClientePage {
 
   adicionar(cliente: Cliente) {
   
-    this.loaderSave.present();
+    let loaderSave = this.loadingCtrl.create({
+      content: 'Salvando...',
+      dismissOnPageChange: true
+    });
+    loaderSave.present();
 
     if (!this.validaDadosPreSalvamento(cliente)) {
-      this.loaderSave.dismiss();
+      loaderSave.dismiss();
       return;
     }
     this.normalizar(cliente);
@@ -95,7 +94,7 @@ export class NovoClientePage {
       .then((result: any) => {
         console.log("Document addded with id >>> ", result.id);
         this.alert("Sucesso", "Cliente cadastrado com sucesso.");
-        this.loaderSave.dismiss();
+        loaderSave.dismiss();
         this.navCtrl.pop();
       })
       .catch((error) => {
@@ -106,10 +105,15 @@ export class NovoClientePage {
 
   atualizar(cliente: Cliente) {
 
-    this.loaderSave.present();
+    let loaderSave = this.loadingCtrl.create({
+      content: 'Salvando...',
+      dismissOnPageChange: true
+    });
+
+    loaderSave.present();
 
     if (!this.validaDadosPreSalvamento(cliente)) {
-      this.loaderSave.dismiss();
+      loaderSave.dismiss();
       return;
     }
     this.normalizar(cliente);
@@ -117,7 +121,7 @@ export class NovoClientePage {
     this.clientesProvider.atualizar(cliente)
       .then((result: any) => {
         this.alert("Sucesso", "Cliente atualizado com sucesso.");
-        this.loaderSave.dismiss();
+        loaderSave.dismiss();
         this.navCtrl.pop();
       })
       .catch((error) => {

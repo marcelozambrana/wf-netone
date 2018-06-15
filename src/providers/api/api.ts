@@ -173,7 +173,7 @@ export class ApiProvider {
             'netone-next-request-token': (!next_token ? '' :  next_token)
           }
         }).subscribe(res => {
-          resolve(res);
+          resolve({res, code: 200});
         }, err => {
           reject(err.error);
         });

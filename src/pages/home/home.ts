@@ -223,6 +223,8 @@ export class HomePage {
         //loaderSync.dismiss();
         this.toastAlert('Falha ao sincronizar dados... retorno status: ' + resultSyncProdutos.code);
         return;
+      } else {
+        resultSyncProdutos = resultSyncProdutos.res;
       }
 
       resultSyncClientes = await this.apiProvider.syncClientes(this.netoneAuthToken,
