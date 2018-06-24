@@ -319,7 +319,12 @@ export class ListagemPedidoPage {
     });
     loader.present();
 
-    if (this.usuarioLogado == null) {
+    if (this.usuarioLogado) {
+      let userEmail = this.usuarioLogado.email;
+      this.usuarioLogado = await this.usuariosProvider.buscarUsuario(userEmail);
+    }
+
+    if (!this.usuarioLogado || !this.usuarioLogado == null) {
       loader.dismiss();
       this.showAlert("Error", "Falha ao enviar pedido - Sequência inválida.");
       return;

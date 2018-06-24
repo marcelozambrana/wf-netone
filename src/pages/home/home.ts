@@ -75,7 +75,8 @@ export class HomePage {
       console.log('Root path storage firebase: ' + this.rootPathFirebase);
       console.log('Auth token: ' + this.netoneAuthToken);
       console.log('Next token: ' + this.netoneNextToken);
-      console.log('Usuario logado: ' + this.usuarioLogado);
+      console.log('Usuario logado: ');
+      console.log(this.usuarioLogado);
 
       await this.clientesProvider.init();
       await this.produtosProvider.init();
@@ -200,18 +201,27 @@ export class HomePage {
   }
 
   async syncServer() {
+    
+    let loaderSync = this.loadingCtrl.create({
+      content: 'Sincronizando dados com o servidor... Essa operação pode levar alguns minutos.',
+      dismissOnPageChange: true
+    });
+    loaderSync.present();
+
+    let userEmail =  this.usuarioLogado.email;
+    this.usuarioLogado = await this.usuariosProvider.buscarUsuario(userEmail);
+
+    if (!this.usuarioLogado) {
+      loaderSync.dismiss();
+      this.toastAlert('Falha ao sincronizar dados... usuário inválido.');
+      return;
+    }
 
     let resultSyncProdutos: any;
     let resultSyncClientes: any;
     let resultSyncFormas: any;
     let resultSyncCondicoes: any;
     let resultSyncCartoes: any;
-
-    let loaderSync = this.loadingCtrl.create({
-      content: 'Sincronizando dados com o servidor... Essa operação pode levar alguns minutos...',
-      dismissOnPageChange: true
-    });
-    loaderSync.present();
 
     try {
       console.log('sincronizando...')
@@ -220,8 +230,8 @@ export class HomePage {
         this.netoneNextToken, this.usuarioLogado.sequenceApiProduto);
 
       if (resultSyncProdutos.code != 200) {
-        //loaderSync.dismiss();
-        this.toastAlert('Falha ao sincronizar dados... retorno status: ' + resultSyncProdutos.code);
+        loaderSync.dismiss();
+        this.toastAlert('Falha ao sincronizar dados: ' + resultSyncProdutos.code);
         return;
       } else {
         resultSyncProdutos = resultSyncProdutos.res;
@@ -263,7 +273,7 @@ export class HomePage {
 
     if (sequenceCP != null && sequenceCP >= result[0].sequence) {
       console.log('sequence atual = ' + sequenceCP + ', sequence retornada = ' + result[0].sequence);
-      console.log('Nenhuma atualização de condicoes de pagamento disponível');
+      console.log('Nenhuma atualização de condições de pagamento disponível.');
       return sequenceCP;
     }
 
@@ -309,7 +319,7 @@ export class HomePage {
 
     if (sequenceF != null && sequenceF >= result[0].sequence) {
       console.log('sequence atual = ' + sequenceF + ', sequence retornada = ' + result[0].sequence);
-      console.log('Nenhuma atualização de formas de pagamento disponível');
+      console.log('Nenhuma atualização de formas de pagamento disponível.');
       return sequenceF;
     }
 
@@ -335,7 +345,7 @@ export class HomePage {
 
     if (sequenceC != null && sequenceC >= result[0].sequence) {
       console.log('sequence atual = ' + sequenceC + ', sequence retornada = ' + result[0].sequence);
-      console.log('Nenhuma atualização de clientes disponível');
+      console.log('Nenhuma atualização de clientes disponível.');
       return sequenceC;
     }
 
@@ -366,7 +376,7 @@ export class HomePage {
 
     if (sequenceP != null && sequenceP >= result[0].sequence) {
       console.log('sequence atual = ' + sequenceP + ', sequence retornada = ' + result[0].sequence);
-      console.log('Nenhuma atualização de produtos disponível');
+      console.log('Nenhuma atualização de produtos disponível.');
       return sequenceP;
     }
 

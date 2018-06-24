@@ -47,7 +47,7 @@
 
     <div *ngIf="passo=='dataEmissao'">
 
-      <h6>Dados gerais</h6>
+      <h6 padding>Dados gerais</h6>
       <ion-list inset>
         <ion-item>
           <ion-label floating>Emissão</ion-label>
@@ -66,10 +66,11 @@
     <div *ngIf="passo == 'produtos'">
       <ion-list inset>
 
-        <a *ngIf="pedido.itens.length == 0" (click)="adicionarItemPedido()">
-          <ion-icon name="pricetags"></ion-icon>
-          <span>Começar a adicionar itens</span>
-        </a>
+        <ion-item *ngIf="pedido.itens.length == 0" (click)="adicionarItemPedido()" text-wrap text-justify>
+          <ion-icon name="pricetags" item-start></ion-icon>
+          <h3 ion-text color="dark">Através desse ícone você pode adicionar os itens do pedido.</h3>
+          <h3 ion-text color="primary">Ele estará disponível sempre no canto superior direito desta tela.</h3>
+        </ion-item>
 
         <ion-item class="item-pedido" *ngFor="let item of pedido.itens">
           <ion-grid>
